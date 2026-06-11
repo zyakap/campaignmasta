@@ -1,0 +1,34 @@
+{% extends "campaigns/base.html" %}
+{% block content %}
+  <section class="page-head">
+    <div><p class="eyebrow">Issues and Promises</p><h1>Community Follow-Up</h1></div>
+    <div class="action-row">
+      <a class="primary-btn" href="{% url 'issue_create' %}">Issue</a>
+      <a class="secondary-btn" href="{% url 'promise_create' %}">Promise</a>
+    </div>
+  </section>
+  <section class="content-grid">
+    <div class="panel">
+      <div class="panel-title"><h2>Issues</h2></div>
+      {% for issue in records %}
+        <article class="list-card">
+          <strong>{{ issue.title }}</strong>
+          <span>{{ issue.category }} · {{ issue.get_priority_display }} · {{ issue.get_status_display }}</span>
+        </article>
+      {% empty %}
+        <p class="muted">No issues recorded.</p>
+      {% endfor %}
+    </div>
+    <div class="panel">
+      <div class="panel-title"><h2>Promises</h2></div>
+      {% for promise in promises %}
+        <article class="list-card">
+          <strong>{{ promise.title }}</strong>
+          <span>{{ promise.get_status_display }}{% if promise.target_date %} · target {{ promise.target_date }}{% endif %}</span>
+        </article>
+      {% empty %}
+        <p class="muted">No promises tracked.</p>
+      {% endfor %}
+    </div>
+  </section>
+{% endblock %}

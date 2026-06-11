@@ -1,0 +1,30 @@
+{% extends "campaigns/base.html" %}
+{% block content %}
+  <section class="page-head">
+    <div>
+      <p class="eyebrow">Compliance Record</p>
+      <h1>Community Assistance</h1>
+      <p class="muted">Internal record of all assistance provided during the campaign period.</p>
+    </div>
+    <a class="primary-btn" href="{% url 'community_assistance_create' %}">Record assistance</a>
+  </section>
+
+  <section class="panel" style="margin-bottom:1rem">
+    <p><strong>Total estimated value:</strong> PGK {{ total_pgk|floatformat:2 }}</p>
+  </section>
+
+  <section class="record-list">
+    {% for record in records %}
+      <article class="record-card">
+        <div>
+          <strong>{{ record.recipient_group }}</strong>
+          <span>PGK {{ record.estimated_value_pgk|floatformat:2 }}</span>
+        </div>
+        <p>{{ record.get_assistance_type_display }} · {{ record.ward }}{% if record.village %} · {{ record.village }}{% endif %} · {{ record.date }}</p>
+        <small>{{ record.description|truncatechars:120 }}{% if record.approved_by %} · Approved by {{ record.approved_by.full_name }}{% endif %}</small>
+      </article>
+    {% empty %}
+      <p class="muted">No assistance records yet.</p>
+    {% endfor %}
+  </section>
+{% endblock %}

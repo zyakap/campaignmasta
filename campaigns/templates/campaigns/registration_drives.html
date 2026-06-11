@@ -1,0 +1,37 @@
+{% extends "campaigns/base.html" %}
+{% block content %}
+  <section class="page-head">
+    <div>
+      <p class="eyebrow">Voter Roll</p>
+      <h1>Registration Drives</h1>
+      <p class="muted">Track ward-level voter enrolment efforts before the election.</p>
+    </div>
+    <a class="primary-btn" href="{% url 'registration_drive_create' %}">New drive</a>
+  </section>
+
+  <section class="record-list">
+    {% for drive in records %}
+      <article class="record-card">
+        <div>
+          <strong>{{ drive.title }}</strong>
+          <span class="badge {% if drive.status == 'ACTIVE' %}badge-green{% elif drive.status == 'COMPLETED' %}badge-green{% elif drive.status == 'CANCELLED' %}badge-red{% else %}badge-yellow{% endif %}">
+            {{ drive.get_status_display }}
+          </span>
+        </div>
+        <p>{{ drive.ward }} · {{ drive.start_date }}{% if drive.end_date %} → {{ drive.end_date }}{% endif %}</p>
+        <small>
+          Target: {{ drive.target_count }} · Enrolled: {{ drive.actual_count }}
+          {% if drive.actual_count and drive.target_count %}
+            ({{ drive.actual_count|floatformat:0 }}/{{ drive.target_count|floatformat:0 }})
+          {% endif %}
+          {% if drive.team_members.all %}
+            · Team: {% for m in drive.team_members.all %}{{ m.full_name }}{% if not forloop.last %}, {% endif %}{% endfor %}
+          {% endif %}
+        </small>
+        <a class="secondary-btn" style="font-size:.8rem" href="{% url 'registration_drive_edit' drive.id %}">Update</a>
+      </article>
+    {% empty %}
+      <p class="muted">No registration drives recorded. Track voter enrolment efforts before the election.</p>
+    {% endfor %}
+  </section>
+{% endblock %}

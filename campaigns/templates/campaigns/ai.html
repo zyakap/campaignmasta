@@ -1,0 +1,17 @@
+{% extends "campaigns/base.html" %}
+{% block content %}
+  <section class="page-head">
+    <div><p class="eyebrow">AI Assistant</p><h1>Human Review Queue</h1></div>
+  </section>
+  <section class="record-list">
+    {% for item in records %}
+      <article class="record-card">
+        <div><strong>{{ item.get_work_type_display }}</strong><span>{{ item.get_status_display }}</span></div>
+        <p>{% if item.ward %}{{ item.ward }}{% elif item.event %}{{ item.event }}{% else %}Campaign-wide{% endif %}</p>
+        <small><a href="{% url 'ai_review' item.id %}">Review draft</a></small>
+      </article>
+    {% empty %}
+      <p class="muted">No assistant drafts yet. Generate one from a ward brief.</p>
+    {% endfor %}
+  </section>
+{% endblock %}

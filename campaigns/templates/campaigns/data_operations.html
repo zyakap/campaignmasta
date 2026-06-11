@@ -1,0 +1,37 @@
+{% extends "campaigns/base.html" %}
+{% block content %}
+  <section class="page-head">
+    <div><p class="eyebrow">Data Operations</p><h1>Imports and Exports</h1></div>
+    <div class="action-row">
+      <a class="primary-btn" href="{% url 'import_create' %}">Import</a>
+      <a class="secondary-btn" href="{% url 'export_create' %}">Export</a>
+    </div>
+  </section>
+
+  <section class="content-grid">
+    <div class="panel">
+      <div class="panel-title"><h2>Recent Imports</h2></div>
+      {% for batch in imports %}
+        <article class="list-card">
+          <strong>{{ batch.get_import_type_display }}</strong>
+          <span>{{ batch.get_status_display }} · {{ batch.valid_rows }}/{{ batch.total_rows }} imported</span>
+          {% if batch.error_rows %}<small>{{ batch.error_rows }} rows need correction.</small>{% endif %}
+        </article>
+      {% empty %}
+        <p class="muted">No imports yet.</p>
+      {% endfor %}
+    </div>
+    <div class="panel">
+      <div class="panel-title"><h2>Recent Exports</h2></div>
+      {% for export in exports %}
+        <article class="list-card">
+          <strong>{{ export.get_export_type_display }}</strong>
+          <span>{{ export.get_status_display }}</span>
+          <small>{% if export.output_file %}<a href="{% url 'export_download' export.id %}">Download file</a>{% else %}<a href="{% url 'export_download' export.id %}">Generate file</a>{% endif %}</small>
+        </article>
+      {% empty %}
+        <p class="muted">No exports requested.</p>
+      {% endfor %}
+    </div>
+  </section>
+{% endblock %}

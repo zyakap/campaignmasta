@@ -1,0 +1,62 @@
+{% extends "campaigns/base.html" %}
+{% block content %}
+  <section class="page-head">
+    <div>
+      <p class="eyebrow">Campaign Settings</p>
+      <h1>Connectors</h1>
+      <p class="muted">Configure AI, WhatsApp, SMS, email, maps, payments, storage, and webhooks for this candidate.</p>
+    </div>
+    <a class="primary-btn" href="{% url 'connector_create' %}">Connector</a>
+  </section>
+
+  {% if user.is_superuser %}
+    <section class="quick-actions">
+      <a class="secondary-btn" href="{% url 'platform_usage_settings' %}">Usage Pricing</a>
+    </section>
+  {% endif %}
+
+  <section class="content-grid">
+    <form method="post" class="panel mobile-form">
+      {% csrf_token %}
+      <div class="panel-title"><h2>General Settings</h2></div>
+      {{ form.non_field_errors }}
+      {% for field in form %}
+        <label>
+          <span>{{ field.label }}</span>
+          {{ field }}
+          {% if field.errors %}<small class="field-error">{{ field.errors|striptags }}</small>{% endif %}
+        </label>
+      {% endfor %}
+      <button class="primary-btn" type="submit">Save settings</button>
+    </form>
+
+    <div class="panel">
+      <div class="panel-title"><h2>Available Connector Types</h2></div>
+      {% for value, label in missing_connector_types %}
+        <article class="list-card">
+          <strong>{{ label }}</strong>
+          <span>Not configured</span>
+        </article>
+      {% empty %}
+        <p class="muted">All connector types have at least one configuration.</p>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="record-list connector-list">
+    {% for connector in connectors %}
+      <article class="record-card">
+        <div><strong>{{ connector.name }}</strong><span>{{ connector.get_status_display }}</span></div>
+        <p>{{ connector.get_connector_type_display }}{% if connector.provider %} · {{ connector.provider }}{% endif %}{% if connector.is_enabled %} · enabled{% else %} · disabled{% endif %}</p>
+        <small>
+          <a href="{% url 'connector_update' connector.id %}">Edit</a>
+          · <a href="{% url 'connector_test' connector.id %}">Check</a>
+          {% if connector.last_tested_at %} · tested {{ connector.last_tested_at|date:"M j, g:i a" }}{% endif %}
+        </small>
+        {% if connector.last_test_result %}<small>{{ connector.last_test_result }}</small>{% endif %}
+      </article>
+    {% empty %}
+      <p class="muted">No connectors configured yet.</p>
+    {% endfor %}
+  </section>
+{% endblock %}

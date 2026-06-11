@@ -1,0 +1,19 @@
+{% extends "campaigns/base.html" %}
+{% block content %}
+  <section class="page-head">
+    <div><p class="eyebrow">Influencer CRM</p><h1>Key People</h1></div>
+    <a class="primary-btn" href="{% url 'influencer_create' %}">Add</a>
+  </section>
+  <form class="searchbar" method="get"><input name="q" value="{{ query }}" placeholder="Search name, phone, role"></form>
+  <section class="record-list">
+    {% for person in records %}
+      <article class="record-card">
+        <div><strong>{{ person.full_name }}</strong><span>{{ person.influence_score }}/100</span></div>
+        <p>{{ person.community_role|default:"Influencer" }}{% if person.village %} · {{ person.village }}{% endif %}</p>
+        <small>Next contact: {{ person.next_contact_due_date|default:"Not scheduled" }}{% if person.assigned_owner %} · owner {{ person.assigned_owner }}{% endif %}</small>
+      </article>
+    {% empty %}
+      <p class="muted">No key people recorded yet.</p>
+    {% endfor %}
+  </section>
+{% endblock %}

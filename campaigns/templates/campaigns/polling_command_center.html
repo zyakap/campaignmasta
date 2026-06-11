@@ -1,0 +1,64 @@
+{% extends "campaigns/base.html" %}
+{% block content %}
+  <section class="page-head">
+    <div>
+      <p class="eyebrow">Polling Day</p>
+      <h1>Command Center</h1>
+      <p class="muted">Live booth status, scrutineer check-ins, and running tally.</p>
+    </div>
+    <div style="display:flex;gap:.5rem">
+      <a class="secondary-btn" href="{% url 'polling_status_create' %}">Update booth</a>
+      <a class="primary-btn" href="{% url 'polling_incident_create' %}">Report incident</a>
+    </div>
+  </section>
+
+  <section class="panel" style="margin-bottom:1rem">
+    <div style="display:flex;gap:2rem;flex-wrap:wrap">
+      <div>
+        <p class="eyebrow">Running tally</p>
+        <p style="font-size:2rem;font-weight:700;margin:0">{{ total_our_tally }}</p>
+        <small class="muted">votes observed across all booths</small>
+      </div>
+      <div>
+        <p class="eyebrow">Booths reporting</p>
+        <p style="font-size:2rem;font-weight:700;margin:0">
+          {% with checked_in=locations|length %}{{ checked_in }}{% endwith %}
+        </p>
+        <small class="muted">total booths</small>
+      </div>
+    </div>
+  </section>
+
+  <section class="record-list">
+    {% for loc in locations %}
+      <article class="record-card {% if loc.security_risk == 'HIGH' or loc.security_risk == 'REFUSED' %}record-card--alert{% endif %}">
+        <div>
+          <strong>{{ loc.name }}</strong>
+          <span class="badge {% if loc.scrutineer_checked_in %}badge-green{% else %}badge-yellow{% endif %}">
+            {% if loc.scrutineer_checked_in %}Scrutineer in{% else %}Not checked in{% endif %}
+          </span>
+          {% if loc.security_risk != 'LOW' %}
+            <span class="badge badge-red">{{ loc.get_security_risk_display }}</span>
+          {% endif %}
+        </div>
+        <p>
+          {{ loc.ward|default:"No ward" }}
+          {% if loc.assigned_scrutineer %} · {{ loc.assigned_scrutineer.full_name }}{% endif %}
+          {% if loc.expected_turnout %} · Expected {{ loc.expected_turnout }} voters{% endif %}
+        </p>
+        {% if loc.latest_status %}
+          <small>
+            {% if loc.latest_status.our_tally is not None %}Our tally: <strong>{{ loc.latest_status.our_tally }}</strong> · {% endif %}
+            {% if loc.latest_status.booth_open %}Booth open{% else %}Booth closed{% endif %}
+            · Updated {{ loc.latest_status.status_time|timesince }} ago
+          </small>
+        {% else %}
+          <small class="muted">No status update yet.</small>
+        {% endif %}
+        {% if loc.contact_number %}<a href="tel:{{ loc.contact_number }}">{{ loc.contact_number }}</a>{% endif %}
+      </article>
+    {% empty %}
+      <p class="muted">No polling locations configured. Add them under Polling → Locations.</p>
+    {% endfor %}
+  </section>
+{% endblock %}

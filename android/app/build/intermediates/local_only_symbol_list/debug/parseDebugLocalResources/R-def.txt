@@ -1,0 +1,21 @@
+R_DEF: Internal format may change without notice
+local
+drawable ic_launcher_background
+drawable ic_launcher_foreground
+mipmap ic_launcher
+mipmap ic_launcher_round
+string add_supporter_title
+string app_name
+string calls_title
+string dashboard_title
+string login_button
+string login_password_hint
+string login_title
+string login_username_hint
+string messages_title
+string offline_banner
+string polling_title
+string supporters_title
+string sync_pending
+string ward_briefs_title
+style Theme.CampaignMasta

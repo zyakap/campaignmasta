@@ -1,0 +1,36 @@
+{% extends "campaigns/base.html" %}
+{% block content %}
+  <section class="page-head">
+    <div>
+      <p class="eyebrow">Opposition Intelligence</p>
+      <h1>Competitor Activity</h1>
+      <p class="muted">Track opponent movements, promises, and preference deals to inform your counter-strategy.</p>
+    </div>
+    <a class="primary-btn" href="{% url 'competitor_activity_create' %}">Log activity</a>
+  </section>
+
+  <section class="record-list">
+    {% for record in records %}
+      <article class="record-card">
+        <div>
+          <strong>{{ record.opponent_name }}</strong>
+          <span class="badge {% if record.source == 'CONFIRMED' %}badge-red{% elif record.source == 'RUMOUR' %}badge-yellow{% else %}badge-yellow{% endif %}">
+            {{ record.get_source_display }}
+          </span>
+        </div>
+        <p>
+          {{ record.get_activity_type_display }} · {{ record.date }}
+          {% if record.ward %} · {{ record.ward }}{% endif %}
+          {% if record.opponent_party %} · {{ record.opponent_party }}{% endif %}
+        </p>
+        <small>{{ record.description|truncatechars:160 }}</small>
+        {% if record.response_action %}
+          <small><strong>Response:</strong> {{ record.response_action|truncatechars:120 }}{% if record.response_assigned_to %} → {{ record.response_assigned_to.full_name }}{% endif %}</small>
+        {% endif %}
+        <a class="secondary-btn" style="font-size:.8rem" href="{% url 'competitor_activity_edit' record.id %}">Edit</a>
+      </article>
+    {% empty %}
+      <p class="muted">No competitor activities logged yet.</p>
+    {% endfor %}
+  </section>
+{% endblock %}

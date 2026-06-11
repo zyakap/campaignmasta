@@ -1,0 +1,60 @@
+{% extends "campaigns/base.html" %}
+{% block content %}
+  <section class="page-head">
+    <div>
+      <p class="eyebrow">Flexible SaaS Subscription</p>
+      <h1>Modules and Bundles</h1>
+      <p class="muted">{{ candidate.name }} can run only the modules it needs, or use a discounted bundle.</p>
+    </div>
+    <a class="primary-btn" href="{% url 'subscription_quote_create' %}">Quote</a>
+  </section>
+
+  <section class="content-grid">
+    <div class="panel">
+      <div class="panel-title"><h2>Subscribable Modules</h2></div>
+      {% for item in module_catalog %}
+        <article class="list-card">
+          <strong>{{ item.module.name }}</strong>
+          <span>{{ item.module.get_category_display }}{% if item.enabled %} · enabled{% endif %}{% if item.module.is_core %} · core{% endif %}</span>
+          <small>{{ item.module.description|default:"No description recorded." }}</small>
+          {% for price in item.prices %}
+            <small>{{ price.get_billing_cycle_display }}: {{ price.currency }} {{ price.price }}{% if price.setup_fee %} · setup {{ price.setup_fee }}{% endif %}</small>
+          {% empty %}
+            <small>Pricing not configured.</small>
+          {% endfor %}
+        </article>
+      {% empty %}
+        <p class="muted">No software modules configured yet.</p>
+      {% endfor %}
+    </div>
+
+    <div class="panel">
+      <div class="panel-title"><h2>Discounted Bundles</h2></div>
+      {% for bundle in bundles %}
+        <article class="list-card">
+          <strong>{{ bundle.name }}</strong>
+          <span>{{ bundle.get_billing_cycle_display }} · {{ bundle.currency }} {{ bundle.bundle_price }}{% if bundle.is_full_package %} · full package{% endif %}</span>
+          <small>{{ bundle.description|default:"Bundle description pending." }}</small>
+          <small>Modules: {% for module in bundle.modules.all %}{{ module.name }}{% if not forloop.last %}, {% endif %}{% empty %}None selected{% endfor %}</small>
+          <small>Included usage: {% for quota in bundle.included_usage_quotas.all %}{{ quota.quantity }} {{ quota.get_service_display }} {{ quota.get_unit_display }}{% if not forloop.last %}, {% endif %}{% empty %}No included quota{% endfor %}</small>
+          {% if bundle.discount_percent %}<small>Discount: {{ bundle.discount_percent }}%</small>{% endif %}
+        </article>
+      {% empty %}
+        <p class="muted">No bundles configured yet.</p>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="panel quote-panel">
+    <div class="panel-title"><h2>Recent Quotes</h2></div>
+    {% for quote in quotes %}
+      <article class="list-card">
+        <strong>{{ quote.get_billing_cycle_display }} quote</strong>
+        <span>{{ quote.currency }} {{ quote.total }} · savings {{ quote.discount_amount }}</span>
+        <small>{% if quote.accepted_at %}Accepted {{ quote.accepted_at|date:"M j, Y" }}{% else %}<a href="{% url 'subscription_quote_accept' quote.id %}">Accept and enable modules</a>{% endif %}</small>
+      </article>
+    {% empty %}
+      <p class="muted">No quotes created yet.</p>
+    {% endfor %}
+  </section>
+{% endblock %}

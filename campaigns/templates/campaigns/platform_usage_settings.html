@@ -1,0 +1,123 @@
+{% extends "campaigns/base.html" %}
+{% block content %}
+  <section class="page-head">
+    <div>
+      <p class="eyebrow">SaaS Admin</p>
+      <h1>Usage &amp; AI Pricing</h1>
+      <p class="muted">Rate cards, free AI models, plan assignments, and included quotas.</p>
+    </div>
+    <div class="action-row">
+      <a class="primary-btn" href="{% url 'plan_ai_model_create' %}">Assign AI to plan</a>
+      <a class="secondary-btn" href="{% url 'free_ai_model_create' %}">Add free model</a>
+      <a class="secondary-btn" href="{% url 'usage_rate_create' %}">Add rate</a>
+      <a class="secondary-btn" href="{% url 'included_quota_create' %}">Add quota</a>
+    </div>
+  </section>
+
+  {# ── Plan → AI Model assignments ──────────────────────────── #}
+  <section class="panel">
+    <div class="panel-title">
+      <h2>Plan AI Models</h2>
+      <p class="muted" style="font-size:.85rem">Tenants on each plan will use the default model immediately upon activation — no wallet charge.</p>
+    </div>
+    {% regroup plan_ai_models by plan as plan_groups %}
+    {% for group in plan_groups %}
+      <div style="margin-bottom:1rem">
+        <p><strong>{{ group.grouper }}</strong></p>
+        {% for assignment in group.list %}
+          <article class="list-card" style="display:flex;align-items:center;gap:.75rem">
+            <div style="flex:1">
+              <strong>{{ assignment.ai_model.name }}</strong>
+              {% if assignment.is_default %}<span class="badge badge-green">default</span>{% endif %}
+              <span class="muted" style="font-size:.8rem">{{ assignment.ai_model.provider|default:"Unknown provider" }} · {{ assignment.ai_model.model_id }}</span>
+            </div>
+            <form method="post" action="{% url 'plan_ai_model_delete' assignment.id %}" style="margin:0">
+              {% csrf_token %}
+              <button type="submit" class="danger-btn" style="font-size:.8rem;padding:.2rem .5rem">Remove</button>
+            </form>
+          </article>
+        {% endfor %}
+      </div>
+    {% empty %}
+      <p class="muted">No plan-AI assignments yet. Add one to give tenants immediate free AI access on activation.</p>
+    {% endfor %}
+  </section>
+
+  {# ── Free AI Model library ─────────────────────────────────── #}
+  <section class="panel">
+    <div class="panel-title"><h2>Free AI Model Library</h2></div>
+    {% for model in free_models %}
+      <article class="list-card">
+        <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">
+          <strong>{{ model.name }}</strong>
+          {% if not model.is_active %}<span class="badge">inactive</span>{% endif %}
+          <span class="muted" style="font-size:.8rem">{{ model.provider|default:"—" }} · <code>{{ model.model_id }}</code></span>
+          {% if model.context_window %}<span class="muted" style="font-size:.8rem">{{ model.context_window|floatformat:"0" }} ctx</span>{% endif %}
+        </div>
+        <small>Daily limit: {{ model.daily_free_requests|default:"∞" }} · Monthly: {{ model.monthly_free_requests|default:"∞" }}{% if model.notes %} · {{ model.notes }}{% endif %}</small>
+        <a class="secondary-btn" style="font-size:.8rem;padding:.2rem .5rem" href="{% url 'free_ai_model_edit' model.id %}">Edit</a>
+      </article>
+    {% empty %}
+      <p class="muted">No free AI models configured. Add Kimi K2 or another free provider to get started.</p>
+    {% endfor %}
+  </section>
+
+  <section class="content-grid">
+    {# ── Rate cards ───────────────────────────────────────────── #}
+    <div class="panel">
+      <div class="panel-title"><h2>Rate Cards &amp; Markups</h2></div>
+      {% for rate in rates %}
+        <article class="list-card">
+          <strong>{{ rate.get_service_display }}{% if rate.model_name %} · {{ rate.model_name }}{% endif %}</strong>
+          <span>{{ rate.currency }} {{ rate.customer_price_per_unit }} / {{ rate.get_unit_display }}{% if rate.is_free %} · free{% endif %}</span>
+          <small>Provider: {{ rate.provider|default:"Default" }} · base {{ rate.provider_cost_per_unit }} · markup {{ rate.markup_percent }}% + {{ rate.fixed_markup_per_unit }}</small>
+        </article>
+      {% empty %}
+        <p class="muted">No usage rates configured.</p>
+      {% endfor %}
+    </div>
+
+    {# ── Included quotas ──────────────────────────────────────── #}
+    <div class="panel">
+      <div class="panel-title"><h2>Included Usage Quotas</h2></div>
+      {% for quota in included_quotas %}
+        <article class="list-card">
+          <strong>{% firstof quota.bundle quota.module "Unassigned" %}</strong>
+          <span>{{ quota.quantity }} {{ quota.get_unit_display }} {{ quota.get_service_display }} · {{ quota.get_billing_cycle_display }}</span>
+          <small>{{ quota.description|default:"Included in subscription price." }}</small>
+        </article>
+      {% empty %}
+        <p class="muted">No included usage quotas configured.</p>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="content-grid">
+    {# ── Tenant wallets ────────────────────────────────────────── #}
+    <div class="panel">
+      <div class="panel-title"><h2>Tenant Wallets</h2></div>
+      {% for wallet in wallets %}
+        <article class="list-card">
+          <strong>{{ wallet.candidate }}</strong>
+          <span>{{ wallet.get_service_display }} · {{ wallet.currency }} {{ wallet.balance }}</span>
+        </article>
+      {% empty %}
+        <p class="muted">No candidate wallets yet.</p>
+      {% endfor %}
+    </div>
+
+    {# ── Recent usage ─────────────────────────────────────────── #}
+    <div class="panel">
+      <div class="panel-title"><h2>Recent Usage</h2></div>
+      {% for event in recent_usage %}
+        <article class="list-card">
+          <strong>{{ event.candidate }}</strong>
+          <span>{{ event.get_service_display }} · {{ event.customer_charge }} · {{ event.get_status_display }}</span>
+          {% if event.free_ai_model %}<small>Free model: {{ event.free_ai_model.name }}</small>{% endif %}
+        </article>
+      {% empty %}
+        <p class="muted">No usage yet.</p>
+      {% endfor %}
+    </div>
+  </section>
+{% endblock %}

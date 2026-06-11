@@ -1,0 +1,104 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Login | CampaignMasta</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f6f7f3;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .auth-wrap {
+      width: 100%;
+      max-width: 400px;
+      padding: 24px 16px;
+    }
+    .brand {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .brand-logo {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px; height: 48px;
+      background: #116149;
+      border-radius: 12px;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 900;
+      margin-bottom: 12px;
+    }
+    .brand p { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: #63706b; font-weight: 600; margin-bottom: 4px; }
+    .brand h1 { font-size: 1.4rem; font-weight: 800; color: #16211d; }
+    .form-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 28px 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.07);
+    }
+    .form-card label {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #374151;
+      margin-bottom: 14px;
+    }
+    .form-card input {
+      border: 1px solid #d1d5db;
+      border-radius: 7px;
+      padding: 9px 12px;
+      font-size: 14px;
+      width: 100%;
+      font-family: inherit;
+      outline: none;
+      transition: border-color .15s;
+    }
+    .form-card input:focus { border-color: #116149; }
+    .errorlist { list-style: none; color: #991b1b; font-size: 12px; margin-top: 4px; }
+    .primary-btn {
+      width: 100%;
+      background: #116149;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 11px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      margin-top: 4px;
+    }
+    .primary-btn:hover { background: #0b4635; }
+  </style>
+</head>
+<body>
+  <div class="auth-wrap">
+    <div class="brand">
+      <div class="brand-logo">CM</div>
+      <p>PNG Campaign CRM</p>
+      <h1>Sign in to command centre</h1>
+    </div>
+    <form method="post" class="form-card">
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+      <label>Username {{ form.username }}</label>
+      <label>Password {{ form.password }}</label>
+      <button class="primary-btn" type="submit">Sign in</button>
+    </form>
+    <div style="text-align:center;margin-top:20px;">
+      <a href="/" style="font-size:12px;color:#63706b;text-decoration:none;">← Back to CampaignMasta website</a>
+    </div>
+  </div>
+</body>
+</html>

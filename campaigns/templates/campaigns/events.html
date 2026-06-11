@@ -1,0 +1,18 @@
+{% extends "campaigns/base.html" %}
+{% block content %}
+  <section class="page-head">
+    <div><p class="eyebrow">Visits and Events</p><h1>Campaign Calendar</h1></div>
+    <a class="primary-btn" href="{% url 'event_create' %}">New</a>
+  </section>
+  <section class="record-list">
+    {% for event in records %}
+      <article class="record-card">
+        <div><strong>{{ event.title }}</strong><span>{{ event.get_event_type_display }}</span></div>
+        <p>{{ event.start_datetime|date:"M j, g:i a" }}{% if event.venue %} · {{ event.venue }}{% endif %}</p>
+        <small>{{ event.talking_points|default:"Talking points not recorded." }}</small>
+      </article>
+    {% empty %}
+      <p class="muted">No events planned yet.</p>
+    {% endfor %}
+  </section>
+{% endblock %}

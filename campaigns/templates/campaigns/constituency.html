@@ -1,0 +1,18 @@
+{% extends "campaigns/base.html" %}
+{% block content %}
+  <section class="page-head">
+    <div><p class="eyebrow">Post-Election Mode</p><h1>Citizen Requests</h1></div>
+    <a class="primary-btn" href="{% url 'citizen_request_create' %}">New</a>
+  </section>
+  <section class="record-list">
+    {% for item in records %}
+      <article class="record-card">
+        <div><strong>{{ item.title }}</strong><span>{{ item.get_status_display }}</span></div>
+        <p>{{ item.requester_name }}{% if item.ward %} · {{ item.ward }}{% endif %}</p>
+        <small>{{ item.category|default:"General" }}{% if item.due_date %} · due {{ item.due_date }}{% endif %}</small>
+      </article>
+    {% empty %}
+      <p class="muted">No citizen requests recorded.</p>
+    {% endfor %}
+  </section>
+{% endblock %}

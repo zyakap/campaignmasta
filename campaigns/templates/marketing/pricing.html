@@ -1,0 +1,341 @@
+{% extends "marketing/base.html" %}
+{% block title %}Pricing — CampaignMasta{% endblock %}
+{% block meta_desc %}CampaignMasta pricing for PNG election candidates. One-time K3,000 setup fee. Plans from K75/fortnight to K150/fortnight Full Package.{% endblock %}
+{% block nav_pricing %}class="active"{% endblock %}
+
+{% block extra_head %}
+<style>
+  .pricing-hero {
+    background: linear-gradient(135deg, #0b3d2e 0%, #116149 100%);
+    padding: 80px 5% 70px; text-align: center; color: #fff;
+  }
+  .pricing-hero .section-label { color: #6ee7b7; }
+  .pricing-hero h1 { font-size: clamp(2rem, 4vw, 3rem); font-weight: 900; line-height: 1.15; margin-bottom: 16px; }
+  .pricing-hero p { font-size: 17px; color: rgba(255,255,255,.8); max-width: 540px; margin: 0 auto 28px; line-height: 1.65; }
+  .setup-banner {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.25);
+    border-radius: 12px; padding: 14px 24px; font-size: 15px; font-weight: 600; color: #fff;
+  }
+  .setup-banner strong { color: #6ee7b7; font-size: 1.4rem; }
+
+  /* ── PLANS ── */
+  .plans-section { padding: 80px 5%; background: var(--neutral-100); }
+  .plans-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; max-width: 1060px; margin: 0 auto; }
+  .plan-card {
+    background: #fff; border-radius: 18px; padding: 36px 28px;
+    border: 2px solid var(--neutral-200); position: relative;
+    transition: all .2s;
+  }
+  .plan-card:hover { border-color: var(--green-mid); box-shadow: 0 8px 32px rgba(17,97,73,.12); }
+  .plan-card.featured {
+    border-color: var(--green-mid);
+    box-shadow: 0 8px 40px rgba(17,97,73,.18);
+    transform: scale(1.03);
+  }
+  .plan-badge {
+    position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
+    background: var(--green-mid); color: #fff;
+    font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+    padding: 5px 16px; border-radius: 50px; white-space: nowrap;
+  }
+  .plan-name { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--neutral-500); margin-bottom: 10px; }
+  .plan-price { margin-bottom: 6px; }
+  .plan-price .amount { font-size: 2.8rem; font-weight: 900; color: var(--neutral-900); line-height: 1; }
+  .plan-price .currency { font-size: 1.2rem; font-weight: 700; color: var(--neutral-700); vertical-align: top; padding-top: 8px; display: inline-block; }
+  .plan-price .period { font-size: 14px; color: var(--neutral-500); font-weight: 500; }
+  .plan-tagline { font-size: 14px; color: var(--neutral-500); margin-bottom: 28px; line-height: 1.5; border-bottom: 1px solid var(--neutral-200); padding-bottom: 20px; }
+  .plan-features { list-style: none; margin-bottom: 28px; }
+  .plan-features li { display: flex; align-items: flex-start; gap: 10px; padding: 7px 0; font-size: 14px; color: var(--neutral-700); }
+  .plan-features li i.check { color: var(--green-mid); flex-shrink: 0; margin-top: 2px; }
+  .plan-features li i.cross { color: #d1d5db; flex-shrink: 0; margin-top: 2px; }
+  .plan-features li.muted { color: #9ca3af; }
+  .plan-cta { display: block; width: 100%; text-align: center; padding: 13px; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; text-decoration: none; transition: all .15s; border: 2px solid var(--green-mid); color: var(--green-mid); background: transparent; }
+  .plan-cta.featured-cta { background: var(--green-mid); color: #fff; }
+  .plan-cta:hover { background: var(--green-mid); color: #fff; }
+
+  /* ── SETUP FEE ── */
+  .setup-section { padding: 72px 5%; background: #fff; }
+  .setup-inner { max-width: 900px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
+  .setup-list { list-style: none; margin-top: 20px; }
+  .setup-list li { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--neutral-200); font-size: 14px; color: var(--neutral-700); }
+  .setup-list li:last-child { border-bottom: none; }
+  .setup-list li i { color: var(--green-mid); margin-top: 2px; flex-shrink: 0; }
+  .setup-card {
+    background: linear-gradient(135deg, #0b3d2e, #116149);
+    border-radius: 18px; padding: 40px 32px; color: #fff; text-align: center;
+  }
+  .setup-card .fee { font-size: 3.5rem; font-weight: 900; color: #6ee7b7; line-height: 1; margin-bottom: 6px; }
+  .setup-card .fee-label { font-size: 13px; color: rgba(255,255,255,.65); font-weight: 500; margin-bottom: 20px; }
+  .setup-card p { font-size: 14px; color: rgba(255,255,255,.8); line-height: 1.65; }
+
+  /* ── COMPARE ── */
+  .compare-section { padding: 72px 5%; background: var(--neutral-100); }
+  .compare-table { max-width: 1000px; margin: 48px auto 0; border-radius: 16px; overflow: hidden; border: 1px solid var(--neutral-200); background: #fff; }
+  .compare-table table { width: 100%; border-collapse: collapse; }
+  .compare-table th { padding: 16px 20px; text-align: left; font-size: 13px; font-weight: 700; background: var(--neutral-900); color: #fff; }
+  .compare-table th:not(:first-child) { text-align: center; }
+  .compare-table td { padding: 13px 20px; font-size: 13px; color: var(--neutral-700); border-bottom: 1px solid var(--neutral-200); }
+  .compare-table td:not(:first-child) { text-align: center; }
+  .compare-table tr:last-child td { border-bottom: none; }
+  .compare-table tr.section-row td { background: var(--neutral-100); font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--neutral-500); padding: 10px 20px; }
+  .compare-table i.yes { color: var(--green-mid); font-size: 16px; }
+  .compare-table i.no { color: #d1d5db; font-size: 16px; }
+  .col-featured { background: rgba(17,97,73,.04); }
+
+  /* ── FAQ ── */
+  .faq-section { padding: 72px 5%; background: #fff; }
+  .faq-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; max-width: 900px; margin: 40px auto 0; }
+  .faq-item { padding: 24px; border: 1px solid var(--neutral-200); border-radius: 12px; }
+  .faq-item h4 { font-size: 15px; font-weight: 700; color: var(--neutral-900); margin-bottom: 8px; }
+  .faq-item p { font-size: 14px; color: var(--neutral-500); line-height: 1.6; }
+
+  @media (max-width: 768px) {
+    .plans-grid { grid-template-columns: 1fr; }
+    .plan-card.featured { transform: none; }
+    .setup-inner { grid-template-columns: 1fr; }
+    .faq-grid { grid-template-columns: 1fr; }
+    .compare-table { overflow-x: auto; display: block; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- HERO -->
+<div class="pricing-hero">
+  <p class="section-label">Simple, Transparent Pricing</p>
+  <h1>Plans for Every PNG Candidate</h1>
+  <p>One-time setup fee, then a simple fortnightly subscription. No hidden costs, no lock-in contracts.</p>
+  <div class="setup-banner">
+    One-time setup fee: <strong>K3,000</strong>&nbsp;· then from K75/fortnight
+  </div>
+</div>
+
+<!-- PLANS -->
+<section class="plans-section">
+  <div style="text-align:center;margin-bottom:48px;">
+    <p class="section-label">Choose Your Plan</p>
+    <h2 class="section-title">Fortnightly Subscription</h2>
+    <p class="section-sub" style="margin:0 auto;">All plans include the Android app. Upgrade or downgrade anytime.</p>
+  </div>
+  <div class="plans-grid">
+
+    <!-- STARTER -->
+    <div class="plan-card">
+      <div class="plan-name">Starter</div>
+      <div class="plan-price">
+        <span class="currency">K</span><span class="amount">75</span>
+        <span class="period">/fortnight</span>
+      </div>
+      <p class="plan-tagline">For candidates just getting started. Core tools to build your supporter base and run outreach.</p>
+      <ul class="plan-features">
+        <li><i class="fas fa-check-circle check"></i> Supporter CRM (up to 2,000 contacts)</li>
+        <li><i class="fas fa-check-circle check"></i> Team Management (up to 10 users)</li>
+        <li><i class="fas fa-check-circle check"></i> Call Log &amp; Task Manager</li>
+        <li><i class="fas fa-check-circle check"></i> Basic SMS &amp; WhatsApp Outreach</li>
+        <li><i class="fas fa-check-circle check"></i> Events Management</li>
+        <li><i class="fas fa-check-circle check"></i> Android Mobile App</li>
+        <li><i class="fas fa-check-circle check"></i> CSV Data Import/Export</li>
+        <li class="muted"><i class="fas fa-times-circle cross"></i> Ward Intelligence Briefs</li>
+        <li class="muted"><i class="fas fa-times-circle cross"></i> Polling Day Command Centre</li>
+        <li class="muted"><i class="fas fa-times-circle cross"></i> AI Tools</li>
+        <li class="muted"><i class="fas fa-times-circle cross"></i> Competitor Intelligence</li>
+      </ul>
+      <a href="/accounts/login/" class="plan-cta">Get Started</a>
+    </div>
+
+    <!-- PROFESSIONAL -->
+    <div class="plan-card featured">
+      <div class="plan-badge">Most Popular</div>
+      <div class="plan-name">Professional</div>
+      <div class="plan-price">
+        <span class="currency">K</span><span class="amount">100</span>
+        <span class="period">/fortnight</span>
+      </div>
+      <p class="plan-tagline">The complete field campaign toolkit. Everything in Starter, plus intelligence, ward briefs, and PNG-specific features.</p>
+      <ul class="plan-features">
+        <li><i class="fas fa-check-circle check"></i> Everything in Starter</li>
+        <li><i class="fas fa-check-circle check"></i> Unlimited Contacts</li>
+        <li><i class="fas fa-check-circle check"></i> Unlimited Team Users</li>
+        <li><i class="fas fa-check-circle check"></i> Ward Intelligence Briefs</li>
+        <li><i class="fas fa-check-circle check"></i> Issues &amp; Promise Tracker</li>
+        <li><i class="fas fa-check-circle check"></i> Influencer CRM</li>
+        <li><i class="fas fa-check-circle check"></i> Preference Deals Tracker</li>
+        <li><i class="fas fa-check-circle check"></i> Community Groups &amp; Assistance</li>
+        <li><i class="fas fa-check-circle check"></i> Voter Registration Drives</li>
+        <li><i class="fas fa-check-circle check"></i> Reports &amp; Analytics</li>
+        <li class="muted"><i class="fas fa-times-circle cross"></i> Polling Day Command Centre</li>
+        <li class="muted"><i class="fas fa-times-circle cross"></i> AI Tools &amp; Speech Writer</li>
+      </ul>
+      <a href="/accounts/login/" class="plan-cta featured-cta">Get Started</a>
+    </div>
+
+    <!-- FULL PACKAGE -->
+    <div class="plan-card">
+      <div class="plan-name">Full Package</div>
+      <div class="plan-price">
+        <span class="currency">K</span><span class="amount">150</span>
+        <span class="period">/fortnight</span>
+      </div>
+      <p class="plan-tagline">Everything CampaignMasta has to offer. AI, polling command centre, competitor intelligence, and constituency management.</p>
+      <ul class="plan-features">
+        <li><i class="fas fa-check-circle check"></i> Everything in Professional</li>
+        <li><i class="fas fa-check-circle check"></i> Polling Day Command Centre</li>
+        <li><i class="fas fa-check-circle check"></i> Live Polling Station Monitoring</li>
+        <li><i class="fas fa-check-circle check"></i> Incident Reporting &amp; Escalation</li>
+        <li><i class="fas fa-check-circle check"></i> AI Ward Briefs &amp; Speech Writer</li>
+        <li><i class="fas fa-check-circle check"></i> Competitor Intelligence Tracker</li>
+        <li><i class="fas fa-check-circle check"></i> Development Funds Tracker</li>
+        <li><i class="fas fa-check-circle check"></i> Constituency Service Mode</li>
+        <li><i class="fas fa-check-circle check"></i> AI-Powered Work Items</li>
+        <li><i class="fas fa-check-circle check"></i> Full Audit &amp; Access Logs</li>
+        <li><i class="fas fa-check-circle check"></i> Priority Support</li>
+      </ul>
+      <a href="/accounts/login/" class="plan-cta">Get Started</a>
+    </div>
+
+  </div>
+</section>
+
+<!-- SETUP FEE -->
+<section class="setup-section">
+  <div class="setup-inner">
+    <div>
+      <p class="section-label">One-Time Investment</p>
+      <h2 class="section-title" style="font-size:1.9rem;">What's Included in the K3,000 Setup Fee</h2>
+      <p style="font-size:15px;color:var(--neutral-500);margin-bottom:8px;">The setup fee is a one-off payment that covers everything needed to get your campaign platform ready to use from day one.</p>
+      <ul class="setup-list">
+        <li><i class="fas fa-check-circle"></i> Full configuration of your electorate — wards, LLGs, districts, villages</li>
+        <li><i class="fas fa-check-circle"></i> Import of your existing supporter data (CSV)</li>
+        <li><i class="fas fa-check-circle"></i> Setup of your candidate profile and branding</li>
+        <li><i class="fas fa-check-circle"></i> Team account creation and role assignment</li>
+        <li><i class="fas fa-check-circle"></i> Android app installation on team devices</li>
+        <li><i class="fas fa-check-circle"></i> Training session for your campaign manager</li>
+        <li><i class="fas fa-check-circle"></i> 30-day onboarding support via WhatsApp</li>
+      </ul>
+    </div>
+    <div class="setup-card">
+      <div class="fee">K3,000</div>
+      <div class="fee-label">One-time setup fee</div>
+      <p>Paid once when you first subscribe. This is not a recurring charge — you only pay your fortnightly plan fee after setup.</p>
+      <div style="margin-top:24px;padding-top:20px;border-top:1px solid rgba(255,255,255,.15);">
+        <p style="font-size:12px;color:rgba(255,255,255,.5);margin-bottom:8px;">THEN FROM</p>
+        <div style="font-size:2rem;font-weight:900;color:#6ee7b7;">K75<span style="font-size:1rem;color:rgba(255,255,255,.6);font-weight:400;">/fortnight</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMPARISON TABLE -->
+<section class="compare-section">
+  <div style="text-align:center;">
+    <p class="section-label">Plan Comparison</p>
+    <h2 class="section-title">Feature by Feature</h2>
+  </div>
+  <div class="compare-table">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:40%;">Feature</th>
+          <th>Starter<br><small style="font-weight:400;color:rgba(255,255,255,.6);">K75/fn</small></th>
+          <th class="col-featured">Professional<br><small style="font-weight:400;color:rgba(255,255,255,.6);">K100/fn</small></th>
+          <th>Full Package<br><small style="font-weight:400;color:rgba(255,255,255,.6);">K150/fn</small></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="section-row"><td colspan="4">Contacts & CRM</td></tr>
+        <tr><td>Supporter CRM</td><td><i class="fas fa-check-circle yes"></i></td><td class="col-featured"><i class="fas fa-check-circle yes"></i></td><td><i class="fas fa-check-circle yes"></i></td></tr>
+        <tr><td>Contact limit</td><td>2,000</td><td class="col-featured">Unlimited</td><td>Unlimited</td></tr>
+        <tr><td>Influencer CRM</td><td><i class="fas fa-times-circle no"></i></td><td class="col-featured"><i class="fas fa-check-circle yes"></i></td><td><i class="fas fa-check-circle yes"></i></td></tr>
+        <tr><td>Team Management</td><td>Up to 10</td><td class="col-featured">Unlimited</td><td>Unlimited</td></tr>
+
+        <tr class="section-row"><td colspan="4">Outreach</td></tr>
+        <tr><td>Call Logging</td><td><i class="fas fa-check-circle yes"></i></td><td class="col-featured"><i class="fas fa-check-circle yes"></i></td><td><i class="fas fa-check-circle yes"></i></td></tr>
+        <tr><td>SMS / WhatsApp / Email</td><td><i class="fas fa-check-circle yes"></i></td><td class="col-featured"><i class="fas fa-check-circle yes"></i></td><td><i class="fas fa-check-circle yes"></i></td></tr>
+        <tr><td>Events & Attendance</td><td><i class="fas fa-check-circle yes"></i></td><td class="col-featured"><i class="fas fa-check-circle yes"></i></td><td><i class="fas fa-check-circle yes"></i></td></tr>
+        <tr><td>Task Manager</td><td><i class="fas fa-check-circle yes"></i></td><td class="col-featured"><i class="fas fa-check-circle yes"></i></td><td><i class="fas fa-check-circle yes"></i></td></tr>
+
+        <tr class="section-row"><td colspan="4">Intelligence & Analytics</td></tr>
+        <tr><td>Ward Intelligence Briefs</td><td><i class="fas fa-times-circle no"></i></td><td class="col-featured"><i class="fas fa-check-circle yes"></i></td><td><i class="fas fa-check-circle yes"></i></td></tr>
+        <tr><td>Reports & Analytics</td><td>Basic</td><td class="col-featured">Full</td><td>Full</td></tr>
+        <tr><td>Competitor Intelligence</td><td><i class="fas fa-times-circle no"></i></td><td class="col-featured"><i class="fas fa-times-circle no"></i></td><td><i class="fas fa-check-circle yes"></i></td></tr>
+
+        <tr class="section-row"><td colspan="4">PNG-Specific Features</td></tr>
+        <tr><td>Preference Deals</td><td><i class="fas fa-times-circle no"></i></td><td class="col-featured"><i class="fas fa-check-circle yes"></i></td><td><i class="fas fa-check-circle yes"></i></td></tr>
+        <tr><td>Community Groups & Assistance</td><td><i class="fas fa-times-circle no"></i></td><td class="col-featured"><i class="fas fa-check-circle yes"></i></td><td><i class="fas fa-check-circle yes"></i></td></tr>
+        <tr><td>Voter Registration Drives</td><td><i class="fas fa-times-circle no"></i></td><td class="col-featured"><i class="fas fa-check-circle yes"></i></td><td><i class="fas fa-check-circle yes"></i></td></tr>
+        <tr><td>Development Funds Tracker</td><td><i class="fas fa-times-circle no"></i></td><td class="col-featured"><i class="fas fa-times-circle no"></i></td><td><i class="fas fa-check-circle yes"></i></td></tr>
+
+        <tr class="section-row"><td colspan="4">Polling Day</td></tr>
+        <tr><td>Polling Day Command Centre</td><td><i class="fas fa-times-circle no"></i></td><td class="col-featured"><i class="fas fa-times-circle no"></i></td><td><i class="fas fa-check-circle yes"></i></td></tr>
+        <tr><td>Live Incident Reporting</td><td><i class="fas fa-times-circle no"></i></td><td class="col-featured"><i class="fas fa-times-circle no"></i></td><td><i class="fas fa-check-circle yes"></i></td></tr>
+
+        <tr class="section-row"><td colspan="4">AI Tools</td></tr>
+        <tr><td>AI Ward Briefs</td><td><i class="fas fa-times-circle no"></i></td><td class="col-featured"><i class="fas fa-times-circle no"></i></td><td><i class="fas fa-check-circle yes"></i></td></tr>
+        <tr><td>AI Speech Writer</td><td><i class="fas fa-times-circle no"></i></td><td class="col-featured"><i class="fas fa-times-circle no"></i></td><td><i class="fas fa-check-circle yes"></i></td></tr>
+
+        <tr class="section-row"><td colspan="4">Platform</td></tr>
+        <tr><td>Android Mobile App</td><td><i class="fas fa-check-circle yes"></i></td><td class="col-featured"><i class="fas fa-check-circle yes"></i></td><td><i class="fas fa-check-circle yes"></i></td></tr>
+        <tr><td>CSV Import / Export</td><td><i class="fas fa-check-circle yes"></i></td><td class="col-featured"><i class="fas fa-check-circle yes"></i></td><td><i class="fas fa-check-circle yes"></i></td></tr>
+        <tr><td>Constituency Service Mode</td><td><i class="fas fa-times-circle no"></i></td><td class="col-featured"><i class="fas fa-times-circle no"></i></td><td><i class="fas fa-check-circle yes"></i></td></tr>
+        <tr><td>Priority Support</td><td><i class="fas fa-times-circle no"></i></td><td class="col-featured"><i class="fas fa-times-circle no"></i></td><td><i class="fas fa-check-circle yes"></i></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq-section">
+  <div style="text-align:center;">
+    <p class="section-label">Common Questions</p>
+    <h2 class="section-title">Frequently Asked Questions</h2>
+  </div>
+  <div class="faq-grid">
+    <div class="faq-item">
+      <h4>What is the K3,000 setup fee for?</h4>
+      <p>The setup fee covers configuring your electorate's geographic data (wards, LLGs, districts), importing your existing supporter data, training your campaign manager, and 30 days of onboarding support. It is paid once only.</p>
+    </div>
+    <div class="faq-item">
+      <h4>How is "fortnight" billing handled?</h4>
+      <p>Your subscription renews every two weeks (14 days). You can pay by bank transfer or mobile money. We'll send a reminder before each billing date.</p>
+    </div>
+    <div class="faq-item">
+      <h4>Can I upgrade my plan later?</h4>
+      <p>Yes. You can upgrade or downgrade at any time. Upgrades take effect immediately. There are no penalties for changing plans.</p>
+    </div>
+    <div class="faq-item">
+      <h4>Is there a free trial?</h4>
+      <p>Yes — new accounts start on a free trial so you can explore the platform before committing. Contact us to activate your trial.</p>
+    </div>
+    <div class="faq-item">
+      <h4>What happens to my data if I cancel?</h4>
+      <p>You can export all your data at any time. We retain your data for 90 days after cancellation, after which it is permanently deleted.</p>
+    </div>
+    <div class="faq-item">
+      <h4>Does the Android app cost extra?</h4>
+      <p>No. The Android app is included in all subscription plans at no additional cost. You can install it on as many team devices as you need.</p>
+    </div>
+    <div class="faq-item">
+      <h4>Can I use CampaignMasta for a Provincial seat?</h4>
+      <p>Yes. CampaignMasta supports both District Open and Regional/Provincial seats. The geographic structure adjusts automatically based on your electorate type.</p>
+    </div>
+    <div class="faq-item">
+      <h4>How do I get started?</h4>
+      <p>Contact us via email or WhatsApp to start the setup process. We'll configure your electorate, create your account, and get your team trained within a few days.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section style="background:linear-gradient(135deg,#0b3d2e,#116149);padding:72px 5%;text-align:center;color:#fff;">
+  <p class="section-label" style="color:#6ee7b7;">Ready to Win?</p>
+  <h2 style="font-size:2.2rem;font-weight:900;margin-bottom:14px;">Start Your Campaign Today</h2>
+  <p style="font-size:16px;color:rgba(255,255,255,.75);max-width:480px;margin:0 auto 32px;line-height:1.65;">K3,000 setup · Choose your plan · Be live in days</p>
+  <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;">
+    <a href="mailto:info@webmasta.com.pg" class="btn btn-white btn-xl"><i class="fas fa-envelope"></i> Email Us to Get Started</a>
+    <a href="/features/" class="btn btn-ghost-white btn-xl">View All Features</a>
+  </div>
+</section>
+
+{% endblock %}

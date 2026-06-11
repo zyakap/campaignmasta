@@ -1,0 +1,466 @@
+{% extends "marketing/base.html" %}
+{% block title %}Features — CampaignMasta{% endblock %}
+{% block meta_desc %}Explore all features of CampaignMasta: supporter CRM, ward intelligence, polling day command centre, AI tools, outreach, and more. Built for PNG elections.{% endblock %}
+{% block nav_features %}class="active"{% endblock %}
+
+{% block extra_head %}
+<style>
+  .features-hero {
+    background: linear-gradient(135deg, #0b3d2e 0%, #116149 100%);
+    padding: 80px 5% 70px; text-align: center; color: #fff;
+  }
+  .features-hero .section-label { color: #6ee7b7; }
+  .features-hero h1 { font-size: clamp(2rem, 4vw, 3rem); font-weight: 900; line-height: 1.15; margin-bottom: 16px; }
+  .features-hero p { font-size: 17px; color: rgba(255,255,255,.8); max-width: 560px; margin: 0 auto; line-height: 1.65; }
+
+  .features-nav { background: var(--neutral-100); border-bottom: 1px solid var(--neutral-200); padding: 0 5%; position: sticky; top: 64px; z-index: 50; overflow-x: auto; }
+  .features-nav-inner { display: flex; gap: 0; white-space: nowrap; }
+  .features-nav-inner a {
+    display: inline-block; padding: 14px 18px; font-size: 13px; font-weight: 600;
+    color: var(--neutral-500); text-decoration: none; border-bottom: 3px solid transparent;
+    transition: all .15s; white-space: nowrap;
+  }
+  .features-nav-inner a:hover { color: var(--green-mid); }
+  .features-nav-inner a.active { color: var(--green-mid); border-bottom-color: var(--green-mid); }
+
+  .feature-block { padding: 72px 5%; border-bottom: 1px solid var(--neutral-200); }
+  .feature-block:nth-child(even) { background: var(--neutral-100); }
+  .feature-block-inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: start; }
+  .feature-block-inner.reverse { direction: rtl; }
+  .feature-block-inner.reverse > * { direction: ltr; }
+  .feature-block-content {}
+  .feature-block-icon {
+    width: 56px; height: 56px; border-radius: 14px;
+    background: var(--green-pale); color: var(--green-mid);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; margin-bottom: 20px;
+  }
+  .feature-block h2 { font-size: 1.7rem; font-weight: 800; color: var(--neutral-900); margin-bottom: 12px; line-height: 1.25; }
+  .feature-block-sub { font-size: 15px; color: var(--neutral-500); line-height: 1.65; margin-bottom: 24px; }
+  .feature-list { list-style: none; }
+  .feature-list li { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--neutral-200); font-size: 14px; color: var(--neutral-700); }
+  .feature-list li:last-child { border-bottom: none; }
+  .feature-list li i { color: var(--green-mid); margin-top: 2px; flex-shrink: 0; }
+  .feature-visual {
+    background: linear-gradient(135deg, var(--green-dark), var(--green-mid));
+    border-radius: 16px; padding: 32px; color: rgba(255,255,255,.85); min-height: 280px;
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  .feature-visual h4 { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #6ee7b7; margin-bottom: 18px; }
+  .visual-item { background: rgba(255,255,255,.08); border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; }
+  .visual-item-icon { width: 32px; height: 32px; border-radius: 8px; background: rgba(110,231,183,.2); display: flex; align-items: center; justify-content: center; color: #6ee7b7; font-size: 14px; flex-shrink: 0; }
+  .visual-item-text { }
+  .visual-item-title { font-size: 13px; font-weight: 600; color: #fff; }
+  .visual-item-sub { font-size: 11px; color: rgba(255,255,255,.5); margin-top: 2px; }
+  .visual-badge { display: inline-block; font-size: 10px; padding: 3px 8px; border-radius: 4px; font-weight: 600; margin-left: auto; flex-shrink: 0; }
+  .badge-green { background: rgba(110,231,183,.2); color: #6ee7b7; }
+  .badge-yellow { background: rgba(251,191,36,.2); color: #fbbf24; }
+  .badge-red { background: rgba(248,113,113,.2); color: #f87171; }
+
+  .cta-block { background: linear-gradient(135deg, #0b3d2e, #116149); padding: 72px 5%; text-align: center; color: #fff; }
+  .cta-block h2 { font-size: 2rem; font-weight: 800; margin-bottom: 12px; }
+  .cta-block p { color: rgba(255,255,255,.75); font-size: 16px; margin-bottom: 28px; }
+
+  @media (max-width: 768px) {
+    .feature-block-inner { grid-template-columns: 1fr; }
+    .feature-block-inner.reverse { direction: ltr; }
+    .feature-visual { display: none; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="features-hero">
+  <p class="section-label">Complete Feature Set</p>
+  <h1>Everything a PNG Candidate Needs</h1>
+  <p>From the first rally to the last vote counted — CampaignMasta covers every aspect of a modern Papua New Guinea election campaign.</p>
+</div>
+
+<div class="features-nav">
+  <div class="features-nav-inner">
+    <a href="#crm">Supporter CRM</a>
+    <a href="#outreach">Outreach</a>
+    <a href="#intelligence">Intelligence</a>
+    <a href="#polling">Polling Day</a>
+    <a href="#ai">AI Tools</a>
+    <a href="#constituency">Constituency</a>
+    <a href="#png">PNG Features</a>
+    <a href="#data">Data & Reports</a>
+    <a href="#mobile">Android App</a>
+  </div>
+</div>
+
+<!-- 1. SUPPORTER CRM -->
+<div class="feature-block" id="crm">
+  <div class="feature-block-inner">
+    <div class="feature-block-content">
+      <div class="feature-block-icon"><i class="fas fa-users"></i></div>
+      <h2>Supporter CRM</h2>
+      <p class="feature-block-sub">Your most important asset is knowing who supports you and where they live. CampaignMasta lets you build a detailed, searchable database of every voter — organised by province, district, LLG, ward, and village.</p>
+      <ul class="feature-list">
+        <li><i class="fas fa-check-circle"></i> Track support level: Strong, Leaning, Undecided, Opposed</li>
+        <li><i class="fas fa-check-circle"></i> Record gender, occupation, clan, and household details</li>
+        <li><i class="fas fa-check-circle"></i> Filter and search by ward, village, or any field</li>
+        <li><i class="fas fa-check-circle"></i> See coverage heat-map — where are your gaps?</li>
+        <li><i class="fas fa-check-circle"></i> Link supporters to polling locations</li>
+        <li><i class="fas fa-check-circle"></i> Tag VIP supporters for special attention</li>
+        <li><i class="fas fa-check-circle"></i> Bulk import from CSV spreadsheets</li>
+      </ul>
+    </div>
+    <div class="feature-visual">
+      <h4>Supporter Overview</h4>
+      <div class="visual-item">
+        <div class="visual-item-icon"><i class="fas fa-user"></i></div>
+        <div class="visual-item-text"><div class="visual-item-title">John Kama — Goroka Ward 3</div><div class="visual-item-sub">Huli · Village Elder</div></div>
+        <span class="visual-badge badge-green">Strong</span>
+      </div>
+      <div class="visual-item">
+        <div class="visual-item-icon"><i class="fas fa-user"></i></div>
+        <div class="visual-item-text"><div class="visual-item-title">Mary Wapole — Kainantu Ward 7</div><div class="visual-item-sub">Teacher · Female</div></div>
+        <span class="visual-badge badge-yellow">Leaning</span>
+      </div>
+      <div class="visual-item">
+        <div class="visual-item-icon"><i class="fas fa-user"></i></div>
+        <div class="visual-item-text"><div class="visual-item-title">Peter Boga — Lufa Ward 2</div><div class="visual-item-sub">Farmer · Youth Leader</div></div>
+        <span class="visual-badge badge-green">Strong</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 2. TEAM & INFLUENCERS -->
+<div class="feature-block" id="team">
+  <div class="feature-block-inner reverse">
+    <div class="feature-block-content">
+      <div class="feature-block-icon"><i class="fas fa-handshake"></i></div>
+      <h2>Team & Influencer Management</h2>
+      <p class="feature-block-sub">Winning an election requires a network. Track your campaign team, field workers, and the key influencers who can deliver blocks of votes — church leaders, tribe heads, community executives, and business figures.</p>
+      <ul class="feature-list">
+        <li><i class="fas fa-check-circle"></i> Team roles: Campaign Manager, Field Officer, Driver, Scrutineer</li>
+        <li><i class="fas fa-check-circle"></i> Assign team members to specific wards or LLGs</li>
+        <li><i class="fas fa-check-circle"></i> Track influencer type: Church Leader, Tribe Leader, Business Owner, NGO</li>
+        <li><i class="fas fa-check-circle"></i> Record influence level and estimated vote bloc size</li>
+        <li><i class="fas fa-check-circle"></i> Monitor engagement history and last contact date</li>
+        <li><i class="fas fa-check-circle"></i> Track alignment: Committed, Neutral, or Opposing</li>
+      </ul>
+    </div>
+    <div class="feature-visual">
+      <h4>Key Influencers</h4>
+      <div class="visual-item">
+        <div class="visual-item-icon"><i class="fas fa-church"></i></div>
+        <div class="visual-item-text"><div class="visual-item-title">Pastor James Mondo</div><div class="visual-item-sub">Church Leader · ~400 congregation</div></div>
+        <span class="visual-badge badge-green">Committed</span>
+      </div>
+      <div class="visual-item">
+        <div class="visual-item-icon"><i class="fas fa-shield-halved"></i></div>
+        <div class="visual-item-text"><div class="visual-item-title">Chief Philip Taro</div><div class="visual-item-sub">Tribe Head · Kuman Clan</div></div>
+        <span class="visual-badge badge-yellow">Neutral</span>
+      </div>
+      <div class="visual-item">
+        <div class="visual-item-icon"><i class="fas fa-store"></i></div>
+        <div class="visual-item-text"><div class="visual-item-title">Margaret Oa</div><div class="visual-item-sub">Business Owner · Women's Group</div></div>
+        <span class="visual-badge badge-green">Committed</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 3. OUTREACH -->
+<div class="feature-block" id="outreach">
+  <div class="feature-block-inner">
+    <div class="feature-block-content">
+      <div class="feature-block-icon"><i class="fas fa-satellite-dish"></i></div>
+      <h2>Multi-Channel Outreach</h2>
+      <p class="feature-block-sub">Stay in touch with your supporters through every channel. Log every call, send targeted messages, schedule events, and track follow-ups — all in one place.</p>
+      <ul class="feature-list">
+        <li><i class="fas fa-check-circle"></i> Log phone calls with outcome and follow-up notes</li>
+        <li><i class="fas fa-check-circle"></i> Send SMS, WhatsApp, and email messages in bulk</li>
+        <li><i class="fas fa-check-circle"></i> Target messages by ward, support level, or any filter</li>
+        <li><i class="fas fa-check-circle"></i> Track message delivery and read status</li>
+        <li><i class="fas fa-check-circle"></i> Assign tasks to team members with due dates</li>
+        <li><i class="fas fa-check-circle"></i> Plan and manage campaign events and rallies</li>
+        <li><i class="fas fa-check-circle"></i> Record event attendance and follow up with no-shows</li>
+      </ul>
+    </div>
+    <div class="feature-visual">
+      <h4>Recent Outreach</h4>
+      <div class="visual-item">
+        <div class="visual-item-icon"><i class="fas fa-phone"></i></div>
+        <div class="visual-item-text"><div class="visual-item-title">Called: Ward 5 Elders Group</div><div class="visual-item-sub">12 contacts · 45 mins ago</div></div>
+        <span class="visual-badge badge-green">Done</span>
+      </div>
+      <div class="visual-item">
+        <div class="visual-item-icon"><i class="fab fa-whatsapp"></i></div>
+        <div class="visual-item-text"><div class="visual-item-title">WhatsApp: Rally Reminder</div><div class="visual-item-sub">248 recipients · Sent 9am</div></div>
+        <span class="visual-badge badge-green">Sent</span>
+      </div>
+      <div class="visual-item">
+        <div class="visual-item-icon"><i class="fas fa-calendar-days"></i></div>
+        <div class="visual-item-text"><div class="visual-item-title">Rally — Kainantu Town Oval</div><div class="visual-item-sub">Saturday 14 June · 2pm</div></div>
+        <span class="visual-badge badge-yellow">Upcoming</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 4. WARD INTELLIGENCE -->
+<div class="feature-block" id="intelligence">
+  <div class="feature-block-inner reverse">
+    <div class="feature-block-content">
+      <div class="feature-block-icon"><i class="fas fa-map-location-dot"></i></div>
+      <h2>Ward Intelligence Briefs</h2>
+      <p class="feature-block-sub">Know every ward inside-out before you visit. AI-generated intelligence briefs give your candidate the strategic edge — covering demographics, key issues, landmarks, community leaders, and the right talking points for each ward.</p>
+      <ul class="feature-list">
+        <li><i class="fas fa-check-circle"></i> Profile every ward with population, demographics, livelihood</li>
+        <li><i class="fas fa-check-circle"></i> Record landmarks: schools, churches, health posts, markets</li>
+        <li><i class="fas fa-check-circle"></i> Track community issues specific to each ward</li>
+        <li><i class="fas fa-check-circle"></i> AI generates a speech brief tailored to each ward's priorities</li>
+        <li><i class="fas fa-check-circle"></i> Monitor promises made per ward and delivery status</li>
+        <li><i class="fas fa-check-circle"></i> Competitor presence and risk rating by ward</li>
+      </ul>
+    </div>
+    <div class="feature-visual">
+      <h4>Ward Brief — Lufa Ward 4</h4>
+      <div class="visual-item">
+        <div class="visual-item-icon"><i class="fas fa-people-group"></i></div>
+        <div class="visual-item-text"><div class="visual-item-title">Population: ~1,200</div><div class="visual-item-sub">Mostly subsistence farmers</div></div>
+      </div>
+      <div class="visual-item">
+        <div class="visual-item-icon"><i class="fas fa-triangle-exclamation"></i></div>
+        <div class="visual-item-text"><div class="visual-item-title">Top Issue: Road access</div><div class="visual-item-sub">Main road closed 3 months</div></div>
+        <span class="visual-badge badge-red">Urgent</span>
+      </div>
+      <div class="visual-item">
+        <div class="visual-item-icon"><i class="fas fa-wand-magic-sparkles"></i></div>
+        <div class="visual-item-text"><div class="visual-item-title">AI Speech Brief Ready</div><div class="visual-item-sub">Covers road, school, water issues</div></div>
+        <span class="visual-badge badge-green">Ready</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 5. POLLING DAY -->
+<div class="feature-block" id="polling">
+  <div class="feature-block-inner">
+    <div class="feature-block-content">
+      <div class="feature-block-icon"><i class="fas fa-ballot-check"></i></div>
+      <h2>Polling Day Command Centre</h2>
+      <p class="feature-block-sub">On the most important day of your campaign, you need real-time visibility across every polling station in your electorate. CampaignMasta's Polling Day Command Centre puts you in complete control.</p>
+      <ul class="feature-list">
+        <li><i class="fas fa-check-circle"></i> Register all polling locations with coordinates and security risk rating</li>
+        <li><i class="fas fa-check-circle"></i> Field agents report voter turnout live from their phones</li>
+        <li><i class="fas fa-check-circle"></i> Log and escalate polling incidents in real time</li>
+        <li><i class="fas fa-check-circle"></i> Monitor which polling stations are open, delayed, or closed</li>
+        <li><i class="fas fa-check-circle"></i> Track scrutineer deployment across all stations</li>
+        <li><i class="fas fa-check-circle"></i> Live dashboard updates as counts come in</li>
+        <li><i class="fas fa-check-circle"></i> Record disputed results and lodge objections</li>
+      </ul>
+    </div>
+    <div class="feature-visual">
+      <h4>Polling Day — Live Status</h4>
+      <div class="visual-item">
+        <div class="visual-item-icon"><i class="fas fa-location-dot"></i></div>
+        <div class="visual-item-text"><div class="visual-item-title">Goroka Primary School</div><div class="visual-item-sub">Turnout: 68% · Agent: Present</div></div>
+        <span class="visual-badge badge-green">Open</span>
+      </div>
+      <div class="visual-item">
+        <div class="visual-item-icon"><i class="fas fa-location-dot"></i></div>
+        <div class="visual-item-text"><div class="visual-item-title">Kainantu Station</div><div class="visual-item-sub">Turnout: 41% · Incident reported</div></div>
+        <span class="visual-badge badge-red">Incident</span>
+      </div>
+      <div class="visual-item">
+        <div class="visual-item-icon"><i class="fas fa-location-dot"></i></div>
+        <div class="visual-item-text"><div class="visual-item-title">Lufa Community Hall</div><div class="visual-item-sub">Turnout: 55% · All clear</div></div>
+        <span class="visual-badge badge-green">Open</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 6. AI TOOLS -->
+<div class="feature-block" id="ai">
+  <div class="feature-block-inner reverse">
+    <div class="feature-block-content">
+      <div class="feature-block-icon"><i class="fas fa-brain"></i></div>
+      <h2>AI-Powered Campaign Tools</h2>
+      <p class="feature-block-sub">CampaignMasta integrates powerful AI to save your team hours every week. Generate targeted speeches, analyse ward data, draft press releases, and get strategic recommendations automatically.</p>
+      <ul class="feature-list">
+        <li><i class="fas fa-check-circle"></i> AI ward brief generator — analysis based on your real data</li>
+        <li><i class="fas fa-check-circle"></i> Speech writer tailored to specific ward issues and audience</li>
+        <li><i class="fas fa-check-circle"></i> AI reviews and scores your campaign coverage by ward</li>
+        <li><i class="fas fa-check-circle"></i> Automated work item suggestions: who to call, what to fix</li>
+        <li><i class="fas fa-check-circle"></i> Connect to OpenAI, Claude, Gemini, or local models</li>
+        <li><i class="fas fa-check-circle"></i> Track AI usage and costs within your wallet balance</li>
+      </ul>
+    </div>
+    <div class="feature-visual">
+      <h4>AI Work Items</h4>
+      <div class="visual-item">
+        <div class="visual-item-icon"><i class="fas fa-wand-magic-sparkles"></i></div>
+        <div class="visual-item-text"><div class="visual-item-title">Ward 7 Speech Draft Ready</div><div class="visual-item-sub">Focus: water supply, school fees</div></div>
+        <span class="visual-badge badge-green">Review</span>
+      </div>
+      <div class="visual-item">
+        <div class="visual-item-icon"><i class="fas fa-chart-line"></i></div>
+        <div class="visual-item-text"><div class="visual-item-title">Coverage Gap: Wards 12–15</div><div class="visual-item-sub">Only 23 supporters logged</div></div>
+        <span class="visual-badge badge-red">Action</span>
+      </div>
+      <div class="visual-item">
+        <div class="visual-item-icon"><i class="fas fa-file-lines"></i></div>
+        <div class="visual-item-text"><div class="visual-item-title">Lufa Ward Brief Generated</div><div class="visual-item-sub">8 issues · 3 key influencers</div></div>
+        <span class="visual-badge badge-green">Done</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 7. CONSTITUENCY MANAGEMENT -->
+<div class="feature-block" id="constituency">
+  <div class="feature-block-inner">
+    <div class="feature-block-content">
+      <div class="feature-block-icon"><i class="fas fa-landmark"></i></div>
+      <h2>Constituency Service Management</h2>
+      <p class="feature-block-sub">After the election, CampaignMasta switches to constituency mode — helping elected members manage development projects, citizen requests, community grants, and ward development plans.</p>
+      <ul class="feature-list">
+        <li><i class="fas fa-check-circle"></i> Log citizen service requests and track resolution</li>
+        <li><i class="fas fa-check-circle"></i> Manage development projects by ward and LLG</li>
+        <li><i class="fas fa-check-circle"></i> Record community grants and disbursements</li>
+        <li><i class="fas fa-check-circle"></i> Ward Development Plans with progress tracking</li>
+        <li><i class="fas fa-check-circle"></i> Promise tracker — link commitments to delivery status</li>
+        <li><i class="fas fa-check-circle"></i> Switch between campaign mode and constituency mode seamlessly</li>
+      </ul>
+    </div>
+    <div class="feature-visual">
+      <h4>Development Projects</h4>
+      <div class="visual-item">
+        <div class="visual-item-icon"><i class="fas fa-road"></i></div>
+        <div class="visual-item-text"><div class="visual-item-title">Lufa–Kainantu Road Sealing</div><div class="visual-item-sub">DSIP Funded · K480,000</div></div>
+        <span class="visual-badge badge-yellow">In Progress</span>
+      </div>
+      <div class="visual-item">
+        <div class="visual-item-icon"><i class="fas fa-graduation-cap"></i></div>
+        <div class="visual-item-text"><div class="visual-item-title">Goroka Primary Classrooms</div><div class="visual-item-sub">3 classrooms · K120,000</div></div>
+        <span class="visual-badge badge-green">Complete</span>
+      </div>
+      <div class="visual-item">
+        <div class="visual-item-icon"><i class="fas fa-droplet"></i></div>
+        <div class="visual-item-text"><div class="visual-item-title">Kainantu Water Supply</div><div class="visual-item-sub">Ward 4 · Planning phase</div></div>
+        <span class="visual-badge badge-yellow">Planned</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 8. PNG SPECIFIC -->
+<div class="feature-block" id="png">
+  <div class="feature-block-inner reverse">
+    <div class="feature-block-content">
+      <div class="feature-block-icon"><i class="fas fa-flag"></i></div>
+      <h2>PNG-Specific Campaign Features</h2>
+      <p class="feature-block-sub">CampaignMasta is built specifically for Papua New Guinea's unique electoral system and political culture — features you won't find in generic CRM tools.</p>
+      <ul class="feature-list">
+        <li><i class="fas fa-check-circle"></i> <strong>Preference Deals</strong> — Track inter-candidate preference arrangements and voting blocs</li>
+        <li><i class="fas fa-check-circle"></i> <strong>Community Assistance</strong> — Record goods, cash, and services delivered to communities</li>
+        <li><i class="fas fa-check-circle"></i> <strong>Community Groups</strong> — Manage church groups, women's groups, youth groups, sports clubs</li>
+        <li><i class="fas fa-check-circle"></i> <strong>Competitor Intelligence</strong> — Track opponent activities, weaknesses, and voter poaching</li>
+        <li><i class="fas fa-check-circle"></i> <strong>Development Funds</strong> — Track DSIP, RESI, and personal development fund allocations</li>
+        <li><i class="fas fa-check-circle"></i> <strong>Voter Registration Drives</strong> — Coordinate and track enrolment campaigns by ward</li>
+        <li><i class="fas fa-check-circle"></i> <strong>LLG & Ward Structure</strong> — Full PNG geographic hierarchy built in</li>
+      </ul>
+    </div>
+    <div class="feature-visual">
+      <h4>Preference Deals</h4>
+      <div class="visual-item">
+        <div class="visual-item-icon"><i class="fas fa-handshake"></i></div>
+        <div class="visual-item-text"><div class="visual-item-title">Candidate: Michael Opi</div><div class="visual-item-sub">2nd preference confirmed · Kainantu</div></div>
+        <span class="visual-badge badge-green">Active</span>
+      </div>
+      <div class="visual-item">
+        <div class="visual-item-icon"><i class="fas fa-handshake"></i></div>
+        <div class="visual-item-text"><div class="visual-item-title">Candidate: Susan Wari</div><div class="visual-item-sub">3rd preference · under negotiation</div></div>
+        <span class="visual-badge badge-yellow">Pending</span>
+      </div>
+      <div class="visual-item">
+        <div class="visual-item-icon"><i class="fas fa-chart-pie"></i></div>
+        <div class="visual-item-text"><div class="visual-item-title">Voter Registration Drive</div><div class="visual-item-sub">Ward 9: 142 new enrollees this month</div></div>
+        <span class="visual-badge badge-green">On Track</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 9. DATA & REPORTS -->
+<div class="feature-block" id="data">
+  <div class="feature-block-inner">
+    <div class="feature-block-content">
+      <div class="feature-block-icon"><i class="fas fa-chart-line"></i></div>
+      <h2>Reports, Data & Analytics</h2>
+      <p class="feature-block-sub">Understand your campaign's strengths and weaknesses at a glance. Import your existing voter lists, export data for analysis, and review detailed campaign performance reports.</p>
+      <ul class="feature-list">
+        <li><i class="fas fa-check-circle"></i> Campaign dashboard with key metrics at a glance</li>
+        <li><i class="fas fa-check-circle"></i> Supporter count breakdown by ward and support level</li>
+        <li><i class="fas fa-check-circle"></i> Outreach activity reports — calls, messages, events</li>
+        <li><i class="fas fa-check-circle"></i> Import supporters from CSV with field mapping tool</li>
+        <li><i class="fas fa-check-circle"></i> Export any data set for offline analysis</li>
+        <li><i class="fas fa-check-circle"></i> Full audit log — see every action by every team member</li>
+        <li><i class="fas fa-check-circle"></i> Multi-user with role-based access control</li>
+      </ul>
+    </div>
+    <div class="feature-visual">
+      <h4>Campaign Dashboard</h4>
+      <div class="visual-item">
+        <div class="visual-item-icon"><i class="fas fa-users"></i></div>
+        <div class="visual-item-text"><div class="visual-item-title">Total Supporters: 2,841</div><div class="visual-item-sub">↑ 143 this week</div></div>
+        <span class="visual-badge badge-green">+5.3%</span>
+      </div>
+      <div class="visual-item">
+        <div class="visual-item-icon"><i class="fas fa-map"></i></div>
+        <div class="visual-item-text"><div class="visual-item-title">Ward Coverage: 38 / 47</div><div class="visual-item-sub">9 wards with no data yet</div></div>
+        <span class="visual-badge badge-yellow">81%</span>
+      </div>
+      <div class="visual-item">
+        <div class="visual-item-icon"><i class="fas fa-phone"></i></div>
+        <div class="visual-item-text"><div class="visual-item-title">Calls This Week: 214</div><div class="visual-item-sub">62% positive response</div></div>
+        <span class="visual-badge badge-green">Good</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 10. ANDROID APP -->
+<div class="feature-block" id="mobile" style="background:var(--neutral-100);">
+  <div class="feature-block-inner">
+    <div class="feature-block-content">
+      <div class="feature-block-icon" style="background:#d1f0e3;"><i class="fab fa-android"></i></div>
+      <h2>Android Mobile App</h2>
+      <p class="feature-block-sub">Your field teams can't always bring a laptop. The CampaignMasta Android app lets your agents add supporters, log calls, report from polling stations, and stay connected — all from their smartphone, even in remote areas.</p>
+      <ul class="feature-list">
+        <li><i class="fas fa-check-circle"></i> Add new supporters on the spot in the field</li>
+        <li><i class="fas fa-check-circle"></i> Log calls and outreach activity from your phone</li>
+        <li><i class="fas fa-check-circle"></i> Report polling day incidents and turnout in real time</li>
+        <li><i class="fas fa-check-circle"></i> View ward briefs and candidate profile offline</li>
+        <li><i class="fas fa-check-circle"></i> Works on standard Android smartphones</li>
+        <li><i class="fas fa-check-circle"></i> Direct APK install — no Play Store account needed</li>
+      </ul>
+      <div style="margin-top:24px;">
+        <a href="/download/" class="btn btn-primary btn-lg"><i class="fab fa-android"></i> Download APK</a>
+      </div>
+    </div>
+    <div class="feature-visual" style="background:linear-gradient(135deg,#0b3d2e,#116149);text-align:center;padding:48px 32px;">
+      <i class="fab fa-android" style="font-size:80px;color:#6ee7b7;margin-bottom:20px;display:block;"></i>
+      <p style="font-weight:700;font-size:18px;color:#fff;margin-bottom:6px;">CampaignMasta</p>
+      <p style="font-size:13px;color:rgba(255,255,255,.6);margin-bottom:24px;">for Android</p>
+      <a href="/download/" class="btn btn-white" style="width:100%;justify-content:center;"><i class="fab fa-android"></i> Download Now</a>
+    </div>
+  </div>
+</div>
+
+<!-- CTA -->
+<div class="cta-block">
+  <h2>Ready to Run a Smarter Campaign?</h2>
+  <p>Join candidates across Papua New Guinea using CampaignMasta to win elections.</p>
+  <a href="/pricing/" class="btn btn-white btn-xl">View Pricing & Get Started <i class="fas fa-arrow-right"></i></a>
+</div>
+
+{% endblock %}

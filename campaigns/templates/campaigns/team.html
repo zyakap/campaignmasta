@@ -1,0 +1,18 @@
+{% extends "campaigns/base.html" %}
+{% block content %}
+  <section class="page-head">
+    <div><p class="eyebrow">Team Management</p><h1>Campaign Team</h1></div>
+    <a class="primary-btn" href="{% url 'team_member_create' %}">Add</a>
+  </section>
+  <section class="record-list">
+    {% for member in records %}
+      <article class="record-card">
+        <div><strong>{{ member.full_name }}</strong><span>{{ member.get_role_display }}</span></div>
+        <p>{{ member.phone|default:"No phone" }}{% if member.ward %} · {{ member.ward }}{% elif member.llg %} · {{ member.llg }}{% elif member.district %} · {{ member.district }}{% endif %}</p>
+        <small>{% if member.is_active %}Active{% else %}Inactive{% endif %}{% if member.notes %} · {{ member.notes }}{% endif %}</small>
+      </article>
+    {% empty %}
+      <p class="muted">No team members yet.</p>
+    {% endfor %}
+  </section>
+{% endblock %}

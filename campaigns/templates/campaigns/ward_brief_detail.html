@@ -1,0 +1,51 @@
+{% extends "campaigns/base.html" %}
+{% block content %}
+  <section class="page-head">
+    <div><p class="eyebrow">Ward Visit Brief</p><h1>{{ profile.ward }}</h1></div>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+      <a class="secondary-btn" href="{% url 'ward_profile_edit' profile.id %}">Edit</a>
+      <a class="secondary-btn" href="{% url 'ward_speech_create' profile.id %}">Speech notes</a>
+      <a class="primary-btn" href="{% url 'ward_brief_ai_create' profile.id %}">Ward brief</a>
+    </div>
+  </section>
+
+  <section class="content-grid">
+    <div class="panel">
+      <div class="panel-title"><h2>Local Context</h2></div>
+      <p>{{ profile.main_community_issues|default:"No issues recorded." }}</p>
+      <p class="muted">{{ profile.important_landmarks|default:"No landmarks recorded." }}</p>
+      {% if profile.councillor_name %}<p><strong>Councillor:</strong> {{ profile.councillor_name }}</p>{% endif %}
+      {% if profile.key_clans %}<p><strong>Key clans:</strong> {{ profile.key_clans }}</p>{% endif %}
+      {% if profile.security_concerns %}<p class="muted"><strong>Security:</strong> {{ profile.security_concerns }}</p>{% endif %}
+    </div>
+
+    <div class="panel">
+      <div class="panel-title"><h2>Talking Points</h2></div>
+      <p>{{ profile.notes_for_candidate|default:"Listen first, confirm local priorities, and keep commitments specific." }}</p>
+      <p class="muted">Supporters: {{ payload.supporter_count }} · Undecided: {{ payload.undecided_count }}</p>
+      {% if payload.promises %}
+        <p class="muted">Open promises:
+          {% for title, date in payload.promises %}{{ title }}{% if not forloop.last %}, {% endif %}{% endfor %}
+        </p>
+      {% endif %}
+    </div>
+
+    {% if payload.influencers %}
+      <div class="panel">
+        <div class="panel-title"><h2>Key People to Acknowledge</h2></div>
+        {% for name, role in payload.influencers %}
+          <p><strong>{{ name }}</strong>{% if role %} · {{ role }}{% endif %}</p>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% if payload.issues %}
+      <div class="panel">
+        <div class="panel-title"><h2>Current Issues</h2></div>
+        {% for title, category, priority in payload.issues %}
+          <p>{{ title }} <span class="muted">{{ category }} · {{ priority }}</span></p>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </section>
+{% endblock %}

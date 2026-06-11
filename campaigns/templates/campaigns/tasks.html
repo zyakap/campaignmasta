@@ -1,0 +1,18 @@
+{% extends "campaigns/base.html" %}
+{% block content %}
+  <section class="page-head">
+    <div><p class="eyebrow">Campaign Work</p><h1>Tasks</h1></div>
+    <a class="primary-btn" href="{% url 'task_create' %}">New</a>
+  </section>
+  <section class="record-list">
+    {% for task in records %}
+      <article class="record-card">
+        <div><strong>{{ task.title }}</strong><span>{{ task.get_status_display }}</span></div>
+        <p>{{ task.assigned_to|default:"Unassigned" }}{% if task.due_date %} · due {{ task.due_date }}{% endif %}</p>
+        <small>{{ task.get_priority_display }}</small>
+      </article>
+    {% empty %}
+      <p class="muted">No tasks yet.</p>
+    {% endfor %}
+  </section>
+{% endblock %}

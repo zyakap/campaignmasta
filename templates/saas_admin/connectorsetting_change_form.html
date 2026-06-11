@@ -1,0 +1,391 @@
+{% extends "saas_admin/change_form.html" %}
+{% load i18n %}
+
+{% block content %}
+
+<!-- Guide panel sits above the form -->
+<div style="background:var(--white);border:1px solid var(--n200);border-radius:var(--r14);overflow:hidden;margin-bottom:24px;">
+
+  <!-- Header -->
+  <div style="background:var(--g800);padding:18px 24px;display:flex;align-items:center;gap:14px;">
+    <div style="width:38px;height:38px;border-radius:10px;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+      <i class="fas fa-book-open" style="color:#6ee7b7;font-size:16px;"></i>
+    </div>
+    <div>
+      <div style="font-size:15px;font-weight:800;color:#fff;">Connector Setup Guide</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:2px;">How to fill in each field for every connector type — read this before saving.</div>
+    </div>
+  </div>
+
+  <!-- Nav tabs -->
+  <div style="display:flex;border-bottom:1px solid var(--n200);background:var(--n50);flex-wrap:wrap;" id="guide-tabs">
+    <button onclick="showTab('ai')"      class="gtab active" id="tab-ai">AI Provider</button>
+    <button onclick="showTab('wa')"      class="gtab" id="tab-wa">WhatsApp</button>
+    <button onclick="showTab('sms')"     class="gtab" id="tab-sms">SMS</button>
+    <button onclick="showTab('email')"   class="gtab" id="tab-email">Email</button>
+    <button onclick="showTab('maps')"    class="gtab" id="tab-maps">Maps / GIS</button>
+    <button onclick="showTab('payment')" class="gtab" id="tab-payment">Payment</button>
+    <button onclick="showTab('storage')" class="gtab" id="tab-storage">Storage</button>
+    <button onclick="showTab('webhook')" class="gtab" id="tab-webhook">Webhook</button>
+  </div>
+
+  <div style="padding:22px 24px;">
+
+    <!-- ══ AI PROVIDER ══ -->
+    <div class="gpanel" id="panel-ai">
+      <div class="guide-intro">Connect an AI language model to power ward brief generation, speech drafts, and AI-assisted work items. CampaignMasta supports OpenAI-compatible APIs.</div>
+      <div class="guide-grid">
+
+        <div class="guide-section">
+          <div class="gs-title"><i class="fas fa-list-check"></i> Required Fields</div>
+          <div class="gs-body">
+            <div class="gfield"><span class="gf-name">Connector type</span><span class="gf-val">AI Provider</span></div>
+            <div class="gfield"><span class="gf-name">Name</span><span class="gf-val">A label, e.g. <code>OpenAI GPT-4o</code> or <code>Claude 3.5</code></span></div>
+            <div class="gfield"><span class="gf-name">Provider</span><span class="gf-val"><code>openai</code> or <code>anthropic</code> or the vendor name</span></div>
+            <div class="gfield"><span class="gf-name">API Base URL</span><span class="gf-val">OpenAI: <code>https://api.openai.com/v1</code><br>Anthropic: <code>https://api.anthropic.com</code></span></div>
+            <div class="gfield"><span class="gf-name">API Key</span><span class="gf-val">Your secret API key from the provider dashboard. Starts with <code>sk-</code> for OpenAI.</span></div>
+            <div class="gfield"><span class="gf-name">AI Model</span><span class="gf-val">Exact model name: <code>gpt-4o</code>, <code>gpt-4o-mini</code>, <code>claude-3-5-sonnet-20241022</code></span></div>
+            <div class="gfield"><span class="gf-name">AI Temperature</span><span class="gf-val"><code>0.30</code> for factual outputs (recommended). Range 0.0–1.0.</span></div>
+          </div>
+        </div>
+
+        <div class="guide-section">
+          <div class="gs-title"><i class="fas fa-lightbulb"></i> AI System Policy</div>
+          <div class="gs-body">
+            <p style="font-size:13px;color:var(--n600);line-height:1.6;margin-bottom:10px;">This is the <strong>system prompt</strong> that shapes how the AI behaves for this tenant. Paste something like:</p>
+            <div class="code-block">You are a political campaign assistant for a PNG candidate. You help draft ward briefs, speeches, and outreach messages. Always write in clear, simple English suitable for PNG audiences. Be factual, professional, and avoid making promises the candidate cannot keep.</div>
+          </div>
+        </div>
+
+        <div class="guide-section">
+          <div class="gs-title"><i class="fas fa-circle-info"></i> Where to get the API Key</div>
+          <div class="gs-body">
+            <div class="provider-row"><span class="provider-badge openai">OpenAI</span> platform.openai.com → API Keys → Create new secret key</div>
+            <div class="provider-row"><span class="provider-badge anthropic">Anthropic</span> console.anthropic.com → API Keys → Create Key</div>
+            <div class="provider-row"><span class="provider-badge google">Google</span> aistudio.google.com → Get API key (for Gemini)</div>
+          </div>
+        </div>
+
+        <div class="guide-section">
+          <div class="gs-title"><i class="fas fa-gear"></i> Status Workflow</div>
+          <div class="gs-body">
+            <div class="status-flow">
+              <span class="sf-step">Save as <strong>Configured</strong></span>
+              <i class="fas fa-arrow-right sf-arrow"></i>
+              <span class="sf-step">Set to <strong>Needs Test</strong></span>
+              <i class="fas fa-arrow-right sf-arrow"></i>
+              <span class="sf-step">Test connection → set <strong>Active</strong></span>
+            </div>
+            <p style="font-size:12px;color:var(--n400);margin-top:8px;">Only connectors with status <strong>Active</strong> and <strong>Is Enabled</strong> checked will be used by the platform.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ WHATSAPP ══ -->
+    <div class="gpanel hidden" id="panel-wa">
+      <div class="guide-intro">Connect the WhatsApp Business API to send campaign outreach, bulk messages, and supporter notifications via WhatsApp. Requires a Meta Business account.</div>
+      <div class="guide-grid">
+
+        <div class="guide-section">
+          <div class="gs-title"><i class="fas fa-list-check"></i> Required Fields</div>
+          <div class="gs-body">
+            <div class="gfield"><span class="gf-name">Connector type</span><span class="gf-val">WhatsApp Business</span></div>
+            <div class="gfield"><span class="gf-name">Name</span><span class="gf-val">e.g. <code>Campaign WhatsApp</code></span></div>
+            <div class="gfield"><span class="gf-name">Provider</span><span class="gf-val"><code>meta</code></span></div>
+            <div class="gfield"><span class="gf-name">API Base URL</span><span class="gf-val"><code>https://graph.facebook.com/v18.0</code></span></div>
+            <div class="gfield"><span class="gf-name">Access Token</span><span class="gf-val">The permanent System User token from your Meta Business account. Not a temporary user token.</span></div>
+            <div class="gfield"><span class="gf-name">Phone Number ID</span><span class="gf-val">Found in Meta Business Manager → WhatsApp → API Setup. A numeric ID like <code>1234567890</code></span></div>
+            <div class="gfield"><span class="gf-name">Business Account ID</span><span class="gf-val">Your WhatsApp Business Account (WABA) ID from Meta Business Manager.</span></div>
+            <div class="gfield"><span class="gf-name">Default Template</span><span class="gf-val">Name of your approved message template, e.g. <code>campaign_greeting</code></span></div>
+          </div>
+        </div>
+
+        <div class="guide-section">
+          <div class="gs-title"><i class="fas fa-circle-info"></i> How to get these credentials</div>
+          <div class="gs-body">
+            <ol class="guide-steps">
+              <li>Go to <strong>business.facebook.com</strong> → Business Settings</li>
+              <li>Under <strong>Accounts</strong> → <strong>WhatsApp Accounts</strong>, find your WABA ID</li>
+              <li>Go to <strong>System Users</strong> → Add a system user with <em>Admin</em> role</li>
+              <li>Click <strong>Generate Token</strong> → select the WhatsApp app → set expiry to <em>Never</em></li>
+              <li>In <strong>developers.facebook.com</strong> → your app → WhatsApp → API Setup → copy the Phone number ID</li>
+            </ol>
+            <div class="warning-box"><i class="fas fa-triangle-exclamation"></i> Use a <strong>System User token</strong>, not your personal access token. Personal tokens expire and will break messaging.</div>
+          </div>
+        </div>
+
+        <div class="guide-section">
+          <div class="gs-title"><i class="fas fa-bell"></i> Webhook (optional)</div>
+          <div class="gs-body">
+            <div class="gfield"><span class="gf-name">Webhook URL</span><span class="gf-val">Your server's callback URL for incoming messages, e.g. <code>https://campaign.webmasta.com.pg/api/webhooks/whatsapp/</code></span></div>
+            <div class="gfield"><span class="gf-name">Webhook Secret</span><span class="gf-val">A random string you define. Enter this as the <em>Verify Token</em> in the Meta webhook setup.</span></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ SMS ══ -->
+    <div class="gpanel hidden" id="panel-sms">
+      <div class="guide-intro">Connect an SMS gateway to send bulk campaign messages, GOTV reminders, and supporter alerts via text message. Supports Twilio, Vonage, Africa's Talking, and any provider with an HTTP API.</div>
+      <div class="guide-grid">
+
+        <div class="guide-section">
+          <div class="gs-title"><i class="fas fa-list-check"></i> Required Fields</div>
+          <div class="gs-body">
+            <div class="gfield"><span class="gf-name">Connector type</span><span class="gf-val">SMS Gateway</span></div>
+            <div class="gfield"><span class="gf-name">Name</span><span class="gf-val">e.g. <code>Twilio SMS</code> or <code>Africa's Talking</code></span></div>
+            <div class="gfield"><span class="gf-name">Provider</span><span class="gf-val"><code>twilio</code> / <code>vonage</code> / <code>africastalking</code> / <code>custom</code></span></div>
+            <div class="gfield"><span class="gf-name">API Base URL</span><span class="gf-val">Twilio: <code>https://api.twilio.com/2010-04-01</code><br>Africa's Talking: <code>https://api.africastalking.com/version1</code></span></div>
+            <div class="gfield"><span class="gf-name">API Key</span><span class="gf-val">Your Account SID (Twilio) or username/API key from the provider</span></div>
+            <div class="gfield"><span class="gf-name">API Secret</span><span class="gf-val">Auth Token (Twilio) or API secret from the provider</span></div>
+            <div class="gfield"><span class="gf-name">SMS Sender ID</span><span class="gf-val">Your approved sender name or number, e.g. <code>CAMPAIGN</code> or <code>+67570012345</code></span></div>
+            <div class="gfield"><span class="gf-name">Default Country Code</span><span class="gf-val"><code>+675</code> for Papua New Guinea (pre-filled)</span></div>
+          </div>
+        </div>
+
+        <div class="guide-section">
+          <div class="gs-title"><i class="fas fa-flag"></i> PNG-Specific Notes</div>
+          <div class="gs-body">
+            <p style="font-size:13px;color:var(--n600);line-height:1.65;">PNG mobile numbers are 8 digits after the country code. Always store numbers with <code>+675</code> prefix. The platform auto-formats numbers on import if you set the default country code correctly.</p>
+            <div class="info-box"><i class="fas fa-circle-info"></i> Digicel PNG and Bmobile are the main carriers. Not all SMS gateways have reliable reach to PNG — test before going live.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ EMAIL ══ -->
+    <div class="gpanel hidden" id="panel-email">
+      <div class="guide-intro">Configure an SMTP email server to send transactional emails, reports, and bulk campaign communications from the platform.</div>
+      <div class="guide-grid">
+
+        <div class="guide-section">
+          <div class="gs-title"><i class="fas fa-list-check"></i> Required Fields</div>
+          <div class="gs-body">
+            <div class="gfield"><span class="gf-name">Connector type</span><span class="gf-val">Email</span></div>
+            <div class="gfield"><span class="gf-name">Name</span><span class="gf-val">e.g. <code>SendGrid SMTP</code> or <code>Gmail Relay</code></span></div>
+            <div class="gfield"><span class="gf-name">Provider</span><span class="gf-val"><code>sendgrid</code> / <code>mailgun</code> / <code>gmail</code> / <code>smtp</code></span></div>
+            <div class="gfield"><span class="gf-name">Email Host</span><span class="gf-val">SendGrid: <code>smtp.sendgrid.net</code><br>Mailgun: <code>smtp.mailgun.org</code><br>Gmail: <code>smtp.gmail.com</code></span></div>
+            <div class="gfield"><span class="gf-name">Email Port</span><span class="gf-val"><code>587</code> for TLS (recommended) · <code>465</code> for SSL · <code>25</code> for plain</span></div>
+            <div class="gfield"><span class="gf-name">Email Username</span><span class="gf-val">SendGrid: <code>apikey</code> (literal) · Gmail: your full email address</span></div>
+            <div class="gfield"><span class="gf-name">Email Password</span><span class="gf-val">SendGrid: your API key · Gmail: an App Password (not your login password)</span></div>
+            <div class="gfield"><span class="gf-name">Use TLS</span><span class="gf-val">Leave <strong>checked</strong> unless using port 25</span></div>
+            <div class="gfield"><span class="gf-name">From Address</span><span class="gf-val">The sender address recipients see, e.g. <code>campaign@webmasta.com.pg</code></span></div>
+          </div>
+        </div>
+
+        <div class="guide-section">
+          <div class="gs-title"><i class="fas fa-circle-info"></i> Gmail App Password</div>
+          <div class="gs-body">
+            <ol class="guide-steps">
+              <li>Enable 2-Factor Authentication on the Gmail account</li>
+              <li>Go to <strong>myaccount.google.com</strong> → Security → App Passwords</li>
+              <li>Select <em>Mail</em> and <em>Other device</em> → Generate</li>
+              <li>Copy the 16-character password (no spaces) — paste into <strong>Email Password</strong></li>
+            </ol>
+            <div class="warning-box"><i class="fas fa-triangle-exclamation"></i> Do <strong>not</strong> use your Google account password directly — it will be rejected. You must use an App Password.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ MAPS ══ -->
+    <div class="gpanel hidden" id="panel-maps">
+      <div class="guide-intro">Connect a mapping service to display ward maps, village locations, and geo-tagged field data within CampaignMasta. Uses Google Maps or a compatible tile service.</div>
+      <div class="guide-grid">
+
+        <div class="guide-section">
+          <div class="gs-title"><i class="fas fa-list-check"></i> Required Fields</div>
+          <div class="gs-body">
+            <div class="gfield"><span class="gf-name">Connector type</span><span class="gf-val">Maps / GIS</span></div>
+            <div class="gfield"><span class="gf-name">Name</span><span class="gf-val">e.g. <code>Google Maps</code></span></div>
+            <div class="gfield"><span class="gf-name">Provider</span><span class="gf-val"><code>googlemaps</code> / <code>mapbox</code> / <code>openstreetmap</code></span></div>
+            <div class="gfield"><span class="gf-name">Maps API Key</span><span class="gf-val">Your Google Maps JavaScript API key or Mapbox public token</span></div>
+          </div>
+        </div>
+
+        <div class="guide-section">
+          <div class="gs-title"><i class="fas fa-circle-info"></i> Google Maps Setup</div>
+          <div class="gs-body">
+            <ol class="guide-steps">
+              <li>Go to <strong>console.cloud.google.com</strong> → APIs & Services → Credentials</li>
+              <li>Click <strong>Create Credentials</strong> → API Key</li>
+              <li>Restrict the key to: <em>Maps JavaScript API</em> and <em>Geocoding API</em></li>
+              <li>Under <em>Application restrictions</em>, add your domain: <code>campaign.webmasta.com.pg</code></li>
+            </ol>
+            <div class="info-box"><i class="fas fa-circle-info"></i> Google Maps has a free tier of $200/month credit, which covers most campaign usage. Enable billing to avoid the key being disabled.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ PAYMENT ══ -->
+    <div class="gpanel hidden" id="panel-payment">
+      <div class="guide-intro">Connect a payment gateway to process subscription fees, supporter donations, or event registrations directly through the platform.</div>
+      <div class="guide-grid">
+
+        <div class="guide-section">
+          <div class="gs-title"><i class="fas fa-list-check"></i> Required Fields</div>
+          <div class="gs-body">
+            <div class="gfield"><span class="gf-name">Connector type</span><span class="gf-val">Payment Gateway</span></div>
+            <div class="gfield"><span class="gf-name">Name</span><span class="gf-val">e.g. <code>Stripe</code> or <code>BSP PayWay</code></span></div>
+            <div class="gfield"><span class="gf-name">Provider</span><span class="gf-val"><code>stripe</code> / <code>paypal</code> / <code>bsp</code> / <code>custom</code></span></div>
+            <div class="gfield"><span class="gf-name">Payment Public Key</span><span class="gf-val">Stripe: your <code>pk_live_...</code> publishable key (shown to client-side)</span></div>
+            <div class="gfield"><span class="gf-name">Payment Secret Key</span><span class="gf-val">Stripe: your <code>sk_live_...</code> secret key. <strong>Never share this.</strong></span></div>
+            <div class="gfield"><span class="gf-name">Merchant ID</span><span class="gf-val">Your merchant/account identifier from the payment provider</span></div>
+            <div class="gfield"><span class="gf-name">API Base URL</span><span class="gf-val">Stripe: <code>https://api.stripe.com</code></span></div>
+            <div class="gfield"><span class="gf-name">Webhook URL</span><span class="gf-val">Your endpoint for payment events, e.g. <code>https://campaign.webmasta.com.pg/api/webhooks/payment/</code></span></div>
+            <div class="gfield"><span class="gf-name">Webhook Secret</span><span class="gf-val">Stripe: the <code>whsec_...</code> signing secret from the Stripe webhook dashboard</span></div>
+          </div>
+        </div>
+
+        <div class="guide-section">
+          <div class="gs-title"><i class="fas fa-flag"></i> PNG Payment Options</div>
+          <div class="gs-body">
+            <p style="font-size:13px;color:var(--n600);line-height:1.65;margin-bottom:10px;">Stripe is not available in PNG directly. Consider these alternatives:</p>
+            <div class="provider-row"><span class="provider-badge bsp">BSP PayWay</span> Bank South Pacific's online payment gateway for PNG businesses</div>
+            <div class="provider-row"><span class="provider-badge anz">ANZ Transact</span> ANZ PNG's merchant payment solution</div>
+            <div class="provider-row"><span class="provider-badge stripe">Stripe</span> Available if business is registered in AU/NZ — settles in AUD</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ STORAGE ══ -->
+    <div class="gpanel hidden" id="panel-storage">
+      <div class="guide-intro">Connect cloud file storage to host uploaded documents, supporter photos, import files, and APK downloads. Uses an S3-compatible API.</div>
+      <div class="guide-grid">
+
+        <div class="guide-section">
+          <div class="gs-title"><i class="fas fa-list-check"></i> Required Fields</div>
+          <div class="gs-body">
+            <div class="gfield"><span class="gf-name">Connector type</span><span class="gf-val">File Storage</span></div>
+            <div class="gfield"><span class="gf-name">Name</span><span class="gf-val">e.g. <code>AWS S3 Media</code> or <code>Backblaze B2</code></span></div>
+            <div class="gfield"><span class="gf-name">Provider</span><span class="gf-val"><code>s3</code> / <code>backblaze</code> / <code>r2</code> / <code>wasabi</code></span></div>
+            <div class="gfield"><span class="gf-name">API Base URL</span><span class="gf-val">AWS: <code>https://s3.ap-southeast-1.amazonaws.com</code><br>Cloudflare R2: your R2 endpoint URL<br>Backblaze: <code>https://s3.us-west-004.backblazeb2.com</code></span></div>
+            <div class="gfield"><span class="gf-name">API Key</span><span class="gf-val">Access Key ID (AWS) or Application Key ID (Backblaze)</span></div>
+            <div class="gfield"><span class="gf-name">API Secret</span><span class="gf-val">Secret Access Key (AWS) or Application Key (Backblaze)</span></div>
+            <div class="gfield"><span class="gf-name">Extra Config (JSON)</span><span class="gf-val">Bucket name and region: <code>{"bucket": "campaignmasta-media", "region": "ap-southeast-1"}</code></span></div>
+          </div>
+        </div>
+
+        <div class="guide-section">
+          <div class="gs-title"><i class="fas fa-circle-info"></i> AWS S3 IAM Policy</div>
+          <div class="gs-body">
+            <p style="font-size:13px;color:var(--n600);line-height:1.65;margin-bottom:8px;">Create an IAM user with this minimal policy (replace <code>your-bucket</code>):</p>
+            <div class="code-block">{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":["s3:GetObject","s3:PutObject","s3:DeleteObject","s3:ListBucket"],"Resource":["arn:aws:s3:::your-bucket","arn:aws:s3:::your-bucket/*"]}]}</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ WEBHOOK ══ -->
+    <div class="gpanel hidden" id="panel-webhook">
+      <div class="guide-intro">Register an outgoing webhook to push real-time events from CampaignMasta to an external system — such as a spreadsheet automator, Zapier, or a custom backend.</div>
+      <div class="guide-grid">
+
+        <div class="guide-section">
+          <div class="gs-title"><i class="fas fa-list-check"></i> Required Fields</div>
+          <div class="gs-body">
+            <div class="gfield"><span class="gf-name">Connector type</span><span class="gf-val">Webhook</span></div>
+            <div class="gfield"><span class="gf-name">Name</span><span class="gf-val">e.g. <code>Zapier Supporter Sync</code></span></div>
+            <div class="gfield"><span class="gf-name">Provider</span><span class="gf-val"><code>zapier</code> / <code>make</code> / <code>custom</code></span></div>
+            <div class="gfield"><span class="gf-name">Webhook URL</span><span class="gf-val">The URL CampaignMasta will POST events to. Copy from Zapier/Make trigger step.</span></div>
+            <div class="gfield"><span class="gf-name">Webhook Secret</span><span class="gf-val">Optional HMAC signing secret. If set, all POST requests include an <code>X-Webhook-Signature</code> header.</span></div>
+            <div class="gfield"><span class="gf-name">API Key</span><span class="gf-val">If the receiving endpoint requires a bearer token, put it here.</span></div>
+            <div class="gfield"><span class="gf-name">Extra Config (JSON)</span><span class="gf-val">List of events to subscribe to: <code>{"events": ["supporter.created", "supporter.updated", "task.completed"]}</code></span></div>
+          </div>
+        </div>
+
+        <div class="guide-section">
+          <div class="gs-title"><i class="fas fa-bolt"></i> Common Event Types</div>
+          <div class="gs-body">
+            <div class="event-grid">
+              <code>supporter.created</code>
+              <code>supporter.updated</code>
+              <code>task.completed</code>
+              <code>outreach.sent</code>
+              <code>polling.report</code>
+              <code>subscription.renewed</code>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- COMMON BOTTOM ROW -->
+    <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--n100);display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <div style="display:flex;align-items:center;gap:6px;padding:7px 12px;background:var(--g50);border-radius:var(--r6);font-size:12px;color:var(--g700);">
+        <i class="fas fa-shield-halved fa-sm"></i> <strong>Security:</strong> All API keys and secrets are stored encrypted. Never share them in Notes or other plain-text fields.
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;padding:7px 12px;background:#fffbeb;border:1px solid #fde68a;border-radius:var(--r6);font-size:12px;color:#92400e;">
+        <i class="fas fa-triangle-exclamation fa-sm"></i> Set Status to <strong>Active</strong> AND check <strong>Is Enabled</strong> for the connector to work.
+      </div>
+    </div>
+
+  </div><!-- /padding -->
+</div><!-- /guide panel -->
+
+<!-- Now render the actual form from the parent template -->
+{{ block.super }}
+
+<style>
+.gtab{
+  padding:10px 16px;font-size:12px;font-weight:600;color:var(--n500);
+  background:none;border:none;border-bottom:2px solid transparent;
+  cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .1s;
+}
+.gtab:hover{color:var(--n800)}
+.gtab.active{color:var(--g600);border-bottom-color:var(--g600)}
+.gpanel{display:block}.gpanel.hidden{display:none}
+.guide-intro{font-size:13.5px;color:var(--n600);line-height:1.7;margin-bottom:18px;padding:14px 16px;background:var(--n50);border-radius:var(--r6);}
+.guide-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+@media(max-width:900px){.guide-grid{grid-template-columns:1fr}}
+.guide-section{background:var(--n50);border:1px solid var(--n200);border-radius:var(--r10);overflow:hidden;}
+.gs-title{padding:10px 14px;background:var(--n100);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--n600);display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--n200);}
+.gs-title i{color:var(--g600)}
+.gs-body{padding:14px;}
+.gfield{display:flex;flex-direction:column;gap:3px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--n200);}
+.gfield:last-child{margin-bottom:0;padding-bottom:0;border-bottom:none}
+.gf-name{font-size:11.5px;font-weight:700;color:var(--n700);}
+.gf-val{font-size:12px;color:var(--n500);line-height:1.55;}
+.gf-val code{background:var(--n200);border-radius:3px;padding:1px 5px;font-size:11px;color:var(--g800);}
+.guide-steps{padding-left:16px;font-size:12.5px;color:var(--n600);line-height:1.7;}
+.guide-steps li{margin-bottom:5px;}
+.guide-steps li strong{color:var(--n800)}
+.warning-box{display:flex;align-items:flex-start;gap:8px;padding:10px 12px;background:#fffbeb;border:1px solid #fde68a;border-radius:var(--r6);font-size:12px;color:#92400e;margin-top:10px;}
+.info-box{display:flex;align-items:flex-start;gap:8px;padding:10px 12px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:var(--r6);font-size:12px;color:#1e40af;margin-top:10px;}
+.code-block{background:var(--n900);color:#6ee7b7;padding:12px;border-radius:var(--r6);font-size:11px;font-family:monospace;line-height:1.6;word-break:break-all;}
+.status-flow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.sf-step{font-size:12px;padding:5px 10px;background:var(--white);border:1px solid var(--n200);border-radius:20px;color:var(--n700);}
+.sf-arrow{color:var(--n400);font-size:10px;}
+.provider-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:12.5px;color:var(--n600);}
+.provider-badge{padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;color:#fff;flex-shrink:0;}
+.provider-badge.openai,.provider-badge.stripe{background:#19c37d}
+.provider-badge.anthropic{background:#d4670e}
+.provider-badge.google{background:#4285f4}
+.provider-badge.meta{background:#0866ff}
+.provider-badge.bsp{background:#003087}
+.provider-badge.anz{background:#005b99}
+.event-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.event-grid code{background:var(--n200);border-radius:4px;padding:4px 8px;font-size:11px;color:var(--g800);}
+</style>
+
+<script>
+function showTab(id){
+  document.querySelectorAll('.gpanel').forEach(p=>p.classList.add('hidden'));
+  document.querySelectorAll('.gtab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.remove('hidden');
+  document.getElementById('tab-'+id).classList.add('active');
+}
+</script>
+
+{% endblock %}

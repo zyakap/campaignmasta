@@ -1,0 +1,38 @@
+{% extends "campaigns/base.html" %}
+{% block content %}
+  <section class="page-head">
+    <div>
+      <p class="eyebrow">Constituency Finance</p>
+      <h1>Development Funds</h1>
+      <p class="muted">DSIP, SDP, and grant fund allocations by ward and financial year.</p>
+    </div>
+    <a class="primary-btn" href="{% url 'development_fund_create' %}">Add fund</a>
+  </section>
+
+  <section class="record-list">
+    {% regroup records by financial_year as year_groups %}
+    {% for year in year_groups %}
+      <h3 style="margin:1rem 0 .5rem;color:var(--muted)">FY {{ year.grouper }}</h3>
+      {% for fund in year.list %}
+        <article class="record-card">
+          <div>
+            <strong>{{ fund.fund_name }}</strong>
+            <span>PGK {{ fund.total_allocation_pgk|floatformat:0 }}</span>
+          </div>
+          <p>
+            {{ fund.get_fund_type_display }}
+            {% if fund.ward %} · {{ fund.ward }}{% elif fund.district %} · {{ fund.district }}{% endif %}
+          </p>
+          <small>
+            Spent: PGK {{ fund.spent_pgk|floatformat:0 }} ·
+            Remaining: PGK {{ fund.remaining_pgk|floatformat:0 }}
+            {% if fund.notes %} · {{ fund.notes|truncatechars:80 }}{% endif %}
+          </small>
+          <a class="secondary-btn" style="font-size:.8rem" href="{% url 'development_fund_edit' fund.id %}">Update spend</a>
+        </article>
+      {% endfor %}
+    {% empty %}
+      <p class="muted">No development funds recorded. Add DSIP or SDP allocations to track constituency spending.</p>
+    {% endfor %}
+  </section>
+{% endblock %}

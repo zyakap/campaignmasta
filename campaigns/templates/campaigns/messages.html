@@ -1,0 +1,26 @@
+{% extends "campaigns/base.html" %}
+{% block content %}
+  <section class="page-head">
+    <div><p class="eyebrow">Campaign Messaging</p><h1>Messages</h1></div>
+    <a class="primary-btn" href="{% url 'message_create' %}">New</a>
+  </section>
+  <section class="record-list">
+    {% for item in records %}
+      <article class="record-card">
+        <div>
+          <strong><a href="{% url 'message_detail' item.id %}">{{ item.subject }}</a></strong>
+          <span>{{ item.get_priority_display }}</span>
+        </div>
+        <p>{{ item.recipient_type }}{% if item.recipient_group %} · {{ item.recipient_group }}{% endif %}</p>
+        <small>
+          {{ item.get_status_display }} · {{ item.get_delivery_channel_display }}
+          {% if item.read_receipt_required %} · read receipt required{% endif %}
+          {% if item.acknowledgement_required %} · acknowledgement required{% endif %}
+          {% if item.status != "SENT" %} · <a href="{% url 'message_send' item.id %}">Send now</a>{% endif %}
+        </small>
+      </article>
+    {% empty %}
+      <p class="muted">No messages yet.</p>
+    {% endfor %}
+  </section>
+{% endblock %}

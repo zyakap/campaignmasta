@@ -1,0 +1,17 @@
+{% extends "campaigns/base.html" %}
+{% block content %}
+  <section class="page-head">
+    <div><p class="eyebrow">Ward Intelligence</p><h1>Ward Briefs</h1></div>
+  </section>
+  <section class="record-list">
+    {% for ward in records %}
+      <article class="record-card">
+        <div><strong><a href="{% url 'ward_brief_detail' ward.id %}">{{ ward.ward }}</a></strong><span>{{ ward.get_support_strength_display }}</span></div>
+        <p>{{ ward.main_community_issues|default:"No issues recorded yet." }}</p>
+        {% if ward.notes_for_candidate %}<small>{{ ward.notes_for_candidate }}</small>{% endif %}
+      </article>
+    {% empty %}
+      <p class="muted">No ward profiles yet.</p>
+    {% endfor %}
+  </section>
+{% endblock %}

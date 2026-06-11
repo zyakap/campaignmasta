@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="add_supporter_title">Add Supporter</string>
+    <string name="app_name">CampaignMasta</string>
+    <string name="calls_title">Calls Checklist</string>
+    <string name="dashboard_title">Campaign Dashboard</string>
+    <string name="login_button">Sign In</string>
+    <string name="login_password_hint">Password</string>
+    <string name="login_title">Sign In</string>
+    <string name="login_username_hint">Username</string>
+    <string name="messages_title">Messages</string>
+    <string name="offline_banner">Offline — changes will sync when connected</string>
+    <string name="polling_title">Polling Day</string>
+    <string name="supporters_title">Supporters</string>
+    <string name="sync_pending">changes pending sync</string>
+    <string name="ward_briefs_title">Ward Briefs</string>
+    <style name="Theme.CampaignMasta" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@android:color/white</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
+</resources>

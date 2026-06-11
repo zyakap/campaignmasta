@@ -1,0 +1,63 @@
+{% extends "campaigns/base.html" %}
+{% block content %}
+  <section class="page-head">
+    <div>
+      <p class="eyebrow">{{ message.get_priority_display }} · {{ message.get_delivery_channel_display }}</p>
+      <h1>{{ message.subject }}</h1>
+      <p>To: {{ message.recipient_type }}{% if message.recipient_group %} · {{ message.recipient_group }}{% endif %}</p>
+    </div>
+    {% if message.status != "SENT" %}
+      <a class="primary-btn" href="{% url 'message_send' message.id %}">Send</a>
+    {% endif %}
+  </section>
+
+  <section class="content-grid">
+    <div class="panel">
+      <div class="panel-title"><h2>Message</h2></div>
+      <p>{{ message.body|linebreaksbr }}</p>
+      {% if message.sent_at %}<small class="muted">Sent {{ message.sent_at }}</small>{% endif %}
+    </div>
+
+    {% if my_receipt %}
+      <div class="panel">
+        <div class="panel-title"><h2>Your Status</h2></div>
+        {% if my_receipt.read_at %}
+          <p class="muted">Read {{ my_receipt.read_at }}</p>
+        {% else %}
+          <form method="post" action="{% url 'message_mark_read' message.id %}">
+            {% csrf_token %}
+            <button type="submit" class="secondary-btn">Mark as read</button>
+          </form>
+        {% endif %}
+        {% if message.acknowledgement_required %}
+          {% if my_receipt.acknowledged_at %}
+            <p class="muted">Acknowledged {{ my_receipt.acknowledged_at }}</p>
+          {% else %}
+            <form method="post" action="{% url 'message_mark_acknowledged' message.id %}">
+              {% csrf_token %}
+              <button type="submit" class="primary-btn">Acknowledge</button>
+            </form>
+          {% endif %}
+        {% endif %}
+      </div>
+    {% endif %}
+  </section>
+
+  {% if recipients %}
+    <section class="record-list" style="margin-top:1rem">
+      <div class="panel-title"><h2>Recipients ({{ recipients.count }})</h2></div>
+      {% for r in recipients %}
+        <article class="record-card">
+          <div>
+            <strong>{{ r.display_name }}</strong>
+            <span>
+              {% if r.read_at %}Read{% elif r.delivered_at %}Delivered{% elif r.failed %}Failed{% else %}Pending{% endif %}
+              {% if message.acknowledgement_required %}· {% if r.acknowledged_at %}Ack'd{% else %}Not ack'd{% endif %}{% endif %}
+            </span>
+          </div>
+          {% if r.phone %}<small>{{ r.phone }}</small>{% endif %}
+        </article>
+      {% endfor %}
+    </section>
+  {% endif %}
+{% endblock %}

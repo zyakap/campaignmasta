@@ -1,0 +1,9 @@
+{% extends "campaigns/base.html" %}
+{% block content %}
+  <section class="hero-panel">
+    <p class="eyebrow">Setup required</p>
+    <h1>Create your first candidate</h1>
+    <p>Use Django admin to add geography, a candidate, candidate profile, and team members. Then return here for the mobile command centre.</p>
+    <a class="primary-btn" href="{% url 'admin:index' %}">Open admin</a>
+  </section>
+{% endblock %}

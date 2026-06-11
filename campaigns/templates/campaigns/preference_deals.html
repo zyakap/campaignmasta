@@ -1,0 +1,33 @@
+{% extends "campaigns/base.html" %}
+{% block content %}
+  <section class="page-head">
+    <div>
+      <p class="eyebrow">LPV Strategy</p>
+      <h1>Preference Deals</h1>
+      <p class="muted">Agreements to direct 2nd and 3rd preference votes to partner candidates.</p>
+    </div>
+    <a class="primary-btn" href="{% url 'preference_deal_create' %}">New deal</a>
+  </section>
+
+  <section class="record-list">
+    {% for deal in records %}
+      <article class="record-card">
+        <div>
+          <strong>{{ deal.partner_candidate_name }}</strong>
+          <span class="badge {% if deal.status == 'AGREED' %}badge-green{% elif deal.status == 'BROKEN' %}badge-red{% else %}badge-yellow{% endif %}">
+            {{ deal.get_status_display }}
+          </span>
+        </div>
+        <p>
+          #{{ deal.preference_number }} preference
+          {% if deal.partner_party %} · {{ deal.partner_party }}{% endif %}
+          {% if deal.partner_seat %} · {{ deal.partner_seat }}{% endif %}
+        </p>
+        {% if deal.ward_directives %}<small class="muted">{{ deal.ward_directives|truncatechars:120 }}</small>{% endif %}
+        <a class="secondary-btn" style="font-size:.8rem" href="{% url 'preference_deal_edit' deal.id %}">Edit</a>
+      </article>
+    {% empty %}
+      <p class="muted">No preference deals recorded. Add your LPV strategy agreements here.</p>
+    {% endfor %}
+  </section>
+{% endblock %}

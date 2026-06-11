@@ -1,0 +1,19 @@
+{% extends "campaigns/base.html" %}
+{% block content %}
+  <section class="page-head">
+    <a href="javascript:history.back()">Back</a>
+    <h1>{{ title }}</h1>
+  </section>
+  <form method="post" class="mobile-form">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {% for field in form %}
+      <label>
+        <span>{{ field.label }}</span>
+        {{ field }}
+        {% if field.errors %}<small class="field-error">{{ field.errors|striptags }}</small>{% endif %}
+      </label>
+    {% endfor %}
+    <button class="primary-btn sticky-submit" type="submit">{{ submit_label }}</button>
+  </form>
+{% endblock %}

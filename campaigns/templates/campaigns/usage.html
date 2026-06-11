@@ -1,0 +1,40 @@
+{% extends "campaigns/base.html" %}
+{% block content %}
+  <section class="page-head">
+    <div>
+      <p class="eyebrow">Prepaid Usage</p>
+      <h1>Connector Credits</h1>
+      <p class="muted">AI, WhatsApp, SMS, email, and other paid connector usage draws down prepaid balances.</p>
+    </div>
+    <a class="primary-btn" href="{% url 'usage_topup_create' %}">Top Up</a>
+  </section>
+
+  <section class="metric-grid">
+    {% for quota in included_quotas %}
+      <article>
+        <span>{{ quota.remaining_quantity }}</span>
+        <small>Included {{ quota.get_service_display }} {{ quota.get_unit_display }}</small>
+      </article>
+    {% endfor %}
+    {% for wallet in wallets %}
+      <article>
+        <span>{{ wallet.currency }} {{ wallet.balance }}</span>
+        <small>{{ wallet.get_service_display }}{% if wallet.balance <= wallet.low_balance_threshold %} · low{% endif %}</small>
+      </article>
+    {% empty %}
+      <article><span>0</span><small>No prepaid wallets yet</small></article>
+    {% endfor %}
+  </section>
+
+  <section class="record-list">
+    {% for event in recent_usage_events %}
+      <article class="record-card">
+        <div><strong>{{ event.action }}</strong><span>{{ event.get_status_display }}</span></div>
+        <p>{{ event.get_service_display }} · {{ event.quantity }} {{ event.get_unit_display }} · charge {{ event.customer_charge }}</p>
+        <small>Included: {{ event.included_quantity_applied }} · Billable: {{ event.billable_quantity }} · Balance: {{ event.balance_before }} → {{ event.balance_after }}{% if event.free_ai_model %} · free model {{ event.free_ai_model }}{% endif %}</small>
+      </article>
+    {% empty %}
+      <p class="muted">No usage recorded yet.</p>
+    {% endfor %}
+  </section>
+{% endblock %}

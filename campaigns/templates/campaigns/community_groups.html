@@ -1,0 +1,43 @@
+{% extends "campaigns/base.html" %}
+{% block content %}
+  <section class="page-head">
+    <div>
+      <p class="eyebrow">Clan & Voting Blocs</p>
+      <h1>Community Groups</h1>
+      <p class="muted">Clans, churches, women's and youth groups — ward-level voting blocs.</p>
+    </div>
+    <a class="primary-btn" href="{% url 'community_group_create' %}">Add group</a>
+  </section>
+
+  <section class="filter-bar">
+    <form method="get">
+      <select name="ward" onchange="this.form.submit()" class="mobile-input">
+        <option value="">All wards</option>
+        {% for ward in wards %}
+          <option value="{{ ward.id }}" {% if request.GET.ward == ward.id|stringformat:"s" %}selected{% endif %}>{{ ward }}</option>
+        {% endfor %}
+      </select>
+    </form>
+  </section>
+
+  <section class="record-list">
+    {% for group in records %}
+      <article class="record-card">
+        <div>
+          <strong>{{ group.name }}</strong>
+          <span class="badge {% if group.alignment == 'STRONG_SUPPORTER' %}badge-green{% elif group.alignment == 'LEANING_SUPPORT' %}badge-green{% elif group.alignment == 'LEANING_AWAY' %}badge-red{% else %}badge-yellow{% endif %}">
+            {{ group.get_alignment_display }}
+          </span>
+        </div>
+        <p>{{ group.get_group_type_display }} · {{ group.ward }}{% if group.village %} · {{ group.village }}{% endif %}</p>
+        <small>
+          {% if group.estimated_voting_members %}~{{ group.estimated_voting_members }} voting members · {% endif %}
+          {% if group.key_contact %}Contact: {{ group.key_contact.full_name }}{% endif %}
+        </small>
+        <a class="secondary-btn" style="font-size:.8rem" href="{% url 'community_group_edit' group.id %}">Edit</a>
+      </article>
+    {% empty %}
+      <p class="muted">No community groups recorded. Map clans and church groups to understand ward voting blocs.</p>
+    {% endfor %}
+  </section>
+{% endblock %}

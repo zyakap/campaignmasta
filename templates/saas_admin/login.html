@@ -1,0 +1,126 @@
+{% load i18n static %}<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Platform Admin Login — CampaignMasta</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --g900:#061a10;--g800:#0b3d2e;--g700:#0f5239;--g600:#116149;--g500:#1a8a68;
+      --n900:#111827;--n700:#374151;--n600:#4b5563;--n400:#9ca3af;--n200:#e5e7eb;--n100:#f3f4f6;
+      --r600:#dc2626;--r50:#fef2f2;
+    }
+    html,body{height:100%;font-family:'Inter',system-ui,sans-serif;font-size:14px;background:var(--g900)}
+    body{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;}
+    /* bg graphic */
+    body::before{
+      content:'';position:fixed;inset:0;
+      background:radial-gradient(ellipse 80% 60% at 20% 20%, rgba(17,97,73,.25) 0%, transparent 60%),
+                 radial-gradient(ellipse 60% 50% at 80% 80%, rgba(26,138,104,.12) 0%, transparent 50%);
+      pointer-events:none;
+    }
+    .login-shell{
+      width:100%;max-width:400px;position:relative;z-index:1;
+    }
+    .brand-row{text-align:center;margin-bottom:28px;}
+    .brand-mark{
+      display:inline-flex;align-items:center;gap:10px;text-decoration:none;
+    }
+    .brand-icon{
+      width:42px;height:42px;background:var(--g600);border-radius:11px;
+      display:flex;align-items:center;justify-content:center;
+      font-weight:900;font-size:15px;color:#fff;letter-spacing:-.5px;
+    }
+    .brand-text-main{font-size:16px;font-weight:800;color:#fff;line-height:1.2;display:block;}
+    .brand-text-sub{font-size:11px;color:rgba(255,255,255,.4);font-weight:400;display:block;}
+    .card{
+      background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);
+      border-radius:18px;padding:32px;backdrop-filter:blur(16px);
+    }
+    .card-title{font-size:1.25rem;font-weight:800;color:#fff;margin-bottom:4px;}
+    .card-sub{font-size:13px;color:rgba(255,255,255,.45);margin-bottom:26px;}
+    .field-label{display:block;font-size:12px;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.07em;margin-bottom:7px;}
+    .field-wrap{position:relative;margin-bottom:16px;}
+    .field-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,.25);font-size:13px;pointer-events:none;}
+    .field-input{
+      width:100%;height:44px;padding:0 12px 0 38px;
+      background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);
+      border-radius:10px;color:#fff;font-size:14px;font-family:inherit;outline:none;
+      transition:border-color .15s,box-shadow .15s;
+    }
+    .field-input:focus{border-color:rgba(110,231,183,.5);box-shadow:0 0 0 3px rgba(17,97,73,.25);}
+    .field-input::placeholder{color:rgba(255,255,255,.25);}
+    .field-input:-webkit-autofill{-webkit-box-shadow:0 0 0 40px #0b2a1e inset!important;-webkit-text-fill-color:#fff!important;}
+    .submit-btn{
+      width:100%;height:46px;background:var(--g600);border:none;border-radius:10px;
+      color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;
+      transition:background .15s;margin-top:6px;display:flex;align-items:center;justify-content:center;gap:8px;
+    }
+    .submit-btn:hover{background:var(--g500);}
+    .errornote{
+      background:rgba(220,38,38,.1);border:1px solid rgba(220,38,38,.3);border-radius:8px;
+      padding:11px 14px;margin-bottom:18px;font-size:13px;color:#fca5a5;font-weight:500;
+    }
+    .errornote ul{list-style:none;margin:0;}
+    .back-link{
+      display:block;text-align:center;margin-top:22px;
+      font-size:12px;color:rgba(255,255,255,.3);text-decoration:none;
+    }
+    .back-link:hover{color:rgba(255,255,255,.5);}
+  </style>
+</head>
+<body>
+  <div class="login-shell">
+    <div class="brand-row">
+      <a href="/" class="brand-mark">
+        <div class="brand-icon">CM</div>
+        <div>
+          <span class="brand-text-main">CampaignMasta</span>
+          <span class="brand-text-sub">Platform Administration</span>
+        </div>
+      </a>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Admin Sign In</div>
+      <div class="card-sub">Restricted access — authorised personnel only</div>
+
+      {% if form.errors %}
+      <div class="errornote">
+        <i class="fas fa-circle-xmark fa-sm"></i>
+        {% if form.errors.values|length == 1 %}
+          {% for field, errors in form.errors.items %}{% for error in errors %}{{ error }}{% endfor %}{% endfor %}
+        {% else %}
+          Invalid username or password.
+        {% endif %}
+      </div>
+      {% endif %}
+
+      <form method="post" action="{{ form_url }}" id="login-form">
+        {% csrf_token %}
+        {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+
+        <label class="field-label">Username</label>
+        <div class="field-wrap">
+          <i class="fas fa-user field-icon"></i>
+          <input class="field-input" type="text" name="username" autofocus autocomplete="username" placeholder="Enter your username">
+        </div>
+
+        <label class="field-label">Password</label>
+        <div class="field-wrap">
+          <i class="fas fa-lock field-icon"></i>
+          <input class="field-input" type="password" name="password" autocomplete="current-password" placeholder="Enter your password">
+        </div>
+
+        <button class="submit-btn" type="submit"><i class="fas fa-sign-in-alt fa-sm"></i> Sign In to Platform</button>
+      </form>
+    </div>
+
+    <a href="/" class="back-link">← Back to CampaignMasta website</a>
+  </div>
+</body>
+</html>

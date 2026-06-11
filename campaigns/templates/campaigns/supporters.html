@@ -1,0 +1,19 @@
+{% extends "campaigns/base.html" %}
+{% block content %}
+  <section class="page-head">
+    <div><p class="eyebrow">Supporter Registry</p><h1>People</h1></div>
+    <a class="primary-btn" href="{% url 'supporter_create' %}">Add</a>
+  </section>
+  <form class="searchbar" method="get"><input name="q" value="{{ query }}" placeholder="Search name, phone, village"></form>
+  <section class="record-list">
+    {% for person in records %}
+      <article class="record-card">
+        <div><strong>{{ person.full_name }}</strong><span>{{ person.get_support_status_display }}</span></div>
+        <p>{{ person.phone|default:"No phone" }}{% if person.village %} · {{ person.village }}{% endif %}</p>
+        {% if person.main_issue %}<small>{{ person.main_issue }}</small>{% endif %}
+      </article>
+    {% empty %}
+      <p class="muted">No supporter records yet.</p>
+    {% endfor %}
+  </section>
+{% endblock %}

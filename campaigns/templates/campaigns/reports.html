@@ -1,0 +1,22 @@
+{% extends "campaigns/base.html" %}
+{% block content %}
+  <section class="page-head">
+    <div><p class="eyebrow">Reports and Analytics</p><h1>{{ rollup_label }} Rollup</h1></div>
+  </section>
+  <section class="metric-grid">
+    <article><span>{{ metrics.supporter_count }}</span><small>Contacts</small></article>
+    <article><span>{{ metrics.strong_wards }}</span><small>Strong wards</small></article>
+    <article><span>{{ metrics.weak_wards }}</span><small>Weak wards</small></article>
+    <article><span>{{ metrics.polling_locations }}</span><small>Polling locations</small></article>
+  </section>
+  <section class="record-list report-list">
+    {% for row in rollup %}
+      <article class="record-card">
+        <div><strong>{% firstof row.ward__llg__district__name row.ward__llg__name "Unassigned" %}</strong><span>{{ row.total }}</span></div>
+        <p>Strong: {{ row.strong }} · Undecided: {{ row.undecided }}</p>
+      </article>
+    {% empty %}
+      <p class="muted">No supporter data to roll up yet.</p>
+    {% endfor %}
+  </section>
+{% endblock %}

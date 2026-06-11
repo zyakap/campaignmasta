@@ -1,0 +1,35 @@
+{% extends "campaigns/base.html" %}
+{% block content %}
+  <section class="page-head">
+    <div><p class="eyebrow">Polling-Day War Room</p><h1>Polling Operations</h1></div>
+    <div class="action-row">
+      <a class="primary-btn" href="{% url 'polling_status_create' %}">Status</a>
+      <a class="secondary-btn" href="{% url 'polling_location_create' %}">Location</a>
+      <a class="secondary-btn" href="{% url 'polling_incident_create' %}">Incident</a>
+    </div>
+  </section>
+  <section class="content-grid">
+    <div class="panel">
+      <div class="panel-title"><h2>Locations</h2></div>
+      {% for location in locations %}
+        <article class="list-card">
+          <strong>{{ location.name }}</strong>
+          <span>{{ location.status }} · scrutineer {% if location.scrutineer_checked_in %}checked in{% else %}pending{% endif %}</span>
+        </article>
+      {% empty %}
+        <p class="muted">No polling locations recorded.</p>
+      {% endfor %}
+    </div>
+    <div class="panel urgent">
+      <div class="panel-title"><h2>Open Incidents</h2></div>
+      {% for incident in incidents %}
+        <article class="list-card">
+          <strong>{{ incident.title }}</strong>
+          <span>{{ incident.polling_location }} · {{ incident.get_priority_display }}</span>
+        </article>
+      {% empty %}
+        <p class="muted">No open polling incidents.</p>
+      {% endfor %}
+    </div>
+  </section>
+{% endblock %}

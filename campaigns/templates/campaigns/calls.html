@@ -1,0 +1,32 @@
+{% extends "campaigns/base.html" %}
+{% block content %}
+  <section class="page-head">
+    <div><p class="eyebrow">Relationship Discipline</p><h1>Call Checklist</h1></div>
+    <a class="primary-btn" href="{% url 'call_create' %}">Log</a>
+  </section>
+  <section class="record-list">
+    {% for person in overdue %}
+      <article class="record-card">
+        <div><strong>{{ person.full_name }}</strong><span>Overdue</span></div>
+        <p>{{ person.community_role|default:"Influencer" }} · due {{ person.next_contact_due_date }}</p>
+        <a href="tel:{{ person.phone }}">{{ person.phone|default:"No phone" }}</a>
+      </article>
+    {% endfor %}
+    {% for person in due_today %}
+      <article class="record-card">
+        <div><strong>{{ person.full_name }}</strong><span>Today</span></div>
+        <p>{{ person.community_role|default:"Influencer" }} · {{ person.get_influence_level_display }}</p>
+        <a href="tel:{{ person.phone }}">{{ person.phone|default:"No phone" }}</a>
+      </article>
+    {% endfor %}
+    {% for person in quiet_coordinators %}
+      <article class="record-card">
+        <div><strong>{{ person.full_name }}</strong><span>{{ person.get_role_display }}</span></div>
+        <p>Coordinator relationship needs a check-in.</p>
+        <a href="tel:{{ person.phone }}">{{ person.phone|default:"No phone" }}</a>
+      </article>
+    {% empty %}
+      {% if not overdue and not due_today %}<p class="muted">No calls due today.</p>{% endif %}
+    {% endfor %}
+  </section>
+{% endblock %}
