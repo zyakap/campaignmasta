@@ -1,8 +1,12 @@
+import logging
 from datetime import timedelta
 from decimal import Decimal
 
+from django.db import transaction
 from django.db.models import Count, Q, Sum
 from django.utils import timezone
+
+logger = logging.getLogger(__name__)
 
 from .models import (
     AIWorkItem,
@@ -157,60 +161,69 @@ def apply_included_quota(candidate, service, unit, quantity):
 
 def record_metered_usage(candidate, service, action, unit, quantity=1, connector=None, provider="", model_name="", reference="", metadata=None, user=None, currency="PGK"):
     metadata = metadata or {}
-    wallet = usage_wallet_for_candidate(candidate, service, currency=currency)
-    quota, included_quantity = apply_included_quota(candidate, service, unit, quantity)
-    billable_quantity = max(quantity - included_quantity, 0)
-    charge, rate, free_model = estimate_usage_charge(service, unit, billable_quantity, provider=provider, model_name=model_name, currency=currency)
-    provider_cost = Decimal("0.00")
-    markup_amount = Decimal("0.00")
-    if rate and not rate.is_free:
-        provider_cost = (rate.provider_cost_per_unit * billable_quantity).quantize(Decimal("0.0001"))
-        markup_amount = max(charge - provider_cost, Decimal("0.00")).quantize(Decimal("0.0001"))
-    balance_before = wallet.balance
 
-    if billable_quantity == 0 and included_quantity:
-        status = UsageEvent.Status.INCLUDED_QUOTA
-        balance_after = balance_before
-    elif free_model or (rate and rate.is_free):
-        status = UsageEvent.Status.FREE
-        balance_after = balance_before
-    elif not rate:
-        status = UsageEvent.Status.BLOCKED_NO_CREDIT
-        balance_after = balance_before
-        metadata = {**metadata, "billing_error": "No active usage rate card configured for this service/unit."}
-    elif not wallet.can_spend(charge):
-        status = UsageEvent.Status.BLOCKED_NO_CREDIT
-        balance_after = balance_before
-    else:
-        status = UsageEvent.Status.ALLOWED
-        wallet.balance = wallet.balance - charge
-        wallet.save(update_fields=["balance", "updated_at"])
-        balance_after = wallet.balance
+    with transaction.atomic():
+        # select_for_update prevents concurrent over-spending on the same wallet
+        wallet = UsageWallet.objects.select_for_update().get_or_create(
+            candidate=candidate,
+            service=service,
+            currency=currency,
+            defaults={"created_by": None, "updated_by": None},
+        )[0]
+        quota, included_quantity = apply_included_quota(candidate, service, unit, quantity)
+        billable_quantity = max(quantity - included_quantity, 0)
+        charge, rate, free_model = estimate_usage_charge(service, unit, billable_quantity, provider=provider, model_name=model_name, currency=currency)
+        provider_cost = Decimal("0.00")
+        markup_amount = Decimal("0.00")
+        if rate and not rate.is_free:
+            provider_cost = (rate.provider_cost_per_unit * billable_quantity).quantize(Decimal("0.0001"))
+            markup_amount = max(charge - provider_cost, Decimal("0.00")).quantize(Decimal("0.0001"))
+        balance_before = wallet.balance
 
-    event = UsageEvent.objects.create(
-        candidate=candidate,
-        service=service,
-        connector=connector,
-        wallet=wallet,
-        quota=quota,
-        rate_card=rate,
-        free_ai_model=free_model,
-        action=action,
-        unit=unit,
-        quantity=quantity,
-        included_quantity_applied=included_quantity,
-        billable_quantity=billable_quantity,
-        provider_cost=provider_cost,
-        markup_amount=markup_amount,
-        customer_charge=charge,
-        balance_before=balance_before,
-        balance_after=balance_after,
-        status=status,
-        reference=reference,
-        metadata=metadata,
-        created_by=user,
-        updated_by=user,
-    )
+        if billable_quantity == 0 and included_quantity:
+            event_status = UsageEvent.Status.INCLUDED_QUOTA
+            balance_after = balance_before
+        elif free_model or (rate and rate.is_free):
+            event_status = UsageEvent.Status.FREE
+            balance_after = balance_before
+        elif not rate:
+            event_status = UsageEvent.Status.BLOCKED_NO_CREDIT
+            balance_after = balance_before
+            metadata = {**metadata, "billing_error": "No active usage rate card configured for this service/unit."}
+            logger.warning("No rate card for service=%s unit=%s candidate=%s", service, unit, candidate.id)
+        elif not wallet.can_spend(charge):
+            event_status = UsageEvent.Status.BLOCKED_NO_CREDIT
+            balance_after = balance_before
+        else:
+            event_status = UsageEvent.Status.ALLOWED
+            wallet.balance = wallet.balance - charge
+            wallet.save(update_fields=["balance", "updated_at"])
+            balance_after = wallet.balance
+
+        event = UsageEvent.objects.create(
+            candidate=candidate,
+            service=service,
+            connector=connector,
+            wallet=wallet,
+            quota=quota,
+            rate_card=rate,
+            free_ai_model=free_model,
+            action=action,
+            unit=unit,
+            quantity=quantity,
+            included_quantity_applied=included_quantity,
+            billable_quantity=billable_quantity,
+            provider_cost=provider_cost,
+            markup_amount=markup_amount,
+            customer_charge=charge,
+            balance_before=balance_before,
+            balance_after=balance_after,
+            status=event_status,
+            reference=reference,
+            metadata=metadata,
+            created_by=user,
+            updated_by=user,
+        )
     return event
 
 
@@ -276,9 +289,18 @@ def provision_included_quotas(candidate, subscription, modules=None, bundles=Non
 
 
 def enabled_module_codes(candidate):
+    today = timezone.localdate()
     return set(
-        TenantModuleSubscription.objects.filter(candidate=candidate, is_enabled=True, module__is_active=True)
-        .filter(Q(end_date__isnull=True) | Q(end_date__gte=timezone.localdate()))
+        TenantModuleSubscription.objects.filter(
+            candidate=candidate,
+            is_enabled=True,
+            module__is_active=True,
+        )
+        .filter(Q(end_date__isnull=True) | Q(end_date__gte=today))
+        .filter(
+            Q(subscription__isnull=True)
+            | Q(subscription__status__in=[Subscription.Status.TRIAL, Subscription.Status.ACTIVE])
+        )
         .values_list("module__code", flat=True)
     )
 
@@ -422,6 +444,11 @@ def dispatch_message(message, user=None):
     }
     if message.delivery_channel in paid_channel_services and recipient_count:
         connector = messaging_connector_for_channel(message.candidate, message.delivery_channel)
+        if connector is None:
+            logger.warning(
+                "No active %s connector for candidate=%s — dispatching without external delivery",
+                message.delivery_channel, message.candidate_id,
+            )
         require_usage_credit(
             message.candidate,
             paid_channel_services[message.delivery_channel],

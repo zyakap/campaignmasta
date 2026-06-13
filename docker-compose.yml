@@ -1,0 +1,85 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: campaignmasta
+      POSTGRES_USER: campaignmasta
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U campaignmasta"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  web:
+    build: .
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://campaignmasta:${DB_PASSWORD:-changeme}@db:5432/campaignmasta
+      REDIS_URL: redis://redis:6379/1
+    ports:
+      - "8000:8000"
+    volumes:
+      - media:/app/media
+      - logs:/app/logs
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: >
+      sh -c "
+        python manage.py migrate --noinput &&
+        python manage.py collectstatic --noinput &&
+        gunicorn campaignmasta.wsgi:application
+          --bind 0.0.0.0:8000
+          --workers 3
+          --timeout 120
+          --access-logfile -
+          --error-logfile -
+      "
+    restart: unless-stopped
+
+  worker:
+    build: .
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://campaignmasta:${DB_PASSWORD:-changeme}@db:5432/campaignmasta
+      REDIS_URL: redis://redis:6379/1
+    volumes:
+      - media:/app/media
+      - logs:/app/logs
+    depends_on:
+      db:
+        condition: service_healthy
+    # Simple cron-style runner for management commands
+    # Replace with Celery Beat in production for finer control
+    command: >
+      sh -c "
+        while true; do
+          python manage.py send_scheduled_messages;
+          python manage.py check_coordinator_alerts;
+          sleep 300;
+        done
+      "
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  redisdata:
+  media:
+  logs:

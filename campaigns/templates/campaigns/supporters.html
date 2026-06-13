@@ -1,19 +1,92 @@
 {% extends "campaigns/base.html" %}
+{% block title %}Supporters — CampaignMasta{% endblock %}
+{% block nav_supporters %}active{% endblock %}
+
+{% block extra_head %}
+<style>
+.list-page { padding: 0 0 60px; }
+.list-head { display: flex; align-items: center; justify-content: space-between; padding: 20px 20px 12px; flex-wrap: wrap; gap: 10px; }
+.list-head h1 { font-size: 1.3rem; font-weight: 800; color: #1A0C0C; margin: 0; }
+.list-head .eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: #BEA020; font-weight: 700; margin: 0 0 2px; }
+.search-bar { padding: 0 20px 12px; }
+.search-bar form { display: flex; gap: 8px; }
+.search-bar input { flex: 1; padding: 9px 14px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; outline: none; }
+.search-bar input:focus { border-color: #2AAA2A; }
+.search-bar button { background: #2AAA2A; color: #fff; border: none; border-radius: 8px; padding: 9px 16px; font-size: 13px; font-weight: 600; cursor: pointer; }
+.record-grid { display: flex; flex-direction: column; gap: 0; background: #fff; border-radius: 10px; margin: 0 20px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+.record-row { display: flex; align-items: center; padding: 12px 16px; border-bottom: 1px solid #F5F0E8; gap: 12px; }
+.record-row:last-child { border-bottom: none; }
+.record-row:hover { background: #FAFAF7; }
+.avatar { width: 38px; height: 38px; border-radius: 50%; background: #EDE5D2; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #7A6858; flex-shrink: 0; }
+.record-info { flex: 1; min-width: 0; }
+.record-info strong { display: block; font-size: 14px; font-weight: 600; color: #1A0C0C; }
+.record-info span { font-size: 12px; color: #7A6858; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.support-badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 12px; flex-shrink: 0; }
+.support-badge.STRONG { background: #DCFCE7; color: #166534; }
+.support-badge.LEANING { background: #D1FAE5; color: #065F46; }
+.support-badge.UNDECIDED { background: #FEF3C7; color: #92400E; }
+.support-badge.NOT_SUPPORTIVE { background: #FEE2E2; color: #991B1B; }
+.support-badge.UNKNOWN { background: #F3F4F6; color: #6B7280; }
+.empty-state { padding: 60px 20px; text-align: center; color: #9CA3AF; }
+.empty-state i { font-size: 40px; margin-bottom: 12px; opacity: .4; }
+.empty-state h3 { font-size: 16px; font-weight: 600; color: #6B7280; margin-bottom: 6px; }
+.result-count { padding: 0 20px 8px; font-size: 12px; color: #7A6858; }
+</style>
+{% endblock %}
+
 {% block content %}
-  <section class="page-head">
-    <div><p class="eyebrow">Supporter Registry</p><h1>People</h1></div>
-    <a class="primary-btn" href="{% url 'supporter_create' %}">Add</a>
-  </section>
-  <form class="searchbar" method="get"><input name="q" value="{{ query }}" placeholder="Search name, phone, village"></form>
-  <section class="record-list">
+<div class="list-page">
+
+  <div class="list-head">
+    <div>
+      <p class="eyebrow">Supporter Registry</p>
+      <h1>People &amp; Contacts</h1>
+    </div>
+    <a class="primary-btn" href="{% url 'supporter_create' %}">
+      <i class="fas fa-user-plus fa-sm mr-1"></i> Add contact
+    </a>
+  </div>
+
+  <div class="search-bar">
+    <form method="get">
+      <input type="search" name="q" value="{{ query }}" placeholder="Search name, phone, village…" autocomplete="off">
+      <button type="submit"><i class="fas fa-search fa-xs"></i></button>
+    </form>
+  </div>
+
+  {% if query %}
+  <div class="result-count">
+    {% if records %}Showing {{ records|length }} result{{ records|length|pluralize }} for "{{ query }}"
+    {% else %}No results for "{{ query }}"{% endif %}
+  </div>
+  {% endif %}
+
+  {% if records %}
+  <div class="record-grid">
     {% for person in records %}
-      <article class="record-card">
-        <div><strong>{{ person.full_name }}</strong><span>{{ person.get_support_status_display }}</span></div>
-        <p>{{ person.phone|default:"No phone" }}{% if person.village %} · {{ person.village }}{% endif %}</p>
-        {% if person.main_issue %}<small>{{ person.main_issue }}</small>{% endif %}
-      </article>
-    {% empty %}
-      <p class="muted">No supporter records yet.</p>
+    <div class="record-row">
+      <div class="avatar">{{ person.full_name|first|upper }}</div>
+      <div class="record-info">
+        <strong>{{ person.full_name }}</strong>
+        <span>
+          {{ person.phone|default:"No phone" }}
+          {% if person.village %} &middot; {{ person.village }}{% elif person.ward %} &middot; {{ person.ward }}{% endif %}
+          {% if person.influence_level and person.influence_level != 'LOW' %} &middot; {{ person.get_influence_level_display }}{% endif %}
+        </span>
+      </div>
+      <span class="support-badge {{ person.support_status }}">{{ person.get_support_status_display }}</span>
+    </div>
     {% endfor %}
-  </section>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <div><i class="fas fa-users"></i></div>
+    <h3>No contacts yet</h3>
+    <p>Start by registering your first supporter.</p>
+    <br>
+    <a class="primary-btn" href="{% url 'supporter_create' %}">Add first contact</a>
+  </div>
+  {% endif %}
+
+</div>
 {% endblock %}

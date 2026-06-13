@@ -1,119 +1,258 @@
 {% extends "campaigns/base.html" %}
+{% block title %}Dashboard — CampaignMasta{% endblock %}
+{% block nav_dashboard %}active{% endblock %}
+
+{% block extra_head %}
+<style>
+.dash { padding: 0 0 60px; }
+.dash-head { padding: 20px 20px 0; display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+.dash-head-info p.eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: #BEA020; font-weight: 700; margin: 0; }
+.dash-head-info h1 { font-size: 1.5rem; font-weight: 800; color: #1A0C0C; margin: 2px 0; }
+.dash-head-info p.sub { font-size: 13px; color: #7A6858; margin: 0; }
+.dash-status { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 20px; background: #E8F8E8; color: #1A721A; }
+.dash-status.trial { background: #FDF5D8; color: #7A5A00; }
+.dash-status.suspended { background: #FEE8E8; color: #7C1C1C; }
+
+/* Metrics */
+.metric-bar { display: flex; flex-wrap: wrap; gap: 0; padding: 16px 20px 8px; }
+.metric-chip { flex: 1 1 110px; text-align: center; padding: 12px 8px; border-right: 1px solid #EDE5D2; }
+.metric-chip:last-child { border-right: none; }
+.metric-chip .val { display: block; font-size: 26px; font-weight: 800; color: #1A0C0C; line-height: 1; }
+.metric-chip .lbl { display: block; font-size: 11px; color: #7A6858; margin-top: 2px; }
+.metric-chip.alert .val { color: #7C1C1C; }
+.metric-chip.good .val { color: #1A721A; }
+
+/* Quick actions */
+.quick-strip { display: flex; flex-wrap: wrap; gap: 8px; padding: 10px 20px 14px; border-bottom: 1px solid #EDE5D2; background: #fff; }
+
+/* Grid panels */
+.dash-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px,1fr)); gap: 12px; padding: 16px 20px; }
+.panel { background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+.panel.alert-border { border-left: 4px solid #7C1C1C; }
+.panel.green-border { border-left: 4px solid #2AAA2A; }
+.panel-hd { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px 10px; border-bottom: 1px solid #F5F0E8; }
+.panel-hd h2 { font-size: 13px; font-weight: 700; color: #1A0C0C; margin: 0; display: flex; align-items: center; gap: 6px; }
+.panel-hd a { font-size: 12px; color: #2AAA2A; font-weight: 500; text-decoration: none; }
+.list-item { padding: 9px 14px; border-bottom: 1px solid #F5F0E8; }
+.list-item:last-child { border-bottom: none; }
+.list-item strong { display: block; font-size: 13px; font-weight: 600; color: #1A0C0C; }
+.list-item span { font-size: 12px; color: #7A6858; }
+.list-item .badge-tag { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 10px; background: #FEE2E2; color: #991B1B; margin-left: 4px; }
+.list-item .badge-ok { background: #DCFCE7; color: #166534; }
+.no-items { padding: 14px; font-size: 13px; color: #9CA3AF; text-align: center; }
+.wallet-bar { display: flex; justify-content: space-between; align-items: center; padding: 8px 14px; border-bottom: 1px solid #F5F0E8; }
+.wallet-bar .svc { font-size: 13px; font-weight: 600; color: #1A0C0C; }
+.wallet-bar .bal { font-size: 13px; font-weight: 700; }
+.wallet-bar .bal.low { color: #DC2626; }
+.wallet-bar .bal.ok { color: #059669; }
+</style>
+{% endblock %}
+
 {% block content %}
-  <section class="dashboard-head">
-    <div>
+<div class="dash">
+
+  <!-- Head -->
+  <div class="dash-head">
+    <div class="dash-head-info">
       <p class="eyebrow">{{ candidate.get_candidate_type_display }} Campaign</p>
       <h1>{{ candidate.name }}</h1>
-      <p>{{ candidate.province }}{% if candidate.district %} · {{ candidate.district }}{% endif %}</p>
+      <p class="sub">{{ candidate.province }}{% if candidate.district %} &middot; {{ candidate.district }}{% endif %}</p>
     </div>
-    {% if candidates|length > 1 %}
-      <details class="candidate-switch">
-        <summary>Switch</summary>
-        {% for item in candidates %}
-          <a href="{% url 'switch_candidate' item.id %}">{{ item.name }}</a>
-        {% endfor %}
-      </details>
-    {% endif %}
-  </section>
+    <span class="dash-status {% if candidate.status == 'TRIAL' %}trial{% elif candidate.status == 'SUSPENDED' %}suspended{% endif %}">
+      <i class="fas fa-circle fa-xs"></i>
+      {{ candidate.get_status_display }}
+    </span>
+  </div>
 
-  <section class="metric-grid">
-    <article><span>{{ supporter_count }}</span><small>Contacts</small></article>
-    <article><span>{{ strong_supporters }}</span><small>Strong</small></article>
-    <article><span>{{ undecided_contacts }}</span><small>Undecided</small></article>
-    <article><span>{{ consented_contacts }}</span><small>SMS consent</small></article>
-    <article><span>{{ weak_wards }}</span><small>Weak wards</small></article>
-    <article><span>{{ overdue_tasks }}</span><small>Overdue tasks</small></article>
-    <article><span>{{ polling_incidents }}</span><small>Polling incidents</small></article>
-    <article><span>{{ open_issues }}</span><small>Open issues</small></article>
-    {% for wallet in usage_wallets|slice:":4" %}
-      <article><span>{{ wallet.balance }}</span><small>{{ wallet.get_service_display }} credit</small></article>
-    {% endfor %}
-  </section>
+  <!-- Metrics bar -->
+  <div class="metric-bar">
+    <div class="metric-chip {% if supporter_count > 0 %}good{% endif %}">
+      <span class="val">{{ supporter_count }}</span>
+      <span class="lbl">Contacts</span>
+    </div>
+    <div class="metric-chip good">
+      <span class="val">{{ strong_supporters }}</span>
+      <span class="lbl">Strong</span>
+    </div>
+    <div class="metric-chip">
+      <span class="val">{{ undecided_contacts }}</span>
+      <span class="lbl">Undecided</span>
+    </div>
+    <div class="metric-chip">
+      <span class="val">{{ consented_contacts }}</span>
+      <span class="lbl">SMS consent</span>
+    </div>
+    <div class="metric-chip {% if weak_wards > 0 %}alert{% endif %}">
+      <span class="val">{{ weak_wards }}</span>
+      <span class="lbl">Weak wards</span>
+    </div>
+    <div class="metric-chip {% if overdue_tasks > 0 %}alert{% endif %}">
+      <span class="val">{{ overdue_tasks }}</span>
+      <span class="lbl">Overdue tasks</span>
+    </div>
+    <div class="metric-chip {% if polling_incidents > 0 %}alert{% endif %}">
+      <span class="val">{{ polling_incidents }}</span>
+      <span class="lbl">Incidents</span>
+    </div>
+    <div class="metric-chip {% if open_issues > 0 %}alert{% endif %}">
+      <span class="val">{{ open_issues }}</span>
+      <span class="lbl">Open issues</span>
+    </div>
+    <div class="metric-chip {% if pending_promises > 0 %}alert{% endif %}">
+      <span class="val">{{ pending_promises }}</span>
+      <span class="lbl">Pending promises</span>
+    </div>
+  </div>
 
-  <section class="quick-actions">
-    <a class="primary-btn" href="{% url 'supporter_create' %}">Register</a>
-    <a class="secondary-btn" href="{% url 'call_create' %}">Record call</a>
-    <a class="secondary-btn" href="{% url 'message_create' %}">Message</a>
-    <a class="secondary-btn" href="{% url 'task_create' %}">Task</a>
-    <a class="secondary-btn" href="{% url 'event_create' %}">Event</a>
-    <a class="secondary-btn" href="{% url 'issue_create' %}">Issue</a>
-    <a class="secondary-btn" href="{% url 'polling_status_create' %}">Polling</a>
-    <a class="secondary-btn" href="{% url 'reports' %}">Reports</a>
-    <a class="secondary-btn" href="{% url 'usage_dashboard' %}">Usage</a>
-  </section>
+  <!-- Quick actions -->
+  <div class="quick-strip">
+    <a class="primary-btn" href="{% url 'supporter_create' %}"><i class="fas fa-user-plus fa-sm mr-1"></i>Register contact</a>
+    <a class="secondary-btn" href="{% url 'call_create' %}"><i class="fas fa-phone fa-sm mr-1"></i>Record call</a>
+    <a class="secondary-btn" href="{% url 'message_create' %}"><i class="fas fa-envelope fa-sm mr-1"></i>Message</a>
+    <a class="secondary-btn" href="{% url 'task_create' %}"><i class="fas fa-list-check fa-sm mr-1"></i>Task</a>
+    <a class="secondary-btn" href="{% url 'event_create' %}"><i class="fas fa-calendar-plus fa-sm mr-1"></i>Event</a>
+    <a class="secondary-btn" href="{% url 'issue_create' %}"><i class="fas fa-triangle-exclamation fa-sm mr-1"></i>Issue</a>
+    <a class="secondary-btn" href="{% url 'polling_status_create' %}"><i class="fas fa-ballot-check fa-sm mr-1"></i>Polling update</a>
+  </div>
 
-  <section class="content-grid">
-    <div class="panel urgent">
-      <div class="panel-title"><h2>Calls Due</h2><a href="{% url 'calls' %}">View</a></div>
+  <!-- Content grid -->
+  <div class="dash-grid">
+
+    <!-- Calls due -->
+    <div class="panel alert-border">
+      <div class="panel-hd">
+        <h2><i class="fas fa-phone-volume text-danger fa-xs"></i> Calls Due</h2>
+        <a href="{% url 'calls' %}">View all</a>
+      </div>
       {% for person in overdue_calls %}
-        <article class="list-card">
-          <strong>{{ person.full_name }}</strong>
-          <span>{{ person.community_role|default:"Influencer" }} · overdue {{ person.next_contact_due_date }}</span>
-        </article>
-      {% empty %}
-        <p class="muted">No overdue calls.</p>
+        <div class="list-item">
+          <strong>{{ person.full_name }} <span class="badge-tag">OVERDUE</span></strong>
+          <span>{{ person.community_role|default:"Influencer" }} &middot; due {{ person.next_contact_due_date }}</span>
+        </div>
       {% endfor %}
       {% for person in due_calls %}
-        <article class="list-card">
+        <div class="list-item">
           <strong>{{ person.full_name }}</strong>
-          <span>Due today · {{ person.phone }}</span>
-        </article>
+          <span>Due today &middot; {{ person.phone }}</span>
+        </div>
       {% endfor %}
       {% for person in quiet_coordinators %}
-        <article class="list-card">
+        <div class="list-item">
           <strong>{{ person.full_name }}</strong>
-          <span>{{ person.get_role_display }} needs relationship follow-up</span>
-        </article>
+          <span>{{ person.get_role_display }} — needs follow-up</span>
+        </div>
+      {% empty %}
+        {% if not overdue_calls and not due_calls %}
+        <div class="no-items"><i class="fas fa-check-circle text-success fa-sm mr-1"></i>No calls overdue</div>
+        {% endif %}
       {% endfor %}
     </div>
 
+    <!-- Tasks -->
     <div class="panel">
-      <div class="panel-title"><h2>Open Tasks</h2><a href="{% url 'tasks' %}">View</a></div>
+      <div class="panel-hd">
+        <h2><i class="fas fa-list-check fa-xs text-muted"></i> Open Tasks</h2>
+        <a href="{% url 'tasks' %}">View all</a>
+      </div>
       {% for task in open_tasks %}
-        <article class="list-card">
+        <div class="list-item">
           <strong>{{ task.title }}</strong>
-          <span>{{ task.get_priority_display }}{% if task.due_date %} · due {{ task.due_date }}{% endif %}</span>
-        </article>
+          <span>{{ task.get_priority_display }}{% if task.due_date %} &middot; due {{ task.due_date }}{% endif %}{% if task.assigned_to %} &middot; {{ task.assigned_to.full_name }}{% endif %}</span>
+        </div>
       {% empty %}
-        <p class="muted">No open tasks.</p>
+        <div class="no-items"><i class="fas fa-check-circle text-success fa-sm mr-1"></i>No open tasks</div>
       {% endfor %}
     </div>
 
+    <!-- Events -->
     <div class="panel">
-      <div class="panel-title"><h2>Upcoming Events</h2></div>
+      <div class="panel-hd">
+        <h2><i class="fas fa-calendar fa-xs text-muted"></i> Upcoming Events</h2>
+        <a href="{% url 'events' %}">View all</a>
+      </div>
       {% for event in upcoming_events %}
-        <article class="list-card">
+        <div class="list-item">
           <strong>{{ event.title }}</strong>
-          <span>{{ event.get_event_type_display }} · {{ event.start_datetime|date:"M j, g:i a" }}</span>
-        </article>
+          <span>{{ event.get_event_type_display }} &middot; {{ event.start_datetime|date:"M j, g:i a" }}{% if event.ward %} &middot; {{ event.ward }}{% endif %}</span>
+        </div>
       {% empty %}
-        <p class="muted">No upcoming events.</p>
+        <div class="no-items">No upcoming events.</div>
       {% endfor %}
     </div>
 
+    <!-- Issues & Promises -->
     <div class="panel">
-      <div class="panel-title"><h2>Issues</h2></div>
+      <div class="panel-hd">
+        <h2><i class="fas fa-triangle-exclamation fa-xs text-muted"></i> Issues &amp; Promises</h2>
+        <a href="{% url 'issues' %}">View all</a>
+      </div>
       {% for issue in open_issues %}
-        <article class="list-card">
+        <div class="list-item">
           <strong>{{ issue.title }}</strong>
-          <span>{{ issue.category }} · {{ issue.get_priority_display }}</span>
-        </article>
+          <span>{{ issue.category }} &middot; {{ issue.get_priority_display }}</span>
+        </div>
       {% empty %}
-        <p class="muted">No open issues.</p>
+        <div class="no-items">No open issues.</div>
       {% endfor %}
-      <div class="mini-stat">Pending promises: {{ pending_promises }}</div>
+      {% if pending_promises > 0 %}
+      <div class="list-item">
+        <strong>{{ pending_promises }} pending promise{{ pending_promises|pluralize }}</strong>
+        <span>Requires follow-up action</span>
+      </div>
+      {% endif %}
     </div>
 
-    <div class="panel urgent">
-      <div class="panel-title"><h2>Prepaid Credits</h2><a href="{% url 'usage_dashboard' %}">View</a></div>
-      {% for wallet in low_balance_wallets %}
-        <article class="list-card">
-          <strong>{{ wallet.get_service_display }}</strong>
-          <span>Low balance: {{ wallet.currency }} {{ wallet.balance }}</span>
-        </article>
-      {% empty %}
-        <p class="muted">No low connector balances.</p>
+    <!-- Urgent messages -->
+    {% if urgent_messages %}
+    <div class="panel alert-border">
+      <div class="panel-hd">
+        <h2><i class="fas fa-envelope fa-xs text-danger"></i> Urgent Messages</h2>
+        <a href="{% url 'messages' %}">View all</a>
+      </div>
+      {% for msg in urgent_messages %}
+        <div class="list-item">
+          <strong><a href="{% url 'message_detail' msg.id %}" style="color:#1A0C0C;text-decoration:none;">{{ msg.subject }}</a></strong>
+          <span>{{ msg.get_priority_display }} &middot; {{ msg.get_delivery_channel_display }}</span>
+        </div>
       {% endfor %}
     </div>
-  </section>
+    {% endif %}
+
+    <!-- Usage wallets -->
+    <div class="panel">
+      <div class="panel-hd">
+        <h2><i class="fas fa-chart-bar fa-xs text-muted"></i> Prepaid Credits</h2>
+        <a href="{% url 'usage_dashboard' %}">Top up</a>
+      </div>
+      {% for wallet in usage_wallets %}
+        <div class="wallet-bar">
+          <span class="svc">{{ wallet.get_service_display }}</span>
+          <span class="bal {% if wallet.balance <= wallet.low_balance_threshold %}low{% else %}ok{% endif %}">
+            {{ wallet.currency }} {{ wallet.balance|floatformat:2 }}
+            {% if wallet.balance <= wallet.low_balance_threshold %}<i class="fas fa-exclamation-circle fa-xs ml-1"></i>{% endif %}
+          </span>
+        </div>
+      {% empty %}
+        <div class="no-items">No usage wallets.</div>
+      {% endfor %}
+    </div>
+
+    <!-- Ward strength -->
+    {% if ward_strength %}
+    <div class="panel">
+      <div class="panel-hd">
+        <h2><i class="fas fa-map-location-dot fa-xs text-muted"></i> Ward Strength</h2>
+        <a href="{% url 'ward_briefs' %}">View all</a>
+      </div>
+      {% for row in ward_strength %}
+        <div class="list-item">
+          <strong>{{ row.support_strength|default:"Unrated" }}</strong>
+          <span>{{ row.total }} ward{{ row.total|pluralize }}</span>
+        </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+  </div>
+</div>
 {% endblock %}

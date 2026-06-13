@@ -22,7 +22,10 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideGson(): Gson = GsonBuilder().serializeNulls().create()
+    fun provideGson(): Gson = GsonBuilder()
+        .serializeNulls()
+        .setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")
+        .create()
 
     @Provides
     @Singleton
@@ -37,9 +40,19 @@ object NetworkModule {
         return OkHttpClient.Builder()
             .addInterceptor(authInterceptor)
             .addInterceptor(logging)
+            // Retry on connection failure (not on other errors)
+            .retryOnConnectionFailure(true)
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(60, TimeUnit.SECONDS)
             .writeTimeout(60, TimeUnit.SECONDS)
+            // Add a user-agent identifying the app version
+            .addInterceptor { chain ->
+                val request = chain.request().newBuilder()
+                    .addHeader("User-Agent", "CampaignMasta-Android/${BuildConfig.VERSION_NAME}")
+                    .addHeader("Accept", "application/json")
+                    .build()
+                chain.proceed(request)
+            }
             .build()
     }
 

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Network security configuration for CampaignMasta.
+    Production: HTTPS only to campaign.webmasta.com.pg
+    Debug: allows cleartext to localhost (emulator) for development
+-->
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">campaign.webmasta.com.pg</domain>
+        <domain includeSubdomains="true">webmasta.com.pg</domain>
+    </domain-config>
+
+    <!-- Allow cleartext only in debug builds to local emulator -->
+    <debug-overrides>
+        <trust-anchors>
+            <certificates src="user" />
+            <certificates src="system" />
+        </trust-anchors>
+    </debug-overrides>
+</network-security-config>

@@ -1,40 +1,135 @@
 {% extends "campaigns/base.html" %}
+{% block title %}Usage &amp; Credits — CampaignMasta{% endblock %}
+{% block nav_usage %}active{% endblock %}
+
+{% block extra_head %}
+<style>
+.usage-page { padding: 0 0 60px; }
+.usage-head { display: flex; align-items: flex-start; justify-content: space-between; padding: 20px 20px 14px; flex-wrap: wrap; gap: 10px; }
+.usage-head .eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: #BEA020; font-weight: 700; margin: 0 0 2px; }
+.usage-head h1 { font-size: 1.3rem; font-weight: 800; color: #1A0C0C; margin: 0; }
+.usage-head p { font-size: 13px; color: #7A6858; margin: 2px 0 0; }
+.wallet-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; padding: 0 20px 16px; }
+.wallet-card { background: #fff; border-radius: 10px; padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+.wallet-card.low { border-top: 3px solid #dc2626; }
+.wallet-card.ok { border-top: 3px solid #2AAA2A; }
+.wallet-card .service { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #7A6858; margin-bottom: 4px; }
+.wallet-card .balance { font-size: 1.8rem; font-weight: 900; color: #1A0C0C; line-height: 1; }
+.wallet-card .currency { font-size: 13px; font-weight: 400; color: #7A6858; }
+.wallet-card .threshold { font-size: 11px; color: #9CA3AF; margin-top: 4px; }
+.wallet-card .low-badge { display: inline-block; font-size: 11px; font-weight: 700; background: #FEE2E2; color: #991B1B; padding: 2px 7px; border-radius: 10px; margin-top: 5px; }
+.section-head { font-size: 13px; font-weight: 700; color: #1A0C0C; padding: 4px 20px 8px; }
+.quota-list { display: flex; flex-wrap: wrap; gap: 10px; padding: 0 20px 16px; }
+.quota-chip { background: #fff; border-radius: 8px; padding: 10px 14px; box-shadow: 0 1px 4px rgba(0,0,0,.06); min-width: 150px; }
+.quota-chip .q-val { font-size: 1.3rem; font-weight: 800; color: #1A0C0C; }
+.quota-chip .q-label { font-size: 11px; color: #7A6858; }
+.event-list { background: #fff; border-radius: 10px; margin: 0 20px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+.event-row { padding: 10px 14px; border-bottom: 1px solid #F5F0E8; display: flex; align-items: center; gap: 10px; }
+.event-row:last-child { border-bottom: none; }
+.event-icon { width: 32px; height: 32px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+.status-ALLOWED .event-icon { background: #DCFCE7; color: #166534; }
+.status-FREE .event-icon { background: #DBEAFE; color: #1e40af; }
+.status-INCLUDED_QUOTA .event-icon { background: #EDE9FE; color: #5b21b6; }
+.status-BLOCKED_NO_CREDIT .event-icon { background: #FEE2E2; color: #991B1B; }
+.event-info { flex: 1; min-width: 0; }
+.event-info strong { display: block; font-size: 13px; font-weight: 600; color: #1A0C0C; }
+.event-info span { font-size: 12px; color: #7A6858; }
+.event-charge { font-size: 13px; font-weight: 700; color: #1A0C0C; flex-shrink: 0; }
+.status-pill { font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 8px; text-transform: uppercase; }
+.status-ALLOWED { background: #DCFCE7; color: #166534; }
+.status-FREE { background: #DBEAFE; color: #1e40af; }
+.status-INCLUDED_QUOTA { background: #EDE9FE; color: #5b21b6; }
+.status-BLOCKED_NO_CREDIT { background: #FEE2E2; color: #991B1B; }
+.no-events { padding: 24px; text-align: center; font-size: 13px; color: #9CA3AF; }
+</style>
+{% endblock %}
+
 {% block content %}
-  <section class="page-head">
+<div class="usage-page">
+
+  <div class="usage-head">
     <div>
       <p class="eyebrow">Prepaid Usage</p>
       <h1>Connector Credits</h1>
-      <p class="muted">AI, WhatsApp, SMS, email, and other paid connector usage draws down prepaid balances.</p>
+      <p>AI, WhatsApp, SMS, email, and other paid services draw down prepaid balances.</p>
     </div>
-    <a class="primary-btn" href="{% url 'usage_topup_create' %}">Top Up</a>
-  </section>
+    <a class="primary-btn" href="{% url 'usage_topup_create' %}">
+      <i class="fas fa-plus fa-sm mr-1"></i> Top up credit
+    </a>
+  </div>
 
-  <section class="metric-grid">
-    {% for quota in included_quotas %}
-      <article>
-        <span>{{ quota.remaining_quantity }}</span>
-        <small>Included {{ quota.get_service_display }} {{ quota.get_unit_display }}</small>
-      </article>
-    {% endfor %}
+  <!-- Wallet balances -->
+  <div class="section-head">Prepaid Wallets</div>
+  <div class="wallet-grid">
     {% for wallet in wallets %}
-      <article>
-        <span>{{ wallet.currency }} {{ wallet.balance }}</span>
-        <small>{{ wallet.get_service_display }}{% if wallet.balance <= wallet.low_balance_threshold %} · low{% endif %}</small>
-      </article>
+    <div class="wallet-card {% if wallet.balance <= wallet.low_balance_threshold %}low{% else %}ok{% endif %}">
+      <div class="service">{{ wallet.get_service_display }}</div>
+      <div class="balance">{{ wallet.balance|floatformat:2 }} <span class="currency">{{ wallet.currency }}</span></div>
+      <div class="threshold">Alert threshold: {{ wallet.low_balance_threshold }} {{ wallet.currency }}</div>
+      {% if wallet.balance <= wallet.low_balance_threshold %}
+      <span class="low-badge"><i class="fas fa-exclamation-circle fa-xs mr-1"></i>Low balance</span>
+      {% endif %}
+    </div>
     {% empty %}
-      <article><span>0</span><small>No prepaid wallets yet</small></article>
+    <div style="grid-column:1/-1;padding:20px;text-align:center;color:#9CA3AF;font-size:13px;">
+      No usage wallets yet. Wallets are created automatically when you first use a paid service.
+    </div>
     {% endfor %}
-  </section>
+  </div>
 
-  <section class="record-list">
-    {% for event in recent_usage_events %}
-      <article class="record-card">
-        <div><strong>{{ event.action }}</strong><span>{{ event.get_status_display }}</span></div>
-        <p>{{ event.get_service_display }} · {{ event.quantity }} {{ event.get_unit_display }} · charge {{ event.customer_charge }}</p>
-        <small>Included: {{ event.included_quantity_applied }} · Billable: {{ event.billable_quantity }} · Balance: {{ event.balance_before }} → {{ event.balance_after }}{% if event.free_ai_model %} · free model {{ event.free_ai_model }}{% endif %}</small>
-      </article>
-    {% empty %}
-      <p class="muted">No usage recorded yet.</p>
+  <!-- Included quotas -->
+  {% if included_quotas %}
+  <div class="section-head">Included Quotas (plan)</div>
+  <div class="quota-list">
+    {% for quota in included_quotas %}
+    <div class="quota-chip">
+      <div class="q-val">{{ quota.remaining_quantity }}</div>
+      <div class="q-label">{{ quota.get_service_display }} {{ quota.get_unit_display }} remaining</div>
+      {% if quota.reset_period_end %}<div style="font-size:11px;color:#9CA3AF;">Resets {{ quota.reset_period_end }}</div>{% endif %}
+    </div>
     {% endfor %}
-  </section>
+  </div>
+  {% endif %}
+
+  <!-- Recent usage events -->
+  <div class="section-head" style="margin-top:8px;">Recent Usage Events</div>
+  <div class="event-list">
+    {% for event in recent_usage_events %}
+    <div class="event-row status-{{ event.status }}">
+      <div class="event-icon">
+        {% if event.status == 'ALLOWED' %}<i class="fas fa-check"></i>
+        {% elif event.status == 'FREE' %}<i class="fas fa-gift"></i>
+        {% elif event.status == 'INCLUDED_QUOTA' %}<i class="fas fa-layer-group"></i>
+        {% else %}<i class="fas fa-ban"></i>{% endif %}
+      </div>
+      <div class="event-info">
+        <strong>
+          {{ event.action }}
+          <span class="status-pill status-{{ event.status }}">{{ event.get_status_display }}</span>
+        </strong>
+        <span>
+          {{ event.get_service_display }}
+          &middot; {{ event.quantity }} {{ event.get_unit_display }}
+          {% if event.included_quantity_applied %}&middot; {{ event.included_quantity_applied }} included{% endif %}
+          {% if event.free_ai_model %}&middot; free model{% endif %}
+          &middot; {{ event.created_at|date:"M j, g:i a" }}
+        </span>
+      </div>
+      <div class="event-charge">
+        {% if event.customer_charge > 0 %}
+        {{ event.customer_charge }} {{ event.wallet.currency }}
+        {% else %}
+        Free
+        {% endif %}
+      </div>
+    </div>
+    {% empty %}
+    <div class="no-events">
+      <i class="fas fa-chart-bar fa-lg" style="display:block;opacity:.3;margin-bottom:8px;"></i>
+      No usage events recorded yet.
+    </div>
+    {% endfor %}
+  </div>
+
+</div>
 {% endblock %}

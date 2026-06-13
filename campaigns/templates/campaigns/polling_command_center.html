@@ -1,64 +1,196 @@
 {% extends "campaigns/base.html" %}
+{% block title %}Polling Command Center — CampaignMasta{% endblock %}
+{% block nav_polling %}active{% endblock %}
+
+{% block extra_head %}
+<style>
+.command-page { padding: 0 0 40px; }
+.command-head { padding: 20px 20px 14px; display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+.command-head .eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: #BEA020; font-weight: 700; margin: 0 0 2px; }
+.command-head h1 { font-size: 1.4rem; font-weight: 800; color: #1A0C0C; margin: 0; }
+.command-head p { font-size: 13px; color: #7A6858; margin: 2px 0 0; }
+.command-actions { display: flex; gap: 8px; }
+.tally-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; padding: 0 20px 16px; }
+.tally-card { background: #fff; border-radius: 12px; padding: 18px 16px; box-shadow: 0 1px 4px rgba(0,0,0,.06); text-align: center; }
+.tally-card.primary { border-top: 4px solid #2AAA2A; }
+.tally-card.alert { border-top: 4px solid #7C1C1C; }
+.tally-card .tally-val { font-size: 2.4rem; font-weight: 900; color: #1A0C0C; line-height: 1; }
+.tally-card .tally-label { font-size: 12px; color: #7A6858; margin-top: 4px; }
+.booth-list { display: flex; flex-direction: column; gap: 8px; padding: 0 20px; }
+.booth-card { background: #fff; border-radius: 10px; padding: 14px 16px; box-shadow: 0 1px 4px rgba(0,0,0,.06); display: flex; align-items: flex-start; gap: 12px; }
+.booth-card.high-risk { border-left: 4px solid #7C1C1C; }
+.booth-card.refused { border-left: 4px solid #7C1C1C; }
+.booth-icon { width: 38px; height: 38px; border-radius: 8px; background: #EDE5D2; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+.booth-icon.checkin { background: #DCFCE7; }
+.booth-icon.alert { background: #FEE2E2; }
+.booth-info { flex: 1; min-width: 0; }
+.booth-info strong { display: block; font-size: 14px; font-weight: 700; color: #1A0C0C; }
+.booth-info p { font-size: 12px; color: #7A6858; margin: 2px 0; }
+.booth-info .update-time { font-size: 11px; color: #9CA3AF; margin-top: 3px; }
+.booth-badges { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; }
+.badge { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 10px; }
+.badge-green { background: #DCFCE7; color: #166534; }
+.badge-yellow { background: #FEF3C7; color: #92400E; }
+.badge-red { background: #FEE2E2; color: #991B1B; }
+.badge-blue { background: #DBEAFE; color: #1e40af; }
+.tally-count { font-size: 1.2rem; font-weight: 800; color: #1A0C0C; }
+.contact-btn { font-size: 12px; color: #2AAA2A; text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 3px; margin-top: 4px; }
+.empty-panel { background: #fff; border-radius: 10px; padding: 40px 20px; text-align: center; margin: 0 20px; color: #9CA3AF; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+
+/* Auto-refresh indicator */
+.refresh-indicator { font-size: 12px; color: #9CA3AF; padding: 0 20px 10px; display: flex; align-items: center; gap: 6px; }
+.refresh-dot { width: 8px; height: 8px; border-radius: 50%; background: #2AAA2A; animation: pulse 2s infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .3; } }
+</style>
+<meta http-equiv="refresh" content="60">
+{% endblock %}
+
 {% block content %}
-  <section class="page-head">
+<div class="command-page">
+
+  <div class="command-head">
     <div>
-      <p class="eyebrow">Polling Day</p>
-      <h1>Command Center</h1>
-      <p class="muted">Live booth status, scrutineer check-ins, and running tally.</p>
+      <p class="eyebrow">Polling Day Operations</p>
+      <h1>Live Command Center</h1>
+      <p>Booth status, scrutineer check-ins &amp; running tally &middot; refreshes every 60 seconds</p>
     </div>
-    <div style="display:flex;gap:.5rem">
-      <a class="secondary-btn" href="{% url 'polling_status_create' %}">Update booth</a>
-      <a class="primary-btn" href="{% url 'polling_incident_create' %}">Report incident</a>
+    <div class="command-actions">
+      <a class="secondary-btn" href="{% url 'polling_status_create' %}"><i class="fas fa-arrow-up fa-sm mr-1"></i> Booth update</a>
+      <a class="primary-btn" href="{% url 'polling_incident_create' %}"><i class="fas fa-triangle-exclamation fa-sm mr-1"></i> Report incident</a>
     </div>
-  </section>
+  </div>
 
-  <section class="panel" style="margin-bottom:1rem">
-    <div style="display:flex;gap:2rem;flex-wrap:wrap">
-      <div>
-        <p class="eyebrow">Running tally</p>
-        <p style="font-size:2rem;font-weight:700;margin:0">{{ total_our_tally }}</p>
-        <small class="muted">votes observed across all booths</small>
-      </div>
-      <div>
-        <p class="eyebrow">Booths reporting</p>
-        <p style="font-size:2rem;font-weight:700;margin:0">
-          {% with checked_in=locations|length %}{{ checked_in }}{% endwith %}
-        </p>
-        <small class="muted">total booths</small>
-      </div>
-    </div>
-  </section>
+  <div class="refresh-indicator">
+    <span class="refresh-dot"></span>
+    Live &middot; last refreshed {{ "now"|date:"g:i a" }}
+  </div>
 
-  <section class="record-list">
+  <!-- Summary tallies -->
+  <div class="tally-bar">
+    <div class="tally-card primary">
+      <div class="tally-val">{{ total_our_tally }}</div>
+      <div class="tally-label">Running tally (our votes)</div>
+    </div>
+    <div class="tally-card">
+      {% with total=locations|length %}
+      <div class="tally-val">{{ total }}</div>
+      <div class="tally-label">Total polling locations</div>
+      {% endwith %}
+    </div>
+    <div class="tally-card">
+      {% with count=0 %}
+      <div class="tally-val">
+        {% with checked=0 %}
+        {% for loc in locations %}{% if loc.scrutineer_checked_in %}{% with checked=checked|add:1 %}{% endwith %}{% endif %}{% endfor %}
+        {{ checked }}
+        {% endwith %}
+      </div>
+      {% endwith %}
+      <div class="tally-label">Scrutineers checked in</div>
+    </div>
+    <div class="tally-card alert">
+      <div class="tally-val">
+        {% for loc in locations %}{% if loc.security_risk == 'HIGH' or loc.security_risk == 'REFUSED' %}⚠{% endif %}{% endfor %}
+        {% with incidents=0 %}
+        {% for loc in locations %}{% if loc.security_risk == 'HIGH' or loc.security_risk == 'REFUSED' %}{% with incidents=incidents|add:1 %}{% endwith %}{% endif %}{% endfor %}
+        {{ incidents }}
+        {% endwith %}
+      </div>
+      <div class="tally-label">High risk / refused locations</div>
+    </div>
+  </div>
+
+  <!-- Booth cards -->
+  {% if locations %}
+  <div class="booth-list">
     {% for loc in locations %}
-      <article class="record-card {% if loc.security_risk == 'HIGH' or loc.security_risk == 'REFUSED' %}record-card--alert{% endif %}">
-        <div>
-          <strong>{{ loc.name }}</strong>
-          <span class="badge {% if loc.scrutineer_checked_in %}badge-green{% else %}badge-yellow{% endif %}">
-            {% if loc.scrutineer_checked_in %}Scrutineer in{% else %}Not checked in{% endif %}
-          </span>
-          {% if loc.security_risk != 'LOW' %}
-            <span class="badge badge-red">{{ loc.get_security_risk_display }}</span>
+    <div class="booth-card {% if loc.security_risk == 'HIGH' %}high-risk{% elif loc.security_risk == 'REFUSED' %}refused{% endif %}">
+      <div class="booth-icon {% if loc.scrutineer_checked_in %}checkin{% elif loc.security_risk == 'HIGH' or loc.security_risk == 'REFUSED' %}alert{% endif %}">
+        {% if loc.scrutineer_checked_in %}
+          <i class="fas fa-check text-success"></i>
+        {% elif loc.security_risk == 'HIGH' or loc.security_risk == 'REFUSED' %}
+          <i class="fas fa-exclamation text-danger"></i>
+        {% else %}
+          <i class="fas fa-ballot-check text-muted"></i>
+        {% endif %}
+      </div>
+      <div class="booth-info">
+        <strong>{{ loc.name }}</strong>
+        <p>{{ loc.ward|default:"No ward assigned" }}{% if loc.assigned_scrutineer %} &middot; Scrutineer: {{ loc.assigned_scrutineer.full_name }}{% endif %}</p>
+        {% if loc.expected_turnout %}<p>Expected turnout: {{ loc.expected_turnout }} voters</p>{% endif %}
+
+        <div class="booth-badges">
+          {% if loc.scrutineer_checked_in %}
+            <span class="badge badge-green"><i class="fas fa-user-check fa-xs mr-1"></i>Checked in</span>
+          {% else %}
+            <span class="badge badge-yellow"><i class="fas fa-user-clock fa-xs mr-1"></i>Not checked in</span>
+          {% endif %}
+
+          {% if loc.latest_status %}
+            {% if loc.latest_status.booth_open %}
+              <span class="badge badge-blue">Booth open</span>
+            {% else %}
+              <span class="badge badge-yellow">Booth closed</span>
+            {% endif %}
+            {% if loc.latest_status.materials_available %}
+              <span class="badge badge-green">Materials ok</span>
+            {% endif %}
+            {% if loc.latest_status.our_tally is not None %}
+              <span class="badge badge-blue"><strong>{{ loc.latest_status.our_tally }}</strong> votes</span>
+            {% endif %}
+          {% else %}
+            <span class="badge badge-yellow">No update yet</span>
+          {% endif %}
+
+          {% if loc.security_risk == 'HIGH' %}
+            <span class="badge badge-red">High risk</span>
+          {% elif loc.security_risk == 'MODERATE' %}
+            <span class="badge badge-yellow">Moderate risk</span>
+          {% elif loc.security_risk == 'REFUSED' %}
+            <span class="badge badge-red">Access refused</span>
           {% endif %}
         </div>
-        <p>
-          {{ loc.ward|default:"No ward" }}
-          {% if loc.assigned_scrutineer %} · {{ loc.assigned_scrutineer.full_name }}{% endif %}
-          {% if loc.expected_turnout %} · Expected {{ loc.expected_turnout }} voters{% endif %}
-        </p>
+
         {% if loc.latest_status %}
-          <small>
-            {% if loc.latest_status.our_tally is not None %}Our tally: <strong>{{ loc.latest_status.our_tally }}</strong> · {% endif %}
-            {% if loc.latest_status.booth_open %}Booth open{% else %}Booth closed{% endif %}
-            · Updated {{ loc.latest_status.status_time|timesince }} ago
-          </small>
-        {% else %}
-          <small class="muted">No status update yet.</small>
+          <div class="update-time">Updated {{ loc.latest_status.status_time|timesince }} ago</div>
+          {% if loc.latest_status.logistical_issues %}
+            <p style="font-size:12px;color:#dc2626;margin-top:4px;">
+              <i class="fas fa-exclamation-circle fa-xs mr-1"></i>{{ loc.latest_status.logistical_issues }}
+            </p>
+          {% endif %}
         {% endif %}
-        {% if loc.contact_number %}<a href="tel:{{ loc.contact_number }}">{{ loc.contact_number }}</a>{% endif %}
-      </article>
-    {% empty %}
-      <p class="muted">No polling locations configured. Add them under Polling → Locations.</p>
+
+        {% if loc.contact_number %}
+          <a class="contact-btn" href="tel:{{ loc.contact_number }}">
+            <i class="fas fa-phone fa-xs"></i> {{ loc.contact_number }}
+          </a>
+        {% endif %}
+      </div>
+
+      {% if loc.latest_status and loc.latest_status.our_tally is not None %}
+      <div style="text-align:center;flex-shrink:0;">
+        <div class="tally-count">{{ loc.latest_status.our_tally }}</div>
+        <div style="font-size:11px;color:#7A6858;">votes</div>
+      </div>
+      {% endif %}
+    </div>
     {% endfor %}
-  </section>
+  </div>
+  {% else %}
+  <div class="empty-panel">
+    <i class="fas fa-ballot-check fa-2x mb-3" style="opacity:.3;"></i>
+    <h3 style="font-size:15px;font-weight:600;color:#6B7280;margin-bottom:6px;">No polling locations configured</h3>
+    <p style="font-size:13px;">Add polling locations under <a href="{% url 'polling' %}" style="color:#2AAA2A;">Polling → Locations</a> before polling day.</p>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Show last refresh time
+document.querySelector('.refresh-indicator span:last-child').textContent =
+  'Live · last refreshed ' + new Date().toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit', hour12:true});
+</script>
 {% endblock %}

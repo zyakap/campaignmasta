@@ -1,0 +1,9 @@
+# Android SDK location (auto-set by Android Studio)
+sdk.dir=/Users/yourname/Library/Android/sdk
+
+# CampaignMasta API base URL
+# Development (Android emulator connects to host machine):
+BASE_URL=http://10.0.2.2:8000/
+
+# Production:
+# BASE_URL=https://campaign.webmasta.com.pg/

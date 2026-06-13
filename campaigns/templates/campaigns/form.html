@@ -1,19 +1,114 @@
 {% extends "campaigns/base.html" %}
+{% block title %}{{ title }} — CampaignMasta{% endblock %}
+
+{% block extra_head %}
+<style>
+.form-page { max-width: 720px; margin: 0 auto; padding: 24px 20px 80px; }
+.form-page-head { margin-bottom: 20px; }
+.form-page-head .back-link { font-size: 12px; color: #7A6858; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; margin-bottom: 8px; }
+.form-page-head .back-link:hover { color: #2AAA2A; }
+.form-page-head h1 { font-size: 1.4rem; font-weight: 800; color: #1A0C0C; margin: 0; }
+.form-section { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,.06); margin-bottom: 16px; }
+.form-field { margin-bottom: 16px; }
+.form-field:last-child { margin-bottom: 0; }
+.form-field label { display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 5px; }
+.form-field label span.required { color: #dc2626; margin-left: 2px; }
+.form-field input[type="text"],
+.form-field input[type="email"],
+.form-field input[type="number"],
+.form-field input[type="tel"],
+.form-field input[type="date"],
+.form-field input[type="datetime-local"],
+.form-field input[type="time"],
+.form-field input[type="url"],
+.form-field input[type="password"],
+.form-field select,
+.form-field textarea {
+  display: block; width: 100%;
+  padding: 9px 12px; border: 1px solid #d1d5db;
+  border-radius: 8px; font-size: 14px; color: #111827;
+  background: #fff; transition: border-color .15s;
+  outline: none; box-sizing: border-box;
+}
+.form-field input:focus,
+.form-field select:focus,
+.form-field textarea:focus { border-color: #2AAA2A; box-shadow: 0 0 0 3px rgba(42,170,42,.1); }
+.form-field textarea { min-height: 90px; resize: vertical; }
+.form-field select { -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='%236b7280' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 30px; }
+.form-field input[type="checkbox"],
+.form-field input[type="radio"] { width: 16px; height: 16px; accent-color: #2AAA2A; margin-right: 6px; }
+.form-field .helptext { font-size: 12px; color: #6b7280; margin-top: 4px; }
+.form-field .field-errors { list-style: none; padding: 0; margin: 5px 0 0; }
+.form-field .field-errors li { font-size: 12px; color: #dc2626; background: #fef2f2; border: 1px solid #fecaca; border-radius: 5px; padding: 4px 8px; }
+.nonfield-errors { background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 10px 14px; margin-bottom: 16px; font-size: 13px; color: #dc2626; }
+.nonfield-errors ul { margin: 0; padding-left: 16px; }
+.form-actions { position: sticky; bottom: 0; background: rgba(245,242,236,.97); backdrop-filter: blur(8px); border-top: 1px solid #DDD0B8; padding: 12px 20px; margin: 0 -20px -80px; display: flex; gap: 10px; align-items: center; }
+.bool-row { display: flex; align-items: center; gap: 8px; padding: 4px 0; }
+.bool-row label { margin: 0; font-size: 14px; font-weight: 400; color: #374151; cursor: pointer; }
+.file-field { display: flex; align-items: center; gap: 10px; }
+.file-field input[type="file"] { font-size: 13px; }
+</style>
+{% endblock %}
+
 {% block content %}
-  <section class="page-head">
-    <a href="javascript:history.back()">Back</a>
+<div class="form-page">
+
+  <div class="form-page-head">
+    <a class="back-link" href="javascript:history.back()">
+      <i class="fas fa-arrow-left fa-xs"></i> Back
+    </a>
     <h1>{{ title }}</h1>
-  </section>
-  <form method="post" class="mobile-form">
+  </div>
+
+  {% if form.non_field_errors %}
+  <div class="nonfield-errors">
+    <strong>Please fix the following:</strong>
+    <ul>{% for e in form.non_field_errors %}<li>{{ e }}</li>{% endfor %}</ul>
+  </div>
+  {% endif %}
+
+  <form method="post" enctype="multipart/form-data" novalidate>
     {% csrf_token %}
-    {{ form.non_field_errors }}
-    {% for field in form %}
-      <label>
-        <span>{{ field.label }}</span>
-        {{ field }}
-        {% if field.errors %}<small class="field-error">{{ field.errors|striptags }}</small>{% endif %}
-      </label>
-    {% endfor %}
-    <button class="primary-btn sticky-submit" type="submit">{{ submit_label }}</button>
+    <div class="form-section">
+      {% for field in form %}
+        {% if field.field.widget.input_type == "checkbox" %}
+          <div class="form-field">
+            <div class="bool-row">
+              {{ field }}
+              <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            </div>
+            {% if field.help_text %}<p class="helptext">{{ field.help_text }}</p>{% endif %}
+            {% if field.errors %}<ul class="field-errors">{% for e in field.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+          </div>
+        {% elif field.field.widget.input_type == "file" %}
+          <div class="form-field">
+            <label for="{{ field.id_for_label }}">
+              {{ field.label }}{% if field.field.required %}<span class="required">*</span>{% endif %}
+            </label>
+            <div class="file-field">{{ field }}</div>
+            {% if field.help_text %}<p class="helptext">{{ field.help_text }}</p>{% endif %}
+            {% if field.errors %}<ul class="field-errors">{% for e in field.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+          </div>
+        {% else %}
+          <div class="form-field">
+            <label for="{{ field.id_for_label }}">
+              {{ field.label }}{% if field.field.required %}<span class="required">*</span>{% endif %}
+            </label>
+            {{ field }}
+            {% if field.help_text %}<p class="helptext">{{ field.help_text }}</p>{% endif %}
+            {% if field.errors %}<ul class="field-errors">{% for e in field.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+
+    <div class="form-actions">
+      <button class="primary-btn" type="submit">
+        <i class="fas fa-check fa-sm mr-1"></i>{{ submit_label }}
+      </button>
+      <a class="secondary-btn" href="javascript:history.back()">Cancel</a>
+    </div>
   </form>
+
+</div>
 {% endblock %}

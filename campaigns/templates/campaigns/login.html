@@ -3,102 +3,112 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Login | CampaignMasta</title>
+  <title>Sign In — CampaignMasta</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: 'Inter', sans-serif;
-      background: #f6f7f3;
+      background: linear-gradient(135deg, #1A0808 0%, #2C1A1A 40%, #1A0C0C 100%);
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
+      padding: 20px;
     }
-    .auth-wrap {
-      width: 100%;
-      max-width: 400px;
-      padding: 24px 16px;
-    }
-    .brand {
-      text-align: center;
-      margin-bottom: 28px;
-    }
+    .auth-wrap { width: 100%; max-width: 420px; }
+    .brand { text-align: center; margin-bottom: 32px; }
     .brand-logo {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 48px; height: 48px;
-      background: #116149;
-      border-radius: 12px;
-      color: #fff;
-      font-size: 16px;
-      font-weight: 900;
-      margin-bottom: 12px;
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 60px; height: 60px; background: #2AAA2A;
+      border-radius: 16px; color: #fff; font-size: 20px;
+      font-weight: 900; margin-bottom: 16px;
+      box-shadow: 0 4px 20px rgba(42,170,42,.35);
     }
-    .brand p { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: #63706b; font-weight: 600; margin-bottom: 4px; }
-    .brand h1 { font-size: 1.4rem; font-weight: 800; color: #16211d; }
+    .brand p { font-size: 11px; text-transform: uppercase; letter-spacing: .12em; color: rgba(255,255,255,.45); font-weight: 600; margin-bottom: 6px; }
+    .brand h1 { font-size: 1.5rem; font-weight: 800; color: #fff; letter-spacing: -.01em; }
+    .brand h1 span { color: #2AAA2A; }
     .form-card {
-      background: #fff;
-      border-radius: 12px;
-      padding: 28px 24px;
-      box-shadow: 0 2px 8px rgba(0,0,0,.07);
+      background: #fff; border-radius: 16px;
+      padding: 32px 28px;
+      box-shadow: 0 24px 60px rgba(0,0,0,.4);
     }
-    .form-card label {
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-      font-size: 13px;
-      font-weight: 500;
-      color: #374151;
-      margin-bottom: 14px;
+    .form-card h2 { font-size: 1.1rem; font-weight: 700; color: #1A0C0C; margin-bottom: 22px; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 5px; }
+    .form-group input {
+      display: block; width: 100%;
+      border: 1.5px solid #d1d5db; border-radius: 9px;
+      padding: 10px 12px; font-size: 14px; font-family: inherit;
+      color: #111827; outline: none; transition: border-color .15s;
     }
-    .form-card input {
-      border: 1px solid #d1d5db;
-      border-radius: 7px;
-      padding: 9px 12px;
-      font-size: 14px;
-      width: 100%;
-      font-family: inherit;
-      outline: none;
-      transition: border-color .15s;
-    }
-    .form-card input:focus { border-color: #116149; }
-    .errorlist { list-style: none; color: #991b1b; font-size: 12px; margin-top: 4px; }
+    .form-group input:focus { border-color: #2AAA2A; box-shadow: 0 0 0 3px rgba(42,170,42,.12); }
+    .errorlist { list-style: none; padding: 0; margin-top: 5px; }
+    .errorlist li { font-size: 12px; color: #dc2626; }
+    .nonfield-errors { background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 10px 14px; margin-bottom: 16px; font-size: 13px; color: #dc2626; }
     .primary-btn {
-      width: 100%;
-      background: #116149;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      padding: 11px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      font-family: inherit;
-      margin-top: 4px;
+      display: block; width: 100%;
+      background: #2AAA2A; color: #fff; border: none;
+      border-radius: 9px; padding: 12px; font-size: 15px;
+      font-weight: 700; cursor: pointer; font-family: inherit;
+      margin-top: 6px; transition: background .15s;
+      letter-spacing: -.01em;
     }
-    .primary-btn:hover { background: #0b4635; }
+    .primary-btn:hover { background: #1A721A; }
+    .back-link { display: block; text-align: center; margin-top: 20px; font-size: 13px; color: rgba(255,255,255,.5); text-decoration: none; }
+    .back-link:hover { color: rgba(255,255,255,.8); }
+    .footer-note { margin-top: 20px; text-align: center; font-size: 12px; color: rgba(255,255,255,.3); }
   </style>
 </head>
 <body>
   <div class="auth-wrap">
     <div class="brand">
       <div class="brand-logo">CM</div>
-      <p>PNG Campaign CRM</p>
-      <h1>Sign in to command centre</h1>
+      <p>Papua New Guinea &middot; Campaign Platform</p>
+      <h1>Campaign<span>Masta</span></h1>
     </div>
-    <form method="post" class="form-card">
-      {% csrf_token %}
-      {{ form.non_field_errors }}
-      <label>Username {{ form.username }}</label>
-      <label>Password {{ form.password }}</label>
-      <button class="primary-btn" type="submit">Sign in</button>
-    </form>
-    <div style="text-align:center;margin-top:20px;">
-      <a href="/" style="font-size:12px;color:#63706b;text-decoration:none;">← Back to CampaignMasta website</a>
+
+    <div class="form-card">
+      <h2><i class="fas fa-lock fa-sm mr-2 text-muted"></i>Sign in to your campaign</h2>
+
+      {% if form.non_field_errors %}
+      <div class="nonfield-errors">
+        {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+      </div>
+      {% endif %}
+
+      <form method="post" autocomplete="on">
+        {% csrf_token %}
+        <div class="form-group">
+          <label for="id_username">Username</label>
+          <input
+            type="text" name="username" id="id_username"
+            value="{{ form.username.value|default:'' }}"
+            placeholder="Enter your username"
+            autocomplete="username"
+            autofocus
+          >
+          {% if form.username.errors %}<ul class="errorlist">{% for e in form.username.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+        </div>
+        <div class="form-group">
+          <label for="id_password">Password</label>
+          <input
+            type="password" name="password" id="id_password"
+            placeholder="Enter your password"
+            autocomplete="current-password"
+          >
+          {% if form.password.errors %}<ul class="errorlist">{% for e in form.password.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+        </div>
+        <button class="primary-btn" type="submit">
+          <i class="fas fa-sign-in-alt fa-sm mr-1"></i> Sign in
+        </button>
+      </form>
     </div>
+
+    <a class="back-link" href="/"><i class="fas fa-arrow-left fa-xs mr-1"></i> Back to CampaignMasta website</a>
+    <p class="footer-note">Campaign data is encrypted and access is logged.</p>
   </div>
 </body>
 </html>

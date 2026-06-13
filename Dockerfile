@@ -1,23 +1,31 @@
 FROM python:3.11-slim
 
-ENV PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1 \
-    PIPENV_VENV_IN_PROJECT=1
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq-dev \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y \
-    gcc \
-    pkg-config \
-    && rm -rf /var/lib/apt/lists/*
+# Install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-RUN pip install --no-cache-dir pipenv
-
-COPY Pipfile* ./
-RUN pipenv install --skip-lock || pipenv install --deploy
-
+# Copy project
 COPY . .
 
-RUN mkdir -p /app/media /app/staticfiles /app/static_files /app/logs /app/uploads
+# Create necessary directories
+RUN mkdir -p logs media staticfiles
 
-EXPOSE 8031
+# Collect static files (skip if no db)
+RUN python manage.py collectstatic --noinput --settings=campaignmasta.settings 2>/dev/null || true
+
+EXPOSE 8000
+
+CMD ["gunicorn", "campaignmasta.wsgi:application", \
+     "--bind", "0.0.0.0:8000", \
+     "--workers", "3", \
+     "--timeout", "120", \
+     "--access-logfile", "-", \
+     "--error-logfile", "-"]

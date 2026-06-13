@@ -6,3 +6,14 @@ media/
 staticfiles/
 .DS_Store
 .env
+logs/
+*.log
+local.properties
+Pipfile.lock
+node_modules/
+.gradle/
+android/app/build/
+android/build/
+android/local.properties
+*.jks
+*.keystore
