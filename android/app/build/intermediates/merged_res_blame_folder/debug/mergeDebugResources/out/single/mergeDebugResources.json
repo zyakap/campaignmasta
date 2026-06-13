@@ -1,18 +1,22 @@
 [
     {
-        "merged": "com.campaignmasta.app-debug-68:/drawable_ic_launcher_foreground.xml.flat",
-        "source": "com.campaignmasta.app-main-70:/drawable/ic_launcher_foreground.xml"
+        "merged": "/Users/zyakap/.gradle/daemon/8.7/com.campaignmasta.app-debug-68:/mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "/Users/zyakap/.gradle/daemon/8.7/com.campaignmasta.app-main-70:/mipmap-anydpi-v26/ic_launcher_round.xml"
     },
     {
-        "merged": "com.campaignmasta.app-debug-68:/mipmap-anydpi-v26_ic_launcher_round.xml.flat",
-        "source": "com.campaignmasta.app-main-70:/mipmap-anydpi-v26/ic_launcher_round.xml"
+        "merged": "/Users/zyakap/.gradle/daemon/8.7/com.campaignmasta.app-debug-68:/mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "/Users/zyakap/.gradle/daemon/8.7/com.campaignmasta.app-main-70:/mipmap-anydpi-v26/ic_launcher.xml"
     },
     {
-        "merged": "com.campaignmasta.app-debug-68:/drawable_ic_launcher_background.xml.flat",
-        "source": "com.campaignmasta.app-main-70:/drawable/ic_launcher_background.xml"
+        "merged": "/Users/zyakap/.gradle/daemon/8.7/com.campaignmasta.app-debug-68:/drawable_ic_launcher_background.xml.flat",
+        "source": "/Users/zyakap/.gradle/daemon/8.7/com.campaignmasta.app-main-70:/drawable/ic_launcher_background.xml"
     },
     {
-        "merged": "com.campaignmasta.app-debug-68:/mipmap-anydpi-v26_ic_launcher.xml.flat",
-        "source": "com.campaignmasta.app-main-70:/mipmap-anydpi-v26/ic_launcher.xml"
+        "merged": "/Users/zyakap/.gradle/daemon/8.7/com.campaignmasta.app-debug-68:/drawable_ic_launcher_foreground.xml.flat",
+        "source": "/Users/zyakap/.gradle/daemon/8.7/com.campaignmasta.app-main-70:/drawable/ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "com.campaignmasta.app-debug-68:/xml_network_security_config.xml.flat",
+        "source": "com.campaignmasta.app-main-70:/xml/network_security_config.xml"
     }
 ]

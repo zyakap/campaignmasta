@@ -19,3 +19,4 @@ string supporters_title
 string sync_pending
 string ward_briefs_title
 style Theme.CampaignMasta
+xml network_security_config

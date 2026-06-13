@@ -445,22 +445,22 @@ public final class DaggerCampaignMastaApp_HiltComponents_SingletonC {
 
     @IdentifierNameString
     private static final class LazyClassKeyProvider {
-      static String com_campaignmasta_ui_screens_calls_CallViewModel = "com.campaignmasta.ui.screens.calls.CallViewModel";
+      static String com_campaignmasta_ui_screens_dashboard_DashboardViewModel = "com.campaignmasta.ui.screens.dashboard.DashboardViewModel";
 
       static String com_campaignmasta_ui_screens_supporters_SupporterViewModel = "com.campaignmasta.ui.screens.supporters.SupporterViewModel";
 
       static String com_campaignmasta_ui_screens_wards_WardViewModel = "com.campaignmasta.ui.screens.wards.WardViewModel";
 
+      static String com_campaignmasta_ui_screens_calls_CallViewModel = "com.campaignmasta.ui.screens.calls.CallViewModel";
+
+      static String com_campaignmasta_ui_screens_messages_MessageViewModel = "com.campaignmasta.ui.screens.messages.MessageViewModel";
+
       static String com_campaignmasta_ui_screens_polling_PollingViewModel = "com.campaignmasta.ui.screens.polling.PollingViewModel";
 
       static String com_campaignmasta_ui_screens_auth_LoginViewModel = "com.campaignmasta.ui.screens.auth.LoginViewModel";
 
-      static String com_campaignmasta_ui_screens_dashboard_DashboardViewModel = "com.campaignmasta.ui.screens.dashboard.DashboardViewModel";
-
-      static String com_campaignmasta_ui_screens_messages_MessageViewModel = "com.campaignmasta.ui.screens.messages.MessageViewModel";
-
       @KeepFieldType
-      CallViewModel com_campaignmasta_ui_screens_calls_CallViewModel2;
+      DashboardViewModel com_campaignmasta_ui_screens_dashboard_DashboardViewModel2;
 
       @KeepFieldType
       SupporterViewModel com_campaignmasta_ui_screens_supporters_SupporterViewModel2;
@@ -469,16 +469,16 @@ public final class DaggerCampaignMastaApp_HiltComponents_SingletonC {
       WardViewModel com_campaignmasta_ui_screens_wards_WardViewModel2;
 
       @KeepFieldType
+      CallViewModel com_campaignmasta_ui_screens_calls_CallViewModel2;
+
+      @KeepFieldType
+      MessageViewModel com_campaignmasta_ui_screens_messages_MessageViewModel2;
+
+      @KeepFieldType
       PollingViewModel com_campaignmasta_ui_screens_polling_PollingViewModel2;
 
       @KeepFieldType
       LoginViewModel com_campaignmasta_ui_screens_auth_LoginViewModel2;
-
-      @KeepFieldType
-      DashboardViewModel com_campaignmasta_ui_screens_dashboard_DashboardViewModel2;
-
-      @KeepFieldType
-      MessageViewModel com_campaignmasta_ui_screens_messages_MessageViewModel2;
     }
   }
 
@@ -537,40 +537,40 @@ public final class DaggerCampaignMastaApp_HiltComponents_SingletonC {
 
     @IdentifierNameString
     private static final class LazyClassKeyProvider {
-      static String com_campaignmasta_ui_screens_supporters_SupporterViewModel = "com.campaignmasta.ui.screens.supporters.SupporterViewModel";
-
       static String com_campaignmasta_ui_screens_dashboard_DashboardViewModel = "com.campaignmasta.ui.screens.dashboard.DashboardViewModel";
-
-      static String com_campaignmasta_ui_screens_auth_LoginViewModel = "com.campaignmasta.ui.screens.auth.LoginViewModel";
 
       static String com_campaignmasta_ui_screens_calls_CallViewModel = "com.campaignmasta.ui.screens.calls.CallViewModel";
 
-      static String com_campaignmasta_ui_screens_messages_MessageViewModel = "com.campaignmasta.ui.screens.messages.MessageViewModel";
-
-      static String com_campaignmasta_ui_screens_wards_WardViewModel = "com.campaignmasta.ui.screens.wards.WardViewModel";
+      static String com_campaignmasta_ui_screens_supporters_SupporterViewModel = "com.campaignmasta.ui.screens.supporters.SupporterViewModel";
 
       static String com_campaignmasta_ui_screens_polling_PollingViewModel = "com.campaignmasta.ui.screens.polling.PollingViewModel";
 
-      @KeepFieldType
-      SupporterViewModel com_campaignmasta_ui_screens_supporters_SupporterViewModel2;
+      static String com_campaignmasta_ui_screens_auth_LoginViewModel = "com.campaignmasta.ui.screens.auth.LoginViewModel";
+
+      static String com_campaignmasta_ui_screens_wards_WardViewModel = "com.campaignmasta.ui.screens.wards.WardViewModel";
+
+      static String com_campaignmasta_ui_screens_messages_MessageViewModel = "com.campaignmasta.ui.screens.messages.MessageViewModel";
 
       @KeepFieldType
       DashboardViewModel com_campaignmasta_ui_screens_dashboard_DashboardViewModel2;
 
       @KeepFieldType
-      LoginViewModel com_campaignmasta_ui_screens_auth_LoginViewModel2;
-
-      @KeepFieldType
       CallViewModel com_campaignmasta_ui_screens_calls_CallViewModel2;
 
       @KeepFieldType
-      MessageViewModel com_campaignmasta_ui_screens_messages_MessageViewModel2;
+      SupporterViewModel com_campaignmasta_ui_screens_supporters_SupporterViewModel2;
+
+      @KeepFieldType
+      PollingViewModel com_campaignmasta_ui_screens_polling_PollingViewModel2;
+
+      @KeepFieldType
+      LoginViewModel com_campaignmasta_ui_screens_auth_LoginViewModel2;
 
       @KeepFieldType
       WardViewModel com_campaignmasta_ui_screens_wards_WardViewModel2;
 
       @KeepFieldType
-      PollingViewModel com_campaignmasta_ui_screens_polling_PollingViewModel2;
+      MessageViewModel com_campaignmasta_ui_screens_messages_MessageViewModel2;
     }
 
     private static final class SwitchingProvider<T> implements Provider<T> {
@@ -790,6 +790,11 @@ public final class DaggerCampaignMastaApp_HiltComponents_SingletonC {
     @Override
     public void injectCampaignMastaApp(CampaignMastaApp campaignMastaApp) {
       injectCampaignMastaApp2(campaignMastaApp);
+    }
+
+    @Override
+    public UserPreferences userPreferences() {
+      return provideUserPreferencesProvider.get();
     }
 
     @Override

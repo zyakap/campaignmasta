@@ -24,6 +24,7 @@ import hilt_aggregated_deps._com_campaignmasta_di_AppModule;
 import hilt_aggregated_deps._com_campaignmasta_di_DatabaseModule;
 import hilt_aggregated_deps._com_campaignmasta_di_NetworkModule;
 import hilt_aggregated_deps._com_campaignmasta_sync_SyncWorker_HiltModule;
+import hilt_aggregated_deps._com_campaignmasta_ui_navigation_NavGraphEntryPoint;
 import hilt_aggregated_deps._com_campaignmasta_ui_screens_auth_LoginViewModel_HiltModules_BindsModule;
 import hilt_aggregated_deps._com_campaignmasta_ui_screens_auth_LoginViewModel_HiltModules_KeyModule;
 import hilt_aggregated_deps._com_campaignmasta_ui_screens_calls_CallViewModel_HiltModules_BindsModule;
@@ -85,6 +86,7 @@ import hilt_aggregated_deps._dagger_hilt_android_internal_modules_HiltWrapper_Ac
         _com_campaignmasta_di_DatabaseModule.class,
         _com_campaignmasta_di_NetworkModule.class,
         _com_campaignmasta_sync_SyncWorker_HiltModule.class,
+        _com_campaignmasta_ui_navigation_NavGraphEntryPoint.class,
         _com_campaignmasta_ui_screens_auth_LoginViewModel_HiltModules_BindsModule.class,
         _com_campaignmasta_ui_screens_auth_LoginViewModel_HiltModules_KeyModule.class,
         _com_campaignmasta_ui_screens_calls_CallViewModel_HiltModules_BindsModule.class,

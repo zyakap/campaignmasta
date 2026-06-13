@@ -170,8 +170,8 @@ MERGED from [androidx.startup:startup-runtime:1.1.1] /Users/zyakap/.gradle/cache
 		ADDED from /Users/zyakap/PROJECTS/campaignmasta/android/app/src/main/AndroidManifest.xml:13:9-35
 	android:theme
 		ADDED from /Users/zyakap/PROJECTS/campaignmasta/android/app/src/main/AndroidManifest.xml:18:9-51
-	android:usesCleartextTraffic
-		ADDED from /Users/zyakap/PROJECTS/campaignmasta/android/app/src/main/AndroidManifest.xml:19:9-44
+	android:networkSecurityConfig
+		ADDED from /Users/zyakap/PROJECTS/campaignmasta/android/app/src/main/AndroidManifest.xml:19:9-69
 	android:name
 		ADDED from /Users/zyakap/PROJECTS/campaignmasta/android/app/src/main/AndroidManifest.xml:12:9-41
 activity#com.campaignmasta.MainActivity
