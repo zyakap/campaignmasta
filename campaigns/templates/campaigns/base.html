@@ -110,20 +110,30 @@
     .eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: #BEA020; font-weight: 600; margin: 0; }
     .muted { color: #7A6858; font-size: 13px; padding: 12px 16px; }
     .quick-actions { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px 20px 4px; }
-    .primary-btn { background: #2AAA2A; color: #fff; border: none; border-radius: 7px; padding: 8px 16px; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block; }
+    .primary-btn { background: #2AAA2A; color: #fff; border: none; border-radius: 7px; padding: 8px 16px; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; min-height: 44px; }
     .primary-btn:hover { background: #1A721A; color: #fff; text-decoration: none; }
-    .secondary-btn { background: #fff; color: #1A0C0C; border: 1px solid #DDD0B8; border-radius: 7px; padding: 8px 14px; font-size: 13px; font-weight: 500; cursor: pointer; text-decoration: none; display: inline-block; }
+    .secondary-btn { background: #fff; color: #1A0C0C; border: 1px solid #DDD0B8; border-radius: 7px; padding: 8px 14px; font-size: 13px; font-weight: 500; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; min-height: 44px; }
     .secondary-btn:hover { background: #F5F2EC; text-decoration: none; color: #1A0C0C; }
 
     /* ── Form card ── */
     .form-card { background: #fff; border-radius: 10px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
     .form-card label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 500; color: #3C1A1A; margin-bottom: 12px; }
     .form-card input, .form-card select, .form-card textarea {
-      border: 1px solid #d1d5db; border-radius: 6px; padding: 8px 10px;
-      font-size: 14px; width: 100%;
+      border: 1px solid #d1d5db; border-radius: 6px; padding: 10px 12px;
+      font-size: 16px; width: 100%; min-height: 44px;
     }
+    .form-card textarea { min-height: 90px; }
     .auth-panel { max-width: 420px; margin: 40px auto; padding: 0 16px; }
     .auth-panel h1 { font-size: 1.5rem; font-weight: 800; color: #1A0C0C; margin: 8px 0 20px; }
+
+    /* ── Mobile overrides ── */
+    @media (max-width: 767px) {
+      .dropdown-menu { max-width: calc(100vw - 24px) !important; min-width: 0 !important; }
+      .nav-link { min-height: 44px; display: flex !important; align-items: center; }
+      .dashboard-head h1 { font-size: 1.2rem; }
+      .content-grid { grid-template-columns: 1fr !important; }
+      .metric-grid { grid-template-columns: repeat(2, 1fr) !important; }
+    }
   </style>
   {% block extra_head %}{% endblock %}
 </head>

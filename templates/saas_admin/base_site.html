@@ -366,6 +366,63 @@ a.related-widget-wrapper-link{display:none!important;}
 .nowrap{white-space:nowrap}
 #content-main{width:100%}
 .paginator~p{color:var(--n500);font-size:13px;padding:16px 0}
+
+/* ── MOBILE RESPONSIVE ── */
+.sa-menu-toggle{display:none}
+.sa-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:199}
+
+@media(max-width:767px){
+  /* Sidebar off-canvas */
+  .sa-sidebar{transform:translateX(-252px);transition:transform .25s ease;z-index:200}
+  .sa-sidebar.open{transform:translateX(0)}
+  .sa-overlay.open{display:block}
+  .sa-main{margin-left:0}
+
+  /* Mobile topbar toggle button */
+  .sa-menu-toggle{
+    display:flex;align-items:center;justify-content:center;
+    width:44px;height:44px;border-radius:var(--r6);
+    border:1px solid var(--n200);background:none;color:var(--n700);
+    cursor:pointer;font-size:15px;flex-shrink:0;
+  }
+
+  /* Larger tap targets */
+  .sa-icon-btn{width:44px;height:44px}
+  .sa-user-nm{display:none}
+  .sa-nlink{padding:10px 16px;min-height:44px}
+  .sa-nsublink{padding:10px 16px 10px 40px;min-height:40px;display:block}
+
+  /* Topbar spacing */
+  .sa-topbar{padding:0 10px;gap:8px}
+  .sa-crumb{font-size:11.5px;gap:4px}
+
+  /* Content padding */
+  .sa-content{padding:14px 12px}
+
+  /* Forms: stack label + input vertically, larger inputs */
+  .field-inner{flex-direction:column;gap:6px}
+  .field-inner>label{min-width:0;max-width:none;padding-top:0}
+  input[type=text],input[type=email],input[type=password],input[type=number],
+  input[type=url],input[type=date],input[type=datetime-local],input[type=time],
+  input[type=search],select{height:44px;font-size:16px}
+  .vLargeTextField,.vTextField{min-width:0;width:100%}
+
+  /* Tables: horizontal scroll */
+  #result_list{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%}
+  .module table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
+
+  /* Filter sidebar: stack below content on mobile */
+  #changelist-filter{float:none;width:auto;margin-left:0;margin-bottom:12px;border-radius:var(--r10)}
+
+  /* Submit row buttons: taller */
+  .submit-row input[type=submit],.submit-row button[type=submit]{height:44px}
+  .submit-row a.deletelink{height:44px}
+
+  /* Toolbar: wrap tightly */
+  #toolbar{padding:10px 12px;gap:8px}
+  #searchbar{min-width:0;width:100%;flex:1}
+  .actions{padding:8px 12px}
+}
 </style>
 </head>
 <body>
@@ -488,9 +545,12 @@ a.related-widget-wrapper-link{display:none!important;}
   </div>
 </aside>
 
+<div class="sa-overlay" id="sa-overlay"></div>
+
 <!-- ═══ MAIN ═══ -->
 <div class="sa-main">
   <header class="sa-topbar">
+    <button class="sa-menu-toggle" id="sa-menu-toggle" aria-label="Toggle menu"><i class="fas fa-bars"></i></button>
     <div class="sa-crumb">
       <a href="{% url 'saas_admin:index' %}">Platform</a>
       {% block breadcrumbs %}{% endblock %}
@@ -551,6 +611,22 @@ a.related-widget-wrapper-link{display:none!important;}
 </div>
 
 <script>
+(function(){
+  var toggle=document.getElementById('sa-menu-toggle');
+  var sidebar=document.querySelector('.sa-sidebar');
+  var overlay=document.getElementById('sa-overlay');
+  if(toggle){
+    toggle.addEventListener('click',function(){
+      sidebar.classList.toggle('open');
+      overlay.classList.toggle('open');
+    });
+    overlay.addEventListener('click',function(){
+      sidebar.classList.remove('open');
+      overlay.classList.remove('open');
+    });
+  }
+})();
+
 function toggleG(a){
   const grp=a.closest('.sa-ngrp'),sub=grp.querySelector('.sa-nsub'),isOpen=sub.classList.contains('open');
   document.querySelectorAll('.sa-nsub.open').forEach(s=>s.classList.remove('open'));

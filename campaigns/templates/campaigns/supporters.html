@@ -4,16 +4,35 @@
     <div><p class="eyebrow">Supporter Registry</p><h1>People</h1></div>
     <a class="primary-btn" href="{% url 'supporter_create' %}">Add</a>
   </section>
-  <form class="searchbar" method="get"><input name="q" value="{{ query }}" placeholder="Search name, phone, village"></form>
-  <section class="record-list">
-    {% for person in records %}
-      <article class="record-card">
-        <div><strong>{{ person.full_name }}</strong><span>{{ person.get_support_status_display }}</span></div>
-        <p>{{ person.phone|default:"No phone" }}{% if person.village %} · {{ person.village }}{% endif %}</p>
-        {% if person.main_issue %}<small>{{ person.main_issue }}</small>{% endif %}
-      </article>
-    {% empty %}
-      <p class="muted">No supporter records yet.</p>
-    {% endfor %}
-  </section>
+  <form class="searchbar" method="get">
+    <input name="q" value="{{ query }}" placeholder="Search name, phone, village">
+  </form>
+
+  <div class="dark-panel">
+    <p class="dark-panel-eyebrow">Supporter Overview</p>
+    <div class="dark-record-list">
+      {% for person in records %}
+        <div class="dark-card">
+          <div class="dark-card-icon"><i class="fas fa-user"></i></div>
+          <div class="dark-card-body">
+            <p class="dark-card-title">
+              {{ person.full_name }}{% if person.ward %} &mdash; {{ person.ward }}{% endif %}
+            </p>
+            <p class="dark-card-sub">
+              {% if person.clan %}{{ person.clan }}{% if person.occupation %} &middot; {% endif %}{% endif %}{% if person.occupation %}{{ person.occupation }}{% elif person.gender %}{{ person.get_gender_display }}{% endif %}{% if not person.clan and not person.occupation and not person.gender %}No details recorded{% endif %}
+            </p>
+          </div>
+          {% if person.support_status == 'STRONG' %}
+            <span class="dark-badge dark-badge-strong">Strong</span>
+          {% elif person.support_status == 'LEANING' %}
+            <span class="dark-badge dark-badge-leaning">Leaning</span>
+          {% else %}
+            <span class="dark-badge dark-badge-undecided">{{ person.get_support_status_display }}</span>
+          {% endif %}
+        </div>
+      {% empty %}
+        <p style="color:rgba(255,255,255,.5);padding:24px 4px;text-align:center;">No supporter records yet.</p>
+      {% endfor %}
+    </div>
+  </div>
 {% endblock %}

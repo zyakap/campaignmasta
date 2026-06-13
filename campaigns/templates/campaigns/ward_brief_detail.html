@@ -9,43 +9,113 @@
     </div>
   </section>
 
+  <!-- ── At-a-glance dark panel ── -->
+  <div class="dark-panel">
+    <p class="dark-panel-eyebrow">Ward Brief &mdash; {{ profile.ward }}</p>
+    <div class="dark-record-list">
+
+      {% if profile.population_estimate %}
+      <div class="dark-card">
+        <div class="dark-card-icon"><i class="fas fa-people-group"></i></div>
+        <div class="dark-card-body">
+          <p class="dark-card-title">Population: ~{{ profile.population_estimate|floatformat:"0" }}</p>
+          <p class="dark-card-sub">
+            {% if profile.key_clans %}Key clans: {{ profile.key_clans|truncatechars:60 }}{% else %}Est. voting population{% if profile.estimated_voting_population %}: {{ profile.estimated_voting_population }}{% endif %}{% endif %}
+          </p>
+        </div>
+        {% if profile.support_strength == 'STRONG' %}
+          <span class="dark-badge dark-badge-strong">Strong</span>
+        {% elif profile.support_strength == 'MEDIUM' %}
+          <span class="dark-badge dark-badge-medium">Medium</span>
+        {% elif profile.support_strength == 'WEAK' %}
+          <span class="dark-badge dark-badge-weak">Weak</span>
+        {% endif %}
+      </div>
+      {% endif %}
+
+      {% if profile.main_community_issues %}
+      <div class="dark-card">
+        <div class="dark-card-icon"><i class="fas fa-triangle-exclamation"></i></div>
+        <div class="dark-card-body">
+          <p class="dark-card-title">Top Issue{% if payload.issues %}: {{ payload.issues.0.0 }}{% endif %}</p>
+          <p class="dark-card-sub">{{ profile.main_community_issues|truncatechars:80 }}</p>
+        </div>
+        {% if profile.security_concerns %}
+          <span class="dark-badge dark-badge-urgent">Urgent</span>
+        {% endif %}
+      </div>
+      {% endif %}
+
+      {% if profile.notes_for_candidate %}
+      <div class="dark-card">
+        <div class="dark-card-icon"><i class="fas fa-wand-magic-sparkles"></i></div>
+        <div class="dark-card-body">
+          <p class="dark-card-title">Candidate Talking Points</p>
+          <p class="dark-card-sub">{{ profile.notes_for_candidate|truncatechars:80 }}</p>
+        </div>
+        <span class="dark-badge dark-badge-ready">Ready</span>
+      </div>
+      {% endif %}
+
+      {% if payload.supporter_count is not None %}
+      <div class="dark-card">
+        <div class="dark-card-icon"><i class="fas fa-users"></i></div>
+        <div class="dark-card-body">
+          <p class="dark-card-title">{{ payload.supporter_count }} Supporter{{ payload.supporter_count|pluralize }}</p>
+          <p class="dark-card-sub">{{ payload.undecided_count }} undecided &middot; {% if profile.councillor_name %}Councillor: {{ profile.councillor_name }}{% else %}No councillor recorded{% endif %}</p>
+        </div>
+      </div>
+      {% endif %}
+
+    </div>
+  </div>
+
+  <!-- ── Full detail panels ── -->
   <section class="content-grid">
     <div class="panel">
       <div class="panel-title"><h2>Local Context</h2></div>
-      <p>{{ profile.main_community_issues|default:"No issues recorded." }}</p>
-      <p class="muted">{{ profile.important_landmarks|default:"No landmarks recorded." }}</p>
-      {% if profile.councillor_name %}<p><strong>Councillor:</strong> {{ profile.councillor_name }}</p>{% endif %}
-      {% if profile.key_clans %}<p><strong>Key clans:</strong> {{ profile.key_clans }}</p>{% endif %}
-      {% if profile.security_concerns %}<p class="muted"><strong>Security:</strong> {{ profile.security_concerns }}</p>{% endif %}
+      <div style="padding:10px 16px 14px">
+        <p>{{ profile.main_community_issues|default:"No issues recorded." }}</p>
+        {% if profile.important_landmarks %}<p class="muted" style="margin-top:8px">{{ profile.important_landmarks }}</p>{% endif %}
+        {% if profile.councillor_name %}<p style="margin-top:8px"><strong>Councillor:</strong> {{ profile.councillor_name }}</p>{% endif %}
+        {% if profile.key_clans %}<p style="margin-top:8px"><strong>Key clans:</strong> {{ profile.key_clans }}</p>{% endif %}
+        {% if profile.security_concerns %}<p class="muted" style="margin-top:8px"><strong>Security:</strong> {{ profile.security_concerns }}</p>{% endif %}
+      </div>
     </div>
 
     <div class="panel">
       <div class="panel-title"><h2>Talking Points</h2></div>
-      <p>{{ profile.notes_for_candidate|default:"Listen first, confirm local priorities, and keep commitments specific." }}</p>
-      <p class="muted">Supporters: {{ payload.supporter_count }} · Undecided: {{ payload.undecided_count }}</p>
-      {% if payload.promises %}
-        <p class="muted">Open promises:
-          {% for title, date in payload.promises %}{{ title }}{% if not forloop.last %}, {% endif %}{% endfor %}
-        </p>
-      {% endif %}
+      <div style="padding:10px 16px 14px">
+        <p>{{ profile.notes_for_candidate|default:"Listen first, confirm local priorities, and keep commitments specific." }}</p>
+        <p class="muted" style="margin-top:8px">Supporters: {{ payload.supporter_count }} &middot; Undecided: {{ payload.undecided_count }}</p>
+        {% if payload.promises %}
+          <p class="muted" style="margin-top:8px">Open promises:
+            {% for title, date in payload.promises %}{{ title }}{% if not forloop.last %}, {% endif %}{% endfor %}
+          </p>
+        {% endif %}
+      </div>
     </div>
 
     {% if payload.influencers %}
-      <div class="panel">
-        <div class="panel-title"><h2>Key People to Acknowledge</h2></div>
+    <div class="panel">
+      <div class="panel-title"><h2>Key People to Acknowledge</h2></div>
+      <div style="padding:6px 16px 14px">
         {% for name, role in payload.influencers %}
-          <p><strong>{{ name }}</strong>{% if role %} · {{ role }}{% endif %}</p>
+          <p style="padding:6px 0;border-bottom:1px solid var(--line)"><strong>{{ name }}</strong>{% if role %} &middot; {{ role }}{% endif %}</p>
         {% endfor %}
       </div>
+    </div>
     {% endif %}
 
     {% if payload.issues %}
-      <div class="panel">
-        <div class="panel-title"><h2>Current Issues</h2></div>
+    <div class="panel">
+      <div class="panel-title"><h2>Current Issues</h2></div>
+      <div style="padding:6px 16px 14px">
         {% for title, category, priority in payload.issues %}
-          <p>{{ title }} <span class="muted">{{ category }} · {{ priority }}</span></p>
+          <p style="padding:6px 0;border-bottom:1px solid var(--line)">{{ title }} <span class="muted">{{ category }} &middot; {{ priority }}</span></p>
         {% endfor %}
       </div>
+    </div>
     {% endif %}
   </section>
 {% endblock %}

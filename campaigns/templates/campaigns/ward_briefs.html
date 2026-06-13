@@ -3,15 +3,30 @@
   <section class="page-head">
     <div><p class="eyebrow">Ward Intelligence</p><h1>Ward Briefs</h1></div>
   </section>
-  <section class="record-list">
-    {% for ward in records %}
-      <article class="record-card">
-        <div><strong><a href="{% url 'ward_brief_detail' ward.id %}">{{ ward.ward }}</a></strong><span>{{ ward.get_support_strength_display }}</span></div>
-        <p>{{ ward.main_community_issues|default:"No issues recorded yet." }}</p>
-        {% if ward.notes_for_candidate %}<small>{{ ward.notes_for_candidate }}</small>{% endif %}
-      </article>
-    {% empty %}
-      <p class="muted">No ward profiles yet.</p>
-    {% endfor %}
-  </section>
+
+  <div class="dark-panel">
+    <p class="dark-panel-eyebrow">Ward Overview</p>
+    <div class="dark-record-list">
+      {% for ward in records %}
+        <a class="dark-card" href="{% url 'ward_brief_detail' ward.id %}">
+          <div class="dark-card-icon"><i class="fas fa-map-location-dot"></i></div>
+          <div class="dark-card-body">
+            <p class="dark-card-title">{{ ward.ward }}</p>
+            <p class="dark-card-sub">{{ ward.main_community_issues|truncatechars:60|default:"No issues recorded." }}</p>
+          </div>
+          {% if ward.support_strength == 'STRONG' %}
+            <span class="dark-badge dark-badge-strong">Strong</span>
+          {% elif ward.support_strength == 'MEDIUM' %}
+            <span class="dark-badge dark-badge-medium">Medium</span>
+          {% elif ward.support_strength == 'WEAK' %}
+            <span class="dark-badge dark-badge-weak">Weak</span>
+          {% else %}
+            <span class="dark-badge dark-badge-unknown">Unknown</span>
+          {% endif %}
+        </a>
+      {% empty %}
+        <p style="color:rgba(255,255,255,.5);padding:24px 4px;text-align:center;">No ward profiles yet.</p>
+      {% endfor %}
+    </div>
+  </div>
 {% endblock %}
