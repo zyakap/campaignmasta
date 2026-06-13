@@ -9,7 +9,14 @@
       <article class="record-card">
         <div><strong>{{ member.full_name }}</strong><span>{{ member.get_role_display }}</span></div>
         <p>{{ member.phone|default:"No phone" }}{% if member.ward %} · {{ member.ward }}{% elif member.llg %} · {{ member.llg }}{% elif member.district %} · {{ member.district }}{% endif %}</p>
-        <small>{% if member.is_active %}Active{% else %}Inactive{% endif %}{% if member.notes %} · {{ member.notes }}{% endif %}</small>
+        <small>
+          {% if member.is_active %}Active{% else %}Inactive{% endif %}
+          {% if member.user_id %} · <span class="tag tag-ok">📱 Mobile login: {{ member.user.username }}</span>{% else %} · <span class="tag tag-muted">No mobile login</span>{% endif %}
+          {% if member.notes %} · {{ member.notes }}{% endif %}
+        </small>
+        <div class="card-actions">
+          <a class="link-btn" href="{% url 'team_member_edit' member.id %}">Edit{% if not member.user_id %} / enable login{% endif %}</a>
+        </div>
       </article>
     {% empty %}
       <p class="muted">No team members yet.</p>

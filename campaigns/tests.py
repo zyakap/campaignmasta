@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.urls import reverse
 
-from .models import Candidate, District, Province, Role, TeamMember
+from .models import Candidate, CandidateType, District, Province, Role, TeamMember
 
 
 class CampaignRulesTests(TestCase):
@@ -34,6 +34,14 @@ class MobileViewsTests(TestCase):
         self.user = User.objects.create_user(username="tester", password="pass12345")
         self.province = Province.objects.create(name="Morobe")
         self.candidate = Candidate.objects.create(name="Morobe Governor", candidate_type="PROVINCIAL", province=self.province)
+        # The user must have an active team role in the candidate to see its dashboard.
+        TeamMember.objects.create(
+            candidate=self.candidate,
+            user=self.user,
+            full_name="Tester",
+            role=Role.CAMPAIGN_MANAGER,
+            province=self.province,
+        )
 
     def test_dashboard_requires_login(self):
         response = self.client.get(reverse("dashboard"))
@@ -44,3 +52,37 @@ class MobileViewsTests(TestCase):
         response = self.client.get(reverse("dashboard"))
         self.assertContains(response, "Morobe Governor")
         self.assertContains(response, "Register")
+
+
+class TenantIsolationTests(TestCase):
+    """A non-superuser must never resolve to a candidate they have no role in."""
+
+    def setUp(self):
+        User = get_user_model()
+        self.province = Province.objects.create(name="Enga")
+        self.candidate_a = Candidate.objects.create(name="Candidate A", candidate_type="PROVINCIAL", province=self.province)
+        self.candidate_b = Candidate.objects.create(name="Candidate B", candidate_type="PROVINCIAL", province=self.province)
+        self.outsider = User.objects.create_user(username="outsider", password="pass12345")
+        self.member_b_user = User.objects.create_user(username="member_b", password="pass12345")
+        TeamMember.objects.create(
+            candidate=self.candidate_b,
+            user=self.member_b_user,
+            full_name="Member B",
+            role=Role.WARD_COORDINATOR,
+            province=self.province,
+        )
+
+    def test_outsider_sees_no_candidate(self):
+        self.client.login(username="outsider", password="pass12345")
+        response = self.client.get(reverse("dashboard"))
+        self.assertNotContains(response, "Candidate A")
+        self.assertNotContains(response, "Candidate B")
+
+    def test_member_cannot_hijack_other_tenant_via_session(self):
+        self.client.login(username="member_b", password="pass12345")
+        session = self.client.session
+        session["candidate_id"] = self.candidate_a.id  # attempt to reach another tenant
+        session.save()
+        response = self.client.get(reverse("dashboard"))
+        self.assertContains(response, "Candidate B")
+        self.assertNotContains(response, "Candidate A")

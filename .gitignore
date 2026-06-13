@@ -1,8 +1,20 @@
 .venv/
 __pycache__/
+**/__pycache__/
 *.py[cod]
+*$py.class
 db.sqlite3
 media/
 staticfiles/
 .DS_Store
 .env
+
+# Excluded per project preference (deployed/managed out-of-band)
+Pipfile
+Pipfile.lock
+Dockerfile
+
+# Django migrations (the migrations package marker is kept so Django can
+# still recreate migrations on a fresh checkout)
+**/migrations/*.py
+!**/migrations/__init__.py

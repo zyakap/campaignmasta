@@ -72,6 +72,7 @@ def _updated_after_filter(queryset, request):
 class LoginView(APIView):
     permission_classes = [AllowAny]
     authentication_classes = []
+    throttle_scope = "login"
 
     def post(self, request):
         serializer = LoginSerializer(data=request.data, context={"request": request})
@@ -402,6 +403,7 @@ ENTITY_SERIALIZER_MAP = {
 class SyncPushView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
+    throttle_scope = "sync"
 
     def post(self, request):
         batch_serializer = BatchSyncSerializer(data=request.data)

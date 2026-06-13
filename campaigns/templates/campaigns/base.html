@@ -150,15 +150,15 @@
 
     <ul class="navbar-nav ml-auto">
       {% if user.is_authenticated %}
-      {% if candidates|length > 1 %}
+      {% if available_candidates|length > 1 %}
       <li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" style="font-size:13px;color:#1A0C0C;">
           <i class="fas fa-exchange-alt mr-1"></i>Switch
         </a>
         <div class="dropdown-menu dropdown-menu-right shadow border-0" style="border-radius:10px;overflow:hidden;min-width:200px;">
           <div class="dropdown-header" style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.06em;">Switch Tenant</div>
-          {% for item in candidates %}
-          <a class="dropdown-item{% if item.id == candidate.id %} active{% endif %}" href="{% url 'switch_candidate' item.id %}" style="font-size:13px;">
+          {% for item in available_candidates %}
+          <a class="dropdown-item{% if item.id == active_campaign_candidate.id %} active{% endif %}" href="{% url 'switch_candidate' item.id %}" style="font-size:13px;">
             {{ item.name }}
           </a>
           {% endfor %}

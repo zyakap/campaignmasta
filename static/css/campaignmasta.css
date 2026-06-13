@@ -143,6 +143,35 @@ h2 { margin: 0; font-size: 18px; }
 .record-card p { margin: 8px 0 0; color: var(--muted); }
 .record-card small { display: block; margin-top: 8px; color: var(--ink); }
 
+/* Inline status tags */
+.tag {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.tag-ok { background: rgba(42, 170, 42, 0.12); color: var(--primary-dark); }
+.tag-muted { background: var(--surface-2); color: var(--muted); }
+.tag-warn { background: rgba(190, 160, 32, 0.16); color: #7a6410; }
+.tag-danger { background: rgba(124, 28, 28, 0.12); color: var(--accent); }
+
+/* Card action row + inline link button */
+.card-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.link-btn {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 5px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--primary-dark);
+  font-size: 13px;
+  font-weight: 800;
+}
+.link-btn:active { background: var(--surface-2); }
+
 .searchbar { margin-bottom: 12px; }
 .searchbar input, .mobile-input {
   width: 100%;

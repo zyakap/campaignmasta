@@ -2,22 +2,44 @@
 
 Mobile-first Django MVP for the CampaignMasta political CRM and campaign operations blueprint.
 
-## Setup
+## Setup (local development)
 
 ```bash
-cd /Users/zyakap/Documents/projects/campaignmasta
-pipenv install
-pipenv run python manage.py migrate
-pipenv run python manage.py seed_demo
-pipenv run python manage.py runserver
+cd campaignmasta
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py seed_demo
+python manage.py runserver
 ```
 
-Demo login after seeding:
+Demo logins after seeding:
 
 ```text
-username: admin
-password: admin12345
+Platform / web admin   →  username: admin     password: admin12345
+Mobile app (field)     →  username: manager   password: manager12345
 ```
+
+The web admin (`admin`) is a superuser for the Django admin, the SaaS control
+centre at `/saas-admin/`, and the candidate workspace. The `manager` account is a
+Campaign Manager `TeamMember` with a mobile login, used to sign in to the Android app.
+
+## Production deployment
+
+`settings.py` is fully environment-driven — copy `.env.example` to `.env` and set
+at minimum `DJANGO_DEBUG=false` and a strong `DJANGO_SECRET_KEY`. With `DEBUG` off,
+HTTPS redirects, HSTS, and secure cookies are enabled automatically, and static
+files are served with WhiteNoise (run `collectstatic`). Postgres is used when the
+`DB_*` variables are set; otherwise it falls back to SQLite.
+
+```bash
+# Container build & run (migrations + gunicorn + static via WhiteNoise)
+docker build -t campaignmasta .
+docker run --env-file .env -p 8031:8031 campaignmasta
+```
+
+Team members are given mobile-app logins from **Team → Add / Edit** in the web app
+(set a Login username + password); this provisions the linked account and API token.
 
 ## MVP Coverage
 

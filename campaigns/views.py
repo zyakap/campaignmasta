@@ -89,7 +89,9 @@ from .services import (
     create_ward_ai_work_item,
     dashboard_metrics,
     dispatch_message,
+    provision_team_member_login,
     recipients_for_message,
+    resolve_active_candidate,
     bundle_catalog,
     report_rollup,
     module_catalog_for_candidate,
@@ -99,20 +101,12 @@ from .services import (
 
 
 def _active_candidate(request):
-    candidate_id = request.session.get("candidate_id")
-    queryset = Candidate.objects.select_related("province", "district")
-    if candidate_id:
-        candidate = queryset.filter(id=candidate_id).first()
-        if candidate:
-            return candidate
-    if request.user.is_superuser:
-        candidate = queryset.first()
-    else:
-        member = TeamMember.objects.filter(user=request.user, is_active=True).first()
-        candidate = queryset.filter(id=member.candidate_id).first() if member else None
-    if candidate:
-        request.session["candidate_id"] = candidate.id
-    return candidate
+    # Reuse the candidate already resolved by ActiveTenantMiddleware when present;
+    # otherwise resolve with the same authorization-aware logic.
+    candidate = getattr(request, "campaign_candidate", None)
+    if candidate is not None:
+        return candidate
+    return resolve_active_candidate(request)
 
 
 @login_required
@@ -128,7 +122,6 @@ def switch_candidate(request, candidate_id):
 @login_required
 def dashboard(request):
     candidate = _active_candidate(request)
-    tenants = Candidate.objects.all()
     if not candidate:
         return render(request, "campaigns/empty_state.html")
 
@@ -141,7 +134,6 @@ def dashboard(request):
 
     context = {
         "candidate": candidate,
-        "candidates": tenants,
         **dashboard_metrics(candidate),
         "overdue_calls": calls["overdue"][:8],
         "due_calls": calls["due_today"][:8],
@@ -467,10 +459,45 @@ def team_member_create(request):
         member.created_by = request.user
         member.updated_by = request.user
         member.save()
+        account = provision_team_member_login(
+            member,
+            form.cleaned_data.get("login_username"),
+            form.cleaned_data.get("login_password"),
+            user=request.user,
+        )
         log_audit(request, "TEAM_MEMBER_CREATED", member, new_value={"role": member.role})
-        messages.success(request, "Team member saved.")
+        if account:
+            messages.success(request, f"Team member saved. Mobile login enabled for {account.username}.")
+        else:
+            messages.success(request, "Team member saved.")
         return redirect("team")
     return render(request, "campaigns/form.html", {"candidate": candidate, "form": form, "title": "Add Team Member", "submit_label": "Save team member"})
+
+
+@login_required
+@module_required("core-crm")
+@capability_required("manage_team")
+def team_member_edit(request, member_id):
+    candidate = _active_candidate(request)
+    member = get_object_or_404(TeamMember, candidate=candidate, id=member_id)
+    form = TeamMemberQuickForm(request.POST or None, instance=member, candidate=candidate)
+    if form.is_valid():
+        member = form.save(commit=False)
+        member.updated_by = request.user
+        member.save()
+        account = provision_team_member_login(
+            member,
+            form.cleaned_data.get("login_username"),
+            form.cleaned_data.get("login_password"),
+            user=request.user,
+        )
+        log_audit(request, "TEAM_MEMBER_UPDATED", member, new_value={"role": member.role})
+        if account and form.cleaned_data.get("login_password"):
+            messages.success(request, f"Team member updated. Mobile password set for {account.username}.")
+        else:
+            messages.success(request, "Team member updated.")
+        return redirect("team")
+    return render(request, "campaigns/form.html", {"candidate": candidate, "form": form, "title": "Edit Team Member", "submit_label": "Save changes"})
 
 
 @login_required

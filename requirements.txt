@@ -1,0 +1,9 @@
+# CampaignMasta production requirements
+Django>=4.2,<5.0
+djangorestframework>=3.15,<3.17
+Pillow>=10.0
+whitenoise>=6.6
+gunicorn>=21.2
+# PostgreSQL driver — used when DB_ENGINE=django.db.backends.postgresql.
+# Safe to install everywhere; the app falls back to SQLite when no DB_* env is set.
+psycopg2-binary>=2.9

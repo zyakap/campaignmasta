@@ -1,4 +1,11 @@
 db.sqlite3
+db.sqlite3.bak
 __pycache__
 *.pyc
 .git
+.venv
+.DS_Store
+staticfiles/
+media/
+android/
+.claude/

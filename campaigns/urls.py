@@ -24,6 +24,7 @@ urlpatterns = [
     path("platform/usage/quotas/new/", views.included_quota_create, name="included_quota_create"),
     path("team/", views.team, name="team"),
     path("team/new/", views.team_member_create, name="team_member_create"),
+    path("team/<int:member_id>/edit/", views.team_member_edit, name="team_member_edit"),
     path("supporters/", views.supporters, name="supporters"),
     path("supporters/new/", views.supporter_create, name="supporter_create"),
     path("influencers/", views.influencers, name="influencers"),
