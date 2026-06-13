@@ -1,0 +1,5 @@
+full_name,phone,support_status,influence_level,ward,village,consent_to_messages
+API Test Supporter,,UNDECIDED,LOW,,,False
+Lucy Koki,+675 7444 1003,LEANING,LOW,Ward 3,Koki,False
+Michael June,+675 7444 1002,UNDECIDED,LOW,Ward 2,June Valley,True
+Ruth Tokarara,+675 7444 1001,STRONG,LOW,Ward 1,Tokarara,True
