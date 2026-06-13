@@ -71,7 +71,7 @@ class Command(BaseCommand):
             defaults={
                 "candidate_type": "PROVINCIAL",
                 "province": province,
-                "subscription_plan": "PREMIUM",
+                "subscription_plan": "FULL_PACKAGE",
                 "status": "ACTIVE",
                 "created_by": admin,
                 "updated_by": admin,
@@ -164,7 +164,7 @@ class Command(BaseCommand):
         subscription, _ = Subscription.objects.get_or_create(
             candidate=candidate,
             defaults={
-                "plan": "PREMIUM",
+                "plan": "FULL_PACKAGE",
                 "billing_cycle": "CAMPAIGN_PERIOD",
                 "status": "ACTIVE",
                 "amount": 12500,
@@ -289,8 +289,12 @@ class Command(BaseCommand):
         manager, _ = TeamMember.objects.get_or_create(
             candidate=candidate,
             full_name="John Campaign",
-            defaults={"role": Role.CAMPAIGN_MANAGER, "phone": "+675 7111 1111", "province": province, "created_by": admin, "updated_by": admin},
+            defaults={"role": Role.CAMPAIGN_MANAGER, "phone": "+675 7111 1111", "email": "manager@campaignmasta.local", "province": province, "created_by": admin, "updated_by": admin},
         )
+        # Provision a mobile-app login for the manager so the demo works on the Android app.
+        from campaigns.services import provision_team_member_login
+
+        provision_team_member_login(manager, "manager", "manager12345", user=admin)
         district_coord, _ = TeamMember.objects.get_or_create(
             candidate=candidate,
             full_name="Anna District",

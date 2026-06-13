@@ -9,6 +9,7 @@ from .models import (
     CallLog,
     CampaignEvent,
     CampaignTask,
+    Candidate,
     CandidateType,
     CommunityIssue,
     ConnectorSetting,
@@ -48,6 +49,48 @@ SENSITIVE_AI_RULES = [
     "Do not generate intimidation, harassment, coercion, vote-buying, or misleading claims.",
     "Respect candidate and geography boundaries in every prompt and output.",
 ]
+
+
+def resolve_active_candidate(request):
+    """Authorization-aware resolution of the active candidate (tenant) for a request.
+
+    Superusers may view any candidate (session selection, else the first). Other
+    users are restricted to candidates they have an active TeamMember role in, so a
+    session-stored candidate_id can never be used to reach another tenant's data.
+    Returns None for anonymous users.
+    """
+    user = getattr(request, "user", None)
+    if not user or not user.is_authenticated:
+        return None
+
+    queryset = Candidate.objects.select_related("province", "district")
+    session_id = request.session.get("candidate_id")
+
+    if user.is_superuser:
+        candidate = (queryset.filter(id=session_id).first() if session_id else None) or queryset.first()
+    else:
+        memberships = TeamMember.objects.filter(user=user, is_active=True)
+        if session_id and memberships.filter(candidate_id=session_id).exists():
+            candidate = queryset.filter(id=session_id).first()
+        else:
+            member = memberships.select_related("candidate").first()
+            candidate = queryset.filter(id=member.candidate_id).first() if member else None
+
+    if candidate and request.session.get("candidate_id") != candidate.id:
+        request.session["candidate_id"] = candidate.id
+    return candidate
+
+
+def candidates_for_user(user):
+    """Candidates a user may switch between: all for superusers, otherwise only
+    those the user holds an active team role in. Prevents the candidate switcher
+    from leaking other tenants' names."""
+    if not user or not user.is_authenticated:
+        return Candidate.objects.none()
+    queryset = Candidate.objects.select_related("province", "district")
+    if user.is_superuser:
+        return queryset
+    return queryset.filter(teammembers__user=user, teammembers__is_active=True).distinct()
 
 
 def tenant_scope_filter(candidate):
@@ -341,7 +384,7 @@ def accept_quote(quote, user=None):
     quote.save(update_fields=["subtotal", "discount_amount", "total", "accepted_at", "updated_by", "updated_at"])
     subscription = Subscription.objects.create(
         candidate=quote.candidate,
-        plan="PREMIUM" if quote.bundles.filter(is_full_package=True).exists() else "PROFESSIONAL",
+        plan=Candidate.Plan.FULL_PACKAGE if quote.bundles.filter(is_full_package=True).exists() else Candidate.Plan.PROFESSIONAL,
         billing_cycle=quote.billing_cycle,
         status=Subscription.Status.ACTIVE,
         amount=quote.total,
@@ -373,6 +416,41 @@ def accept_quote(quote, user=None):
         )
     provision_included_quotas(quote.candidate, subscription, modules=accepted_modules, bundles=accepted_bundles, user=user)
     return subscription
+
+
+def provision_team_member_login(member, username, password=None, user=None):
+    """Create or update the mobile-app login account linked to a team member.
+
+    Returns the linked user (or None when no username supplied). A DRF auth token
+    is ensured so the team member can immediately authenticate against the API.
+    """
+    from django.contrib.auth import get_user_model
+    from rest_framework.authtoken.models import Token
+
+    username = (username or "").strip()
+    if not username and not member.user_id:
+        return None
+
+    User = get_user_model()
+    account = member.user
+    if account is None:
+        account, _ = User.objects.get_or_create(
+            username=username,
+            defaults={"email": member.email or "", "is_staff": False},
+        )
+    elif username and account.username != username:
+        account.username = username
+    if member.email and account.email != member.email:
+        account.email = member.email
+    if password:
+        account.set_password(password)
+    account.is_active = member.is_active
+    account.save()
+    if member.user_id != account.id:
+        member.user = account
+        member.save(update_fields=["user", "updated_at"])
+    Token.objects.get_or_create(user=account)
+    return account
 
 
 def recipients_for_message(message):
@@ -578,7 +656,7 @@ def dashboard_metrics(candidate):
         "consented_contacts": supporters.filter(consent_to_messages=True).count(),
         "strong_wards": wards.filter(support_strength="STRONG").count(),
         "weak_wards": wards.filter(support_strength="WEAK").count(),
-        "wards_not_visited": wards.exclude(ward__campaignevent__tenant=candidate).count(),
+        "wards_not_visited": wards.exclude(ward__campaignevent__candidate=candidate).count(),
         "pending_promises": PromiseTracker.objects.filter(candidate=candidate).exclude(status__in=["DELIVERED", "CANCELLED"]).count(),
         "open_issues": CommunityIssue.objects.filter(candidate=candidate).exclude(status="RESOLVED").count(),
         "polling_locations": PollingLocation.objects.filter(candidate=candidate).count(),

@@ -49,12 +49,15 @@ python manage.py createsuperuser
 
 ### 2.4 Create a TeamMember for Your Test User
 
-The API resolves the tenant from `TeamMember.user`. After creating a user:
+The API resolves the tenant from `TeamMember.user`. The easiest path:
 
-1. Log in to `/admin/`
-2. Create a `CandidateTenant` (Province, District, etc.)
-3. Create a `TeamMember` linked to the user and tenant with a valid Role
-4. The user can now log in via the Android app
+1. Log in to the web app and open **Team → Add** (or **Edit**)
+2. Fill in the team member, set a **Login username** and **Login password**
+   — this creates the linked account and API token automatically
+3. The team member can now log in via the Android app with those credentials
+
+Alternatively, from `/admin/`: create a `Candidate` (Province, District, etc.),
+then a `TeamMember` linked to a `User` with a valid Role.
 
 ### 2.5 Configure ALLOWED_HOSTS
 
@@ -275,22 +278,27 @@ Store all secrets in `local.properties` (never committed to git):
 
 ### Django
 
-Use environment variables for production secrets. Create a `.env` file (never committed):
+`settings.py` reads everything from environment variables (no extra dependency).
+Copy `.env.example` to `.env` and set:
 
 ```bash
-SECRET_KEY=your-production-secret-key
-DEBUG=False
-ALLOWED_HOSTS=yourdomain.com,www.yourdomain.com
-DATABASE_URL=postgres://user:pass@localhost/campaignmasta
+DJANGO_DEBUG=false
+DJANGO_SECRET_KEY=your-production-secret-key          # required when DEBUG is off
+DJANGO_ALLOWED_HOSTS=campaign.webmasta.com.pg,www.campaign.webmasta.com.pg
+DJANGO_CSRF_TRUSTED_ORIGINS=https://campaign.webmasta.com.pg
+
+# Postgres (omit all DB_* to fall back to the bundled SQLite database)
+DB_ENGINE=django.db.backends.postgresql
+DB_NAME=campaignmasta
+DB_USER=campaignmasta
+DB_PASSWORD=...
+DB_HOST=localhost
+DB_PORT=5432
 ```
 
-Use `python-decouple` or `django-environ` to read these:
-
-```python
-from decouple import config
-SECRET_KEY = config('SECRET_KEY')
-DEBUG = config('DEBUG', default=False, cast=bool)
-```
+The provided `Dockerfile` + `entrypoint.sh` run migrations and serve via gunicorn
+with WhiteNoise-served static files. When `DJANGO_DEBUG=false`, the security
+headers (HSTS, secure cookies, SSL redirect) are enabled automatically.
 
 ---
 

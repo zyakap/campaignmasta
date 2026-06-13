@@ -1,6 +1,6 @@
 from .audit import client_ip
-from .models import AccessLog, Candidate
-from .services import enabled_module_codes
+from .models import AccessLog
+from .services import enabled_module_codes, resolve_active_candidate
 
 
 class ActiveTenantMiddleware:
@@ -10,15 +10,12 @@ class ActiveTenantMiddleware:
     def __call__(self, request):
         request.campaign_candidate = None
         request.enabled_campaign_modules = set()
-        candidate_id = request.session.get("candidate_id")
-        queryset = Candidate.objects.select_related("province", "district")
-        candidate = queryset.filter(id=candidate_id).first() if candidate_id else queryset.first()
+        candidate = resolve_active_candidate(request)
         if candidate:
             request.campaign_candidate = candidate
-            request.session["candidate_id"] = candidate.id
             request.enabled_campaign_modules = enabled_module_codes(candidate)
         response = self.get_response(request)
-        if request.path.startswith("/static/"):
+        if request.path.startswith(("/static/", "/media/")):
             return response
         if getattr(request, "user", None) and request.user.is_authenticated:
             AccessLog.objects.create(

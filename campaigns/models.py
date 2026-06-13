@@ -2,6 +2,7 @@ from datetime import timedelta
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
 from django.utils import timezone
 
@@ -415,7 +416,7 @@ class ConnectorSetting(TenantOwnedModel):
     payment_merchant_id = models.CharField(max_length=120, blank=True)
 
     maps_api_key = models.CharField(max_length=255, blank=True)
-    extra_config = models.JSONField(default=dict, blank=True)
+    extra_config = models.JSONField(default=dict, blank=True, encoder=DjangoJSONEncoder)
     last_tested_at = models.DateTimeField(null=True, blank=True)
     last_test_result = models.TextField(blank=True)
     notes = models.TextField(blank=True)
@@ -550,7 +551,9 @@ class UsageTopUp(TenantOwnedModel):
         ordering = ["-received_at"]
 
     def apply(self):
-        self.wallet.balance = self.wallet.balance + self.amount
+        from decimal import Decimal
+
+        self.wallet.balance = Decimal(self.wallet.balance) + Decimal(self.amount)
         self.wallet.save(update_fields=["balance", "updated_at"])
 
     def save(self, *args, **kwargs):
@@ -661,7 +664,7 @@ class UsageEvent(TenantOwnedModel):
     balance_after = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     status = models.CharField(max_length=24, choices=Status.choices, default=Status.ALLOWED)
     reference = models.CharField(max_length=120, blank=True)
-    metadata = models.JSONField(default=dict, blank=True)
+    metadata = models.JSONField(default=dict, blank=True, encoder=DjangoJSONEncoder)
 
     class Meta:
         ordering = ["-created_at"]
@@ -1148,7 +1151,7 @@ class PollingLocation(TenantOwnedModel):
     scrutineer_checked_in = models.BooleanField(default=False)
     transport_status = models.CharField(max_length=80, blank=True)
     last_status_update = models.DateTimeField(null=True, blank=True)
-    past_vote_data = models.JSONField(default=dict, blank=True, help_text='Previous election tallies. Format: {"2022": {"our_candidate": 340, "opponent_a": 120}}')
+    past_vote_data = models.JSONField(default=dict, blank=True, encoder=DjangoJSONEncoder, help_text='Previous election tallies. Format: {"2022": {"our_candidate": 340, "opponent_a": 120}}')
     security_risk = models.CharField(max_length=16, choices=SecurityRisk.choices, default=SecurityRisk.LOW)
     expected_turnout = models.PositiveIntegerField(null=True, blank=True)
     notes = models.TextField(blank=True)
@@ -1257,7 +1260,7 @@ class AIWorkItem(TenantOwnedModel):
     ai_model = models.CharField(max_length=120, blank=True)
     used_free_model = models.BooleanField(default=False)
     prompt = models.TextField(blank=True)
-    source_snapshot = models.JSONField(default=dict, blank=True)
+    source_snapshot = models.JSONField(default=dict, blank=True, encoder=DjangoJSONEncoder)
     output = models.TextField(blank=True)
     safety_notes = models.TextField(blank=True)
     status = models.CharField(max_length=24, choices=Status.choices, default=Status.DRAFT)
@@ -1284,7 +1287,7 @@ class ImportBatch(TenantOwnedModel):
     total_rows = models.PositiveIntegerField(default=0)
     valid_rows = models.PositiveIntegerField(default=0)
     error_rows = models.PositiveIntegerField(default=0)
-    validation_errors = models.JSONField(default=list, blank=True)
+    validation_errors = models.JSONField(default=list, blank=True, encoder=DjangoJSONEncoder)
 
     class Meta:
         ordering = ["-created_at"]
@@ -1307,7 +1310,7 @@ class ExportRequest(TenantOwnedModel):
     requested_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="campaign_exports")
     approved_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="approved_campaign_exports")
     status = models.CharField(max_length=24, choices=[("REQUESTED", "Requested"), ("APPROVED", "Approved"), ("REJECTED", "Rejected"), ("READY", "Ready")], default="REQUESTED")
-    filters = models.JSONField(default=dict, blank=True)
+    filters = models.JSONField(default=dict, blank=True, encoder=DjangoJSONEncoder)
     output_file = models.FileField(upload_to="exports/", blank=True)
     approved_at = models.DateTimeField(null=True, blank=True)
 
@@ -1573,8 +1576,8 @@ class AuditLog(models.Model):
     action = models.CharField(max_length=80)
     object_type = models.CharField(max_length=80, blank=True)
     object_id = models.CharField(max_length=80, blank=True)
-    old_value = models.JSONField(null=True, blank=True)
-    new_value = models.JSONField(null=True, blank=True)
+    old_value = models.JSONField(null=True, blank=True, encoder=DjangoJSONEncoder)
+    new_value = models.JSONField(null=True, blank=True, encoder=DjangoJSONEncoder)
     ip_address = models.GenericIPAddressField(null=True, blank=True)
     device = models.CharField(max_length=220, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)

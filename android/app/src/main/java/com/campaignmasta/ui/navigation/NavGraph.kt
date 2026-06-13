@@ -17,26 +17,37 @@ import com.campaignmasta.ui.screens.polling.PollingScreen
 import com.campaignmasta.ui.screens.supporters.AddSupporterScreen
 import com.campaignmasta.ui.screens.supporters.SupportersScreen
 import com.campaignmasta.ui.screens.wards.WardBriefsScreen
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
+import dagger.hilt.components.SingletonComponent
+
+@EntryPoint
+@InstallIn(SingletonComponent::class)
+interface NavGraphEntryPoint {
+    fun userPreferences(): UserPreferences
+}
 
 @Composable
 fun CampaignMastaNavGraph() {
     val navController = rememberNavController()
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
 
-    // Determine start destination based on saved auth token
+    // Determine start destination based on the saved auth token so a returning,
+    // already-authenticated user lands straight on the dashboard.
     var startDestination by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(Unit) {
-        // We can't inject UserPreferences directly here without Hilt entry point,
-        // so we check via the hilt entry point pattern. For simplicity we default
-        // to Login and let the LoginViewModel redirect on valid token.
-        startDestination = Screen.Login.route
+        val userPreferences = EntryPointAccessors
+            .fromApplication(context.applicationContext, NavGraphEntryPoint::class.java)
+            .userPreferences()
+        startDestination = if (userPreferences.isLoggedIn()) {
+            Screen.Dashboard.route
+        } else {
+            Screen.Login.route
+        }
 
-        // Start periodic sync worker
+        // Start periodic background sync.
         SyncWorker.enqueuePeriodicSync(WorkManager.getInstance(context))
     }
 

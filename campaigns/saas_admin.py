@@ -37,10 +37,12 @@ class SaaSAdminSite(AdminSite):
         total_tenants = Candidate.objects.count()
 
         active_subs = Subscription.objects.filter(status="ACTIVE").count()
+        # Revenue = customer charges actually debited this month. Billable usage is
+        # recorded with status ALLOWED (FREE/INCLUDED_QUOTA carry a zero charge).
         revenue_mtd = (
             UsageEvent.objects.filter(
                 created_at__gte=month_start,
-                status="BILLED",
+                status=UsageEvent.Status.ALLOWED,
             ).aggregate(total=Sum("customer_charge"))["total"]
             or 0
         )

@@ -87,6 +87,17 @@ class SupporterQuickForm(MobileFormMixin, forms.ModelForm):
 
 
 class TeamMemberQuickForm(MobileFormMixin, forms.ModelForm):
+    login_username = forms.CharField(
+        max_length=150,
+        required=False,
+        help_text="Optional. Set a username so this team member can log in to the mobile app.",
+    )
+    login_password = forms.CharField(
+        required=False,
+        widget=forms.PasswordInput(render_value=False),
+        help_text="Set or reset the mobile-app password. Leave blank to keep the existing password.",
+    )
+
     class Meta:
         model = TeamMember
         fields = [
@@ -108,6 +119,7 @@ class TeamMemberQuickForm(MobileFormMixin, forms.ModelForm):
 
     def __init__(self, *args, candidate=None, **kwargs):
         super().__init__(*args, **kwargs)
+        self.candidate = candidate
         if candidate:
             self.fields["role"].choices = role_choices_for_candidate(candidate)
             self.fields["province"].queryset = self.fields["province"].queryset.filter(id=candidate.province_id)
@@ -116,6 +128,33 @@ class TeamMemberQuickForm(MobileFormMixin, forms.ModelForm):
             self.fields["llg"].queryset = candidate.available_llgs()
             self.fields["ward"].queryset = candidate.available_wards()
             self.fields["village"].queryset = self.fields["village"].queryset.filter(ward__in=candidate.available_wards())
+        if self.instance and self.instance.pk and self.instance.user_id:
+            self.fields["login_username"].initial = self.instance.user.username
+
+    def clean_login_username(self):
+        from django.contrib.auth import get_user_model
+
+        username = (self.cleaned_data.get("login_username") or "").strip()
+        if not username:
+            return username
+        User = get_user_model()
+        clash = User.objects.filter(username__iexact=username)
+        if self.instance and self.instance.pk and self.instance.user_id:
+            clash = clash.exclude(pk=self.instance.user_id)
+        if clash.exists():
+            raise forms.ValidationError("That username is already taken. Choose another.")
+        return username
+
+    def clean(self):
+        cleaned = super().clean()
+        username = cleaned.get("login_username")
+        password = cleaned.get("login_password")
+        creating_login = username and not (self.instance and self.instance.user_id)
+        if creating_login and not password:
+            self.add_error("login_password", "Set a password when creating a new mobile login.")
+        if password and not username and not (self.instance and self.instance.user_id):
+            self.add_error("login_username", "Set a username to enable mobile login.")
+        return cleaned
 
 
 class CallLogQuickForm(MobileFormMixin, forms.ModelForm):
@@ -559,6 +598,10 @@ class ExportRequestForm(MobileFormMixin, forms.ModelForm):
         fields = ["export_type", "filters"]
         widgets = {"filters": forms.Textarea(attrs={"rows": 3})}
 
+    def clean_filters(self):
+        # A blank JSON textarea returns None, which violates the NOT NULL column.
+        return self.cleaned_data.get("filters") or {}
+
 
 class TenantSettingsForm(MobileFormMixin, forms.ModelForm):
     class Meta:
@@ -635,6 +678,10 @@ class ConnectorSettingForm(MobileFormMixin, forms.ModelForm):
             "extra_config": forms.Textarea(attrs={"rows": 4}),
             "notes": forms.Textarea(attrs={"rows": 3}),
         }
+
+    def clean_extra_config(self):
+        # A blank JSON textarea returns None, which violates the NOT NULL column.
+        return self.cleaned_data.get("extra_config") or {}
 
     def save(self, commit=True):
         instance = super().save(commit=False)

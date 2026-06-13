@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -84,8 +85,8 @@ class UserPreferences @Inject constructor(
     }
 
     suspend fun isLoggedIn(): Boolean {
-        var token: String? = null
-        dataStore.data.collect { token = it[AUTH_TOKEN] }
+        // Use first() — collecting a DataStore flow never completes and would suspend forever.
+        val token = authToken.first()
         return !token.isNullOrBlank()
     }
 }

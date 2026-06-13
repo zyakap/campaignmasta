@@ -6,10 +6,10 @@
       <h1>{{ candidate.name }}</h1>
       <p>{{ candidate.province }}{% if candidate.district %} · {{ candidate.district }}{% endif %}</p>
     </div>
-    {% if candidates|length > 1 %}
+    {% if available_candidates|length > 1 %}
       <details class="candidate-switch">
         <summary>Switch</summary>
-        {% for item in candidates %}
+        {% for item in available_candidates %}
           <a href="{% url 'switch_candidate' item.id %}">{{ item.name }}</a>
         {% endfor %}
       </details>
