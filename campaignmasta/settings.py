@@ -5,7 +5,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = "dev-campaignmasta-change-me"
 DEBUG = True
-ALLOWED_HOSTS = ["127.0.0.1", "localhost", "139.180.180.212", "campaign.webmasta.com.pg", "www.campaign.webmasta.com.pg"]
+ALLOWED_HOSTS = ["127.0.0.1", "localhost", "207.148.85.25", "campaignmasta.com", "www.campaignmasta.com"]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -64,8 +64,16 @@ WSGI_APPLICATION = "campaignmasta.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": "cmastadb",
+        "USER": "root",
+        "PASSWORD": "cmWrft5&Wfefs24@",
+        "HOST": "localhost",
+        "PORT": "3306",
+        "OPTIONS": {
+            "charset": "utf8mb4",
+            "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
+        },
     }
 }
 
@@ -82,6 +90,7 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 
 MEDIA_URL = "media/"
