@@ -47,6 +47,7 @@ fun DashboardScreen(
         DashboardCard("Messages", uiState.messagesUnreadCount, Icons.Default.Mail, PNGRed, Screen.Messages.route),
         DashboardCard("Ward Briefs", 0, Icons.Default.Map, PNGGold, Screen.WardBriefs.route),
         DashboardCard("Polling Day", 0, Icons.Default.HowToVote, Color(0xFF6A1B9A), Screen.Polling.route),
+        DashboardCard("My Team", 0, Icons.Default.Groups, Color(0xFF1565C0), Screen.Team.route),
     )
 
     Scaffold(

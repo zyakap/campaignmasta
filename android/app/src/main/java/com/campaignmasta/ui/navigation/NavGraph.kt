@@ -16,6 +16,8 @@ import com.campaignmasta.ui.screens.messages.MessagesScreen
 import com.campaignmasta.ui.screens.polling.PollingScreen
 import com.campaignmasta.ui.screens.supporters.AddSupporterScreen
 import com.campaignmasta.ui.screens.supporters.SupportersScreen
+import com.campaignmasta.ui.screens.team.AddMemberScreen
+import com.campaignmasta.ui.screens.team.TeamScreen
 import com.campaignmasta.ui.screens.wards.WardBriefsScreen
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
@@ -106,6 +108,20 @@ fun CampaignMastaNavGraph() {
 
         composable(Screen.Polling.route) {
             PollingScreen(onBack = { navController.popBackStack() })
+        }
+
+        composable(Screen.Team.route) {
+            TeamScreen(
+                onBack = { navController.popBackStack() },
+                onAddMember = { navController.navigate(Screen.AddMember.route) }
+            )
+        }
+
+        composable(Screen.AddMember.route) {
+            AddMemberScreen(
+                onBack = { navController.popBackStack() },
+                onSaved = { navController.popBackStack() }
+            )
         }
     }
 }

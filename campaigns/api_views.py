@@ -22,6 +22,16 @@ from .models import (
     TeamMember,
     WardProfile,
 )
+from .permissions import (
+    can_approve_member,
+    can_approve_village,
+    can_create_village,
+    creatable_roles,
+    pending_members_for,
+    pending_villages_for,
+    scope_queryset,
+    team_member_for_user,
+)
 from .serializers import (
     BatchSyncSerializer,
     CallLogSerializer,
@@ -142,9 +152,9 @@ class SupporterListCreateView(APIView):
         candidate = _get_candidate(request)
         if not candidate:
             return Response({"detail": "No candidate found."}, status=status.HTTP_403_FORBIDDEN)
-        qs = Supporter.objects.filter(candidate=candidate).select_related(
-            "province", "district", "llg", "ward", "village"
-        ).order_by("full_name")
+        qs = scope_queryset(
+            Supporter.objects.filter(candidate=candidate), request.user, candidate
+        ).select_related("province", "district", "llg", "ward", "village").order_by("full_name")
         qs = _updated_after_filter(qs, request)
         paginator = StandardPagination()
         page = paginator.paginate_queryset(qs, request)
@@ -168,12 +178,89 @@ class TeamMemberListView(APIView):
         candidate = _get_candidate(request)
         if not candidate:
             return Response({"detail": "No candidate found."}, status=status.HTTP_403_FORBIDDEN)
-        qs = TeamMember.objects.filter(candidate=candidate, is_active=True).select_related(
-            "province", "district", "llg", "ward"
-        ).order_by("full_name")
+        qs = scope_queryset(
+            TeamMember.objects.filter(candidate=candidate, approval_status="APPROVED", is_active=True),
+            request.user, candidate,
+        ).select_related("province", "district", "llg", "ward", "village").order_by("full_name")
         qs = _updated_after_filter(qs, request)
         serializer = TeamMemberSerializer(qs, many=True, context={"request": request})
         return Response({"results": serializer.data, "count": qs.count()})
+
+    def post(self, request):
+        candidate = _get_candidate(request)
+        if not candidate:
+            return Response({"detail": "No candidate found."}, status=status.HTTP_403_FORBIDDEN)
+        creator = team_member_for_user(request.user, candidate)
+        if not request.user.is_superuser and not creatable_roles(creator, candidate):
+            return Response({"detail": "You are not allowed to add team members."}, status=status.HTTP_403_FORBIDDEN)
+        new_role = request.data.get("role")
+        allowed = {r[0] for r in creatable_roles(creator, candidate)} if creator else {r[0] for r in creatable_roles(None, candidate)}
+        if not request.user.is_superuser and new_role not in allowed:
+            return Response({"detail": "You cannot create that role."}, status=status.HTTP_403_FORBIDDEN)
+        serializer = TeamMemberSerializer(data=request.data, context={"request": request})
+        serializer.is_valid(raise_exception=True)
+        from .models import ApprovalStatus
+        from .permissions import VIEW_ALL_ROLES
+
+        auto = request.user.is_superuser or creator is None or creator.role in VIEW_ALL_ROLES
+        member = serializer.save(
+            candidate=candidate,
+            province=candidate.province,
+            created_by=request.user,
+            updated_by=request.user,
+            created_by_member=creator,
+            approval_status=ApprovalStatus.APPROVED if auto else ApprovalStatus.PENDING,
+            is_active=auto,
+            approved_by=creator if auto else None,
+            approved_at=timezone.now() if auto else None,
+        )
+        return Response(TeamMemberSerializer(member, context={"request": request}).data, status=status.HTTP_201_CREATED)
+
+
+class TeamMemberPendingView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        candidate = _get_candidate(request)
+        if not candidate:
+            return Response({"detail": "No candidate found."}, status=status.HTTP_403_FORBIDDEN)
+        qs = pending_members_for(request.user, candidate).order_by("full_name")
+        serializer = TeamMemberSerializer(qs, many=True, context={"request": request})
+        return Response({"results": serializer.data, "count": qs.count()})
+
+
+class TeamMemberApproveView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+        candidate = _get_candidate(request)
+        member = TeamMember.objects.filter(candidate=candidate, id=pk).first()
+        if not member:
+            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+        approver = team_member_for_user(request.user, candidate)
+        if not (request.user.is_superuser or (approver and can_approve_member(approver, member))):
+            return Response({"detail": "Not allowed."}, status=status.HTTP_403_FORBIDDEN)
+        reject = bool(request.data.get("reject"))
+        if member.is_pending:
+            member.reject(by_member=approver) if reject else member.approve(by_member=approver)
+            member.updated_by = request.user
+            member.save()
+        return Response(TeamMemberSerializer(member, context={"request": request}).data)
+
+
+class CreatableRolesView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        candidate = _get_candidate(request)
+        if not candidate:
+            return Response({"detail": "No candidate found."}, status=status.HTTP_403_FORBIDDEN)
+        creator = team_member_for_user(request.user, candidate)
+        roles = creatable_roles(creator if not request.user.is_superuser else None, candidate)
+        return Response({"results": [{"value": v, "label": l} for v, l in roles]})
 
 
 # ─── Influencers ──────────────────────────────────────────────────────────────
@@ -186,7 +273,7 @@ class InfluencerListView(APIView):
         candidate = _get_candidate(request)
         if not candidate:
             return Response({"detail": "No candidate found."}, status=status.HTTP_403_FORBIDDEN)
-        qs = Influencer.objects.filter(candidate=candidate).select_related("ward").order_by("full_name")
+        qs = scope_queryset(Influencer.objects.filter(candidate=candidate), request.user, candidate).select_related("ward").order_by("full_name")
         qs = _updated_after_filter(qs, request)
         serializer = InfluencerSerializer(qs, many=True, context={"request": request})
         return Response({"results": serializer.data, "count": qs.count()})
@@ -270,7 +357,7 @@ class WardProfileListView(APIView):
         candidate = _get_candidate(request)
         if not candidate:
             return Response({"detail": "No candidate found."}, status=status.HTTP_403_FORBIDDEN)
-        qs = WardProfile.objects.filter(candidate=candidate).select_related(
+        qs = scope_queryset(WardProfile.objects.filter(candidate=candidate), request.user, candidate).select_related(
             "ward", "ward__llg"
         ).order_by("ward__name")
         qs = _updated_after_filter(qs, request)
@@ -301,7 +388,7 @@ class CommunityGroupListCreateView(APIView):
         candidate = _get_candidate(request)
         if not candidate:
             return Response({"detail": "No candidate found."}, status=status.HTTP_403_FORBIDDEN)
-        qs = CommunityGroup.objects.filter(candidate=candidate).select_related("ward").order_by("name")
+        qs = scope_queryset(CommunityGroup.objects.filter(candidate=candidate), request.user, candidate).select_related("ward").order_by("name")
         qs = _updated_after_filter(qs, request)
         serializer = CommunityGroupSerializer(qs, many=True, context={"request": request})
         return Response({"results": serializer.data, "count": qs.count()})
@@ -323,7 +410,7 @@ class PollingLocationListView(APIView):
         candidate = _get_candidate(request)
         if not candidate:
             return Response({"detail": "No candidate found."}, status=status.HTTP_403_FORBIDDEN)
-        qs = PollingLocation.objects.filter(candidate=candidate).select_related(
+        qs = scope_queryset(PollingLocation.objects.filter(candidate=candidate), request.user, candidate).select_related(
             "ward", "assigned_scrutineer"
         ).order_by("name")
         qs = _updated_after_filter(qs, request)
@@ -450,3 +537,115 @@ class SyncPushView(APIView):
                 results.append({"local_id": local_id, "server_id": server_id, "status": f"ERROR: {exc}"})
 
         return Response({"results": results})
+
+
+# ─── Geography cascade (approved-only, for cascading pickers) ──────────────────
+
+class GeographyView(APIView):
+    """Cascading geography for selection: districts?province=, llgs?district=,
+    wards?llg=, villages?ward=. Villages are limited to APPROVED entries, and
+    results are confined to the candidate's available geography."""
+
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        from .models import District, LLG, Ward, Village
+
+        candidate = _get_candidate(request)
+        if not candidate:
+            return Response({"detail": "No candidate found."}, status=status.HTTP_403_FORBIDDEN)
+        level = request.query_params.get("level")
+        parent = request.query_params.get("parent")
+        data = []
+        if level == "districts":
+            qs = candidate.available_districts()
+            data = [{"id": d.id, "name": d.name} for d in qs]
+        elif level == "llgs":
+            qs = candidate.available_llgs()
+            if parent:
+                qs = qs.filter(district_id=parent)
+            data = [{"id": x.id, "name": x.name, "district": x.district_id} for x in qs]
+        elif level == "wards":
+            qs = candidate.available_wards()
+            if parent:
+                qs = qs.filter(llg_id=parent)
+            data = [{"id": w.id, "name": w.name, "llg": w.llg_id} for w in qs]
+        elif level == "villages":
+            qs = Village.objects.filter(ward__in=candidate.available_wards(), approval_status="APPROVED")
+            if parent:
+                qs = qs.filter(ward_id=parent)
+            data = [{"id": v.id, "name": v.name, "ward": v.ward_id} for v in qs.order_by("name")]
+        return Response({"results": data})
+
+
+# ─── Villages: create on request + approval ───────────────────────────────────
+
+class VillageListCreateView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        candidate = _get_candidate(request)
+        if not candidate:
+            return Response({"detail": "No candidate found."}, status=status.HTTP_403_FORBIDDEN)
+        qs = pending_villages_for(request.user, candidate).order_by("ward__name", "name")
+        data = [
+            {
+                "id": v.id, "name": v.name, "ward": v.ward_id, "ward_name": v.ward.name,
+                "llg_name": v.ward.llg.name if v.ward.llg_id else None,
+                "approval_status": v.approval_status,
+                "created_by": v.created_by_member.full_name if v.created_by_member_id else None,
+            }
+            for v in qs
+        ]
+        return Response({"results": data, "count": len(data)})
+
+    def post(self, request):
+        from .models import ApprovalStatus, Village, Ward
+        from .permissions import VIEW_ALL_ROLES
+
+        candidate = _get_candidate(request)
+        if not candidate:
+            return Response({"detail": "No candidate found."}, status=status.HTTP_403_FORBIDDEN)
+        creator = team_member_for_user(request.user, candidate)
+        if not request.user.is_superuser and not can_create_village(creator):
+            return Response({"detail": "You are not allowed to add villages."}, status=status.HTTP_403_FORBIDDEN)
+        ward_id = request.data.get("ward")
+        name = (request.data.get("name") or "").strip()
+        ward = Ward.objects.filter(id=ward_id, llg__in=candidate.available_llgs()).first()
+        if not ward or not name:
+            return Response({"detail": "Valid ward and name are required."}, status=status.HTTP_400_BAD_REQUEST)
+        auto = request.user.is_superuser or creator is None or creator.role in VIEW_ALL_ROLES
+        village = Village.objects.create(
+            ward=ward, name=name, created_by=request.user, created_by_member=creator,
+            approval_status=ApprovalStatus.APPROVED if auto else ApprovalStatus.PENDING,
+            approved_by=creator if auto else None,
+            approved_at=timezone.now() if auto else None,
+        )
+        return Response(
+            {"id": village.id, "name": village.name, "ward": ward.id, "approval_status": village.approval_status},
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class VillageApproveView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+        from .models import ApprovalStatus, Village
+
+        candidate = _get_candidate(request)
+        village = Village.objects.filter(id=pk).select_related("ward", "ward__llg").first()
+        if not village:
+            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+        approver = team_member_for_user(request.user, candidate)
+        if not (request.user.is_superuser or (approver and can_approve_village(approver, village))):
+            return Response({"detail": "Not allowed."}, status=status.HTTP_403_FORBIDDEN)
+        if village.is_pending:
+            village.approval_status = ApprovalStatus.REJECTED if request.data.get("reject") else ApprovalStatus.APPROVED
+            village.approved_by = approver
+            village.approved_at = timezone.now()
+            village.save(update_fields=["approval_status", "approved_by", "approved_at"])
+        return Response({"id": village.id, "approval_status": village.approval_status})

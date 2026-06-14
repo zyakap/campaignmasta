@@ -99,11 +99,55 @@
     .footer-bottom-links { display: flex; gap: 20px; }
     .footer-bottom-links a { color: rgba(255,255,255,.5); text-decoration: none; }
 
-    /* ── MOBILE ── */
-    .nav-mobile-toggle { display: none; background: none; border: none; cursor: pointer; font-size: 20px; color: var(--neutral-700); }
+    /* ── MOBILE NAV ── */
+    .nav-mobile-toggle {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      min-width: 44px;
+      min-height: 44px;
+      background: none;
+      border: 1.5px solid var(--neutral-200);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 18px;
+      color: var(--neutral-700);
+    }
+    .mobile-menu {
+      display: none;
+      position: fixed;
+      top: 64px;
+      left: 0;
+      right: 0;
+      z-index: 99;
+      background: #fff;
+      border-bottom: 1px solid var(--neutral-200);
+      box-shadow: 0 10px 30px rgba(0,0,0,.10);
+      padding: 12px 5% 20px;
+      flex-direction: column;
+    }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu-link {
+      display: block;
+      padding: 14px 4px;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--neutral-700);
+      text-decoration: none;
+      border-bottom: 1px solid var(--neutral-200);
+    }
+    .mobile-menu-link:last-of-type { border-bottom: none; }
+    .mobile-menu-link:active, .mobile-menu-link.active { color: var(--green-mid); }
+    .mobile-menu-cta {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+    }
+    .mobile-menu-cta .btn { flex: 1; justify-content: center; min-height: 48px; }
+
     @media (max-width: 768px) {
       .nav-links, .nav-cta { display: none; }
-      .nav-mobile-toggle { display: block; }
+      .nav-mobile-toggle { display: flex; }
       .footer-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
     }
     @media (max-width: 480px) {
@@ -130,10 +174,21 @@
     <a href="/accounts/login/" class="btn btn-outline">Sign In</a>
     <a href="/pricing/" class="btn btn-primary">Get Started</a>
   </div>
-  <button class="nav-mobile-toggle" onclick="document.querySelector('.nav-links').style.display='flex';document.querySelector('.nav-cta').style.display='flex';">
-    <i class="fas fa-bars"></i>
+  <button class="nav-mobile-toggle" id="nav-toggle" aria-label="Open menu" aria-expanded="false">
+    <i class="fas fa-bars" id="nav-toggle-icon"></i>
   </button>
 </nav>
+
+<div class="mobile-menu" id="mobile-menu" role="navigation" aria-label="Mobile navigation">
+  <a href="/" class="mobile-menu-link {% block mob_nav_home %}{% endblock %}">Home</a>
+  <a href="/features/" class="mobile-menu-link {% block mob_nav_features %}{% endblock %}">Features</a>
+  <a href="/pricing/" class="mobile-menu-link {% block mob_nav_pricing %}{% endblock %}">Pricing</a>
+  <a href="/download/" class="mobile-menu-link {% block mob_nav_download %}{% endblock %}">Download</a>
+  <div class="mobile-menu-cta">
+    <a href="/accounts/login/" class="btn btn-outline">Sign In</a>
+    <a href="/pricing/" class="btn btn-primary">Get Started</a>
+  </div>
+</div>
 
 {% block content %}{% endblock %}
 
@@ -183,5 +238,34 @@
 </footer>
 
 {% block extra_scripts %}{% endblock %}
+<script>
+(function () {
+  var toggle = document.getElementById('nav-toggle');
+  var menu = document.getElementById('mobile-menu');
+  var icon = document.getElementById('nav-toggle-icon');
+  if (!toggle) return;
+  toggle.addEventListener('click', function () {
+    var open = menu.classList.toggle('open');
+    toggle.setAttribute('aria-expanded', open);
+    icon.className = open ? 'fas fa-xmark' : 'fas fa-bars';
+  });
+  // Close when a link inside is tapped
+  menu.querySelectorAll('a').forEach(function (a) {
+    a.addEventListener('click', function () {
+      menu.classList.remove('open');
+      toggle.setAttribute('aria-expanded', 'false');
+      icon.className = 'fas fa-bars';
+    });
+  });
+  // Close when clicking outside
+  document.addEventListener('click', function (e) {
+    if (!menu.contains(e.target) && !toggle.contains(e.target)) {
+      menu.classList.remove('open');
+      toggle.setAttribute('aria-expanded', 'false');
+      icon.className = 'fas fa-bars';
+    }
+  });
+})();
+</script>
 </body>
 </html>

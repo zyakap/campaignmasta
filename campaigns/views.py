@@ -36,10 +36,12 @@ from .forms import (
     TenantSettingsForm,
     UsageRateCardForm,
     UsageTopUpForm,
+    VillageQuickForm,
     WardProfileForm,
 )
 from .models import (
     AIWorkItem,
+    ApprovalStatus,
     CampaignEvent,
     CampaignTask,
     Candidate,
@@ -73,9 +75,23 @@ from .models import (
     UsageRateCard,
     UsageService,
     UsageWallet,
+    Village,
     WardProfile,
 )
-from .permissions import capability_required, module_required
+from .permissions import (
+    VIEW_ALL_ROLES,
+    capability_required,
+    can_approve_member,
+    can_approve_village,
+    can_create_village,
+    creatable_roles,
+    module_required,
+    pending_members_for,
+    pending_villages_for,
+    scope_queryset,
+    team_member_for_user,
+)
+from django.core.exceptions import PermissionDenied
 from .import_export import build_export_file, process_import_batch
 from .audit import log_audit
 from .services import (
@@ -433,7 +449,7 @@ def included_quota_create(request):
 def supporters(request):
     candidate = _active_candidate(request)
     query = request.GET.get("q", "")
-    records = Supporter.objects.filter(candidate=candidate).select_related("ward", "village").order_by("-created_at")
+    records = scope_queryset(Supporter.objects.filter(candidate=candidate), request.user, candidate).select_related("ward", "village").order_by("-created_at")
     if query:
         records = records.filter(Q(full_name__icontains=query) | Q(phone__icontains=query) | Q(village__name__icontains=query))
     return render(request, "campaigns/supporters.html", {"candidate": candidate, "records": records[:100], "query": query})
@@ -443,21 +459,60 @@ def supporters(request):
 @module_required("core-crm")
 def team(request):
     candidate = _active_candidate(request)
-    records = TeamMember.objects.filter(candidate=candidate).select_related("district", "llg", "ward", "village").order_by("role", "full_name")
-    return render(request, "campaigns/team.html", {"candidate": candidate, "records": records})
+    member = team_member_for_user(request.user, candidate)
+    records = (
+        scope_queryset(
+            TeamMember.objects.filter(candidate=candidate, approval_status=ApprovalStatus.APPROVED),
+            request.user,
+            candidate,
+        )
+        .select_related("district", "llg", "ward", "village")
+        .order_by("role", "full_name")
+    )
+    pending = pending_members_for(request.user, candidate).order_by("role", "full_name")
+    pending_villages = pending_villages_for(request.user, candidate).order_by("ward__name", "name")
+    can_add = request.user.is_superuser or bool(creatable_roles(member, candidate))
+    can_add_village = request.user.is_superuser or can_create_village(member)
+    return render(
+        request,
+        "campaigns/team.html",
+        {
+            "candidate": candidate,
+            "records": records,
+            "pending": pending,
+            "pending_villages": pending_villages,
+            "current_member": member,
+            "can_add": can_add,
+            "can_add_village": can_add_village,
+        },
+    )
 
 
 @login_required
 @module_required("core-crm")
-@capability_required("manage_team")
 def team_member_create(request):
     candidate = _active_candidate(request)
-    form = TeamMemberQuickForm(request.POST or None, candidate=candidate)
+    creator = team_member_for_user(request.user, candidate)
+    # Only roles that have someone below them (or superuser) may add team members.
+    if not request.user.is_superuser and not creatable_roles(creator, candidate):
+        raise PermissionDenied
+    form = TeamMemberQuickForm(request.POST or None, candidate=candidate, creator_member=creator)
     if form.is_valid():
         member = form.save(commit=False)
         member.candidate = candidate
         member.created_by = request.user
         member.updated_by = request.user
+        member.created_by_member = creator
+        # Senior/admin creators (and superuser) approve immediately; coordinators
+        # create a PENDING member that their own supervisor must approve.
+        auto_approve = request.user.is_superuser or creator is None or creator.role in VIEW_ALL_ROLES
+        if auto_approve:
+            member.approval_status = ApprovalStatus.APPROVED
+            member.approved_by = creator
+            member.approved_at = timezone.now()
+        else:
+            member.approval_status = ApprovalStatus.PENDING
+            member.is_active = False  # cannot act until approved
         member.save()
         account = provision_team_member_login(
             member,
@@ -465,8 +520,10 @@ def team_member_create(request):
             form.cleaned_data.get("login_password"),
             user=request.user,
         )
-        log_audit(request, "TEAM_MEMBER_CREATED", member, new_value={"role": member.role})
-        if account:
+        log_audit(request, "TEAM_MEMBER_CREATED", member, new_value={"role": member.role, "approval": member.approval_status})
+        if member.is_pending:
+            messages.success(request, f"{member.full_name} added and is awaiting approval from your supervisor.")
+        elif account:
             messages.success(request, f"Team member saved. Mobile login enabled for {account.username}.")
         else:
             messages.success(request, "Team member saved.")
@@ -498,6 +555,111 @@ def team_member_edit(request, member_id):
             messages.success(request, "Team member updated.")
         return redirect("team")
     return render(request, "campaigns/form.html", {"candidate": candidate, "form": form, "title": "Edit Team Member", "submit_label": "Save changes"})
+
+
+@login_required
+@module_required("core-crm")
+def team_member_approve(request, member_id):
+    candidate = _active_candidate(request)
+    member = get_object_or_404(TeamMember, candidate=candidate, id=member_id)
+    approver = team_member_for_user(request.user, candidate)
+    allowed = request.user.is_superuser or (approver is not None and can_approve_member(approver, member))
+    if not allowed:
+        raise PermissionDenied
+    if request.method == "POST" and member.is_pending:
+        member.approve(by_member=approver)
+        member.updated_by = request.user
+        member.save()
+        log_audit(request, "TEAM_MEMBER_APPROVED", member, new_value={"role": member.role})
+        messages.success(request, f"{member.full_name} approved and activated.")
+    return redirect("team")
+
+
+@login_required
+@module_required("core-crm")
+def team_member_reject(request, member_id):
+    candidate = _active_candidate(request)
+    member = get_object_or_404(TeamMember, candidate=candidate, id=member_id)
+    approver = team_member_for_user(request.user, candidate)
+    allowed = request.user.is_superuser or (approver is not None and can_approve_member(approver, member))
+    if not allowed:
+        raise PermissionDenied
+    if request.method == "POST" and member.is_pending:
+        member.reject(by_member=approver)
+        member.updated_by = request.user
+        member.save()
+        log_audit(request, "TEAM_MEMBER_REJECTED", member, new_value={"role": member.role})
+        messages.warning(request, f"{member.full_name} was rejected.")
+    return redirect("team")
+
+
+@login_required
+@module_required("core-crm")
+def village_create(request):
+    candidate = _active_candidate(request)
+    creator = team_member_for_user(request.user, candidate)
+    if not request.user.is_superuser and not can_create_village(creator):
+        raise PermissionDenied
+    form = VillageQuickForm(request.POST or None, candidate=candidate, creator_member=creator)
+    if form.is_valid():
+        village = form.save(commit=False)
+        village.created_by = request.user
+        village.created_by_member = creator
+        # Senior roles and superusers add official villages straight away;
+        # ward coordinators submit them for LLG-coordinator approval.
+        auto_approve = request.user.is_superuser or creator is None or creator.role in VIEW_ALL_ROLES
+        if auto_approve:
+            village.approval_status = ApprovalStatus.APPROVED
+            village.approved_by = creator
+            village.approved_at = timezone.now()
+        else:
+            village.approval_status = ApprovalStatus.PENDING
+        village.save()
+        log_audit(request, "VILLAGE_CREATED", new_value={"name": village.name, "ward": village.ward.name, "approval": village.approval_status})
+        if village.is_pending:
+            messages.success(request, f"Village “{village.name}” submitted for LLG-coordinator approval.")
+        else:
+            messages.success(request, f"Village “{village.name}” added.")
+        return redirect("team")
+    return render(request, "campaigns/form.html", {"candidate": candidate, "form": form, "title": "Add Village / Area", "submit_label": "Submit village"})
+
+
+@login_required
+@module_required("core-crm")
+def village_approve(request, village_id):
+    candidate = _active_candidate(request)
+    village = get_object_or_404(Village, id=village_id)
+    approver = team_member_for_user(request.user, candidate)
+    allowed = request.user.is_superuser or (approver is not None and can_approve_village(approver, village))
+    if not allowed:
+        raise PermissionDenied
+    if request.method == "POST" and village.is_pending:
+        village.approval_status = ApprovalStatus.APPROVED
+        village.approved_by = approver
+        village.approved_at = timezone.now()
+        village.save(update_fields=["approval_status", "approved_by", "approved_at"])
+        log_audit(request, "VILLAGE_APPROVED", new_value={"name": village.name})
+        messages.success(request, f"Village “{village.name}” approved.")
+    return redirect("team")
+
+
+@login_required
+@module_required("core-crm")
+def village_reject(request, village_id):
+    candidate = _active_candidate(request)
+    village = get_object_or_404(Village, id=village_id)
+    approver = team_member_for_user(request.user, candidate)
+    allowed = request.user.is_superuser or (approver is not None and can_approve_village(approver, village))
+    if not allowed:
+        raise PermissionDenied
+    if request.method == "POST" and village.is_pending:
+        village.approval_status = ApprovalStatus.REJECTED
+        village.approved_by = approver
+        village.approved_at = timezone.now()
+        village.save(update_fields=["approval_status", "approved_by", "approved_at"])
+        log_audit(request, "VILLAGE_REJECTED", new_value={"name": village.name})
+        messages.warning(request, f"Village “{village.name}” rejected.")
+    return redirect("team")
 
 
 @login_required
@@ -651,7 +813,7 @@ def message_mark_acknowledged(request, message_id):
 @module_required("events-tasks")
 def tasks(request):
     candidate = _active_candidate(request)
-    records = CampaignTask.objects.filter(candidate=candidate).select_related("assigned_to").order_by("due_date", "-created_at")[:80]
+    records = scope_queryset(CampaignTask.objects.filter(candidate=candidate), request.user, candidate).select_related("assigned_to").order_by("due_date", "-created_at")[:80]
     return render(request, "campaigns/tasks.html", {"candidate": candidate, "records": records})
 
 
@@ -711,7 +873,7 @@ def ward_profile_edit(request, profile_id):
 @module_required("ward-intelligence")
 def ward_briefs(request):
     candidate = _active_candidate(request)
-    records = WardProfile.objects.filter(candidate=candidate).select_related("ward", "ward__llg").order_by("ward__name")
+    records = scope_queryset(WardProfile.objects.filter(candidate=candidate), request.user, candidate).select_related("ward", "ward__llg").order_by("ward__name")
     return render(request, "campaigns/ward_briefs.html", {"candidate": candidate, "records": records})
 
 
@@ -757,7 +919,8 @@ def ward_speech_create(request, profile_id):
 
 def _list_create(request, model, form_class, template, title, success_message, create_route=None, queryset=None):
     candidate = _active_candidate(request)
-    records = (queryset or model.objects.filter(candidate=candidate)).order_by("-created_at")[:100]
+    base_qs = queryset if queryset is not None else scope_queryset(model.objects.filter(candidate=candidate), request.user, candidate)
+    records = base_qs.order_by("-created_at")[:100]
     if request.method == "POST":
         form = form_class(request.POST, request.FILES or None, candidate=candidate)
         if form.is_valid():
@@ -780,7 +943,7 @@ def _list_create(request, model, form_class, template, title, success_message, c
 def influencers(request):
     candidate = _active_candidate(request)
     query = request.GET.get("q", "")
-    records = Influencer.objects.filter(candidate=candidate).select_related("ward", "village", "assigned_owner").order_by("next_contact_due_date", "full_name")
+    records = scope_queryset(Influencer.objects.filter(candidate=candidate), request.user, candidate).select_related("ward", "village", "assigned_owner").order_by("next_contact_due_date", "full_name")
     if query:
         records = records.filter(Q(full_name__icontains=query) | Q(phone__icontains=query) | Q(community_role__icontains=query))
     return render(request, "campaigns/influencers.html", {"candidate": candidate, "records": records[:100], "query": query})
@@ -807,7 +970,7 @@ def influencer_create(request):
 @module_required("events-tasks")
 def events(request):
     candidate = _active_candidate(request)
-    records = CampaignEvent.objects.filter(candidate=candidate).select_related("ward", "village", "landmark").order_by("start_datetime")[:100]
+    records = scope_queryset(CampaignEvent.objects.filter(candidate=candidate), request.user, candidate).select_related("ward", "village", "landmark").order_by("start_datetime")[:100]
     return render(request, "campaigns/events.html", {"candidate": candidate, "records": records})
 
 
@@ -832,7 +995,7 @@ def event_create(request):
 @module_required("ward-intelligence")
 def issues(request):
     candidate = _active_candidate(request)
-    records = CommunityIssue.objects.filter(candidate=candidate).select_related("ward", "village").order_by("-created_at")[:100]
+    records = scope_queryset(CommunityIssue.objects.filter(candidate=candidate), request.user, candidate).select_related("ward", "village").order_by("-created_at")[:100]
     promises = PromiseTracker.objects.filter(candidate=candidate).select_related("ward", "follow_up_owner").order_by("target_date")[:60]
     return render(request, "campaigns/issues.html", {"candidate": candidate, "records": records, "promises": promises})
 
@@ -953,7 +1116,7 @@ def export_download(request, export_id):
 @module_required("polling-war-room")
 def polling(request):
     candidate = _active_candidate(request)
-    locations = PollingLocation.objects.filter(candidate=candidate).select_related("ward", "assigned_scrutineer").order_by("ward__name", "name")
+    locations = scope_queryset(PollingLocation.objects.filter(candidate=candidate), request.user, candidate).select_related("ward", "assigned_scrutineer").order_by("ward__name", "name")
     incidents = PollingIncident.objects.filter(candidate=candidate).exclude(status="RESOLVED").order_by("-created_at")[:20]
     statuses = PollingStatus.objects.filter(candidate=candidate).select_related("polling_location", "reported_by")[:20]
     return render(request, "campaigns/polling.html", {"candidate": candidate, "locations": locations, "incidents": incidents, "statuses": statuses})
@@ -1014,7 +1177,7 @@ def polling_incident_create(request):
 @module_required("constituency-management")
 def constituency(request):
     candidate = _active_candidate(request)
-    records = CitizenRequest.objects.filter(candidate=candidate).select_related("ward", "assigned_to").order_by("-created_at")[:100]
+    records = scope_queryset(CitizenRequest.objects.filter(candidate=candidate), request.user, candidate).select_related("ward", "assigned_to").order_by("-created_at")[:100]
     return render(request, "campaigns/constituency.html", {"candidate": candidate, "records": records})
 
 
@@ -1107,7 +1270,7 @@ def preference_deal_edit(request, deal_id):
 def community_groups(request):
     candidate = _active_candidate(request)
     ward_id = request.GET.get("ward")
-    records = CommunityGroup.objects.filter(candidate=candidate).select_related("ward", "village", "key_contact")
+    records = scope_queryset(CommunityGroup.objects.filter(candidate=candidate), request.user, candidate).select_related("ward", "village", "key_contact")
     if ward_id:
         records = records.filter(ward_id=ward_id)
     return render(request, "campaigns/community_groups.html", {"candidate": candidate, "records": records, "wards": candidate.available_wards()})
@@ -1147,7 +1310,7 @@ def community_group_edit(request, group_id):
 @login_required
 def community_assistance(request):
     candidate = _active_candidate(request)
-    records = CommunityAssistance.objects.filter(candidate=candidate).select_related("ward", "village", "approved_by").order_by("-date")[:200]
+    records = scope_queryset(CommunityAssistance.objects.filter(candidate=candidate), request.user, candidate).select_related("ward", "village", "approved_by").order_by("-date")[:200]
     total_pgk = sum(r.estimated_value_pgk for r in records)
     return render(request, "campaigns/community_assistance.html", {"candidate": candidate, "records": records, "total_pgk": total_pgk})
 
@@ -1172,7 +1335,7 @@ def community_assistance_create(request):
 @login_required
 def competitor_activities(request):
     candidate = _active_candidate(request)
-    records = CompetitorActivity.objects.filter(candidate=candidate).select_related("ward", "response_assigned_to").order_by("-date")[:200]
+    records = scope_queryset(CompetitorActivity.objects.filter(candidate=candidate), request.user, candidate).select_related("ward", "response_assigned_to").order_by("-date")[:200]
     return render(request, "campaigns/competitor_activities.html", {"candidate": candidate, "records": records})
 
 
@@ -1209,7 +1372,7 @@ def competitor_activity_edit(request, activity_id):
 @login_required
 def development_funds(request):
     candidate = _active_candidate(request)
-    records = DevelopmentFund.objects.filter(candidate=candidate).select_related("ward", "district").order_by("-financial_year", "fund_name")
+    records = scope_queryset(DevelopmentFund.objects.filter(candidate=candidate), request.user, candidate).select_related("ward", "district").order_by("-financial_year", "fund_name")
     return render(request, "campaigns/development_funds.html", {"candidate": candidate, "records": records})
 
 
@@ -1249,7 +1412,7 @@ def development_fund_edit(request, fund_id):
 @login_required
 def registration_drives(request):
     candidate = _active_candidate(request)
-    records = RegistrationDrive.objects.filter(candidate=candidate).select_related("ward").prefetch_related("team_members")
+    records = scope_queryset(RegistrationDrive.objects.filter(candidate=candidate), request.user, candidate).select_related("ward").prefetch_related("team_members")
     return render(request, "campaigns/registration_drives.html", {"candidate": candidate, "records": records})
 
 
@@ -1290,7 +1453,7 @@ def registration_drive_edit(request, drive_id):
 def polling_command_center(request):
     """Polling-day live command center: booth tallies, security risks, scrutineer status."""
     candidate = _active_candidate(request)
-    locations = PollingLocation.objects.filter(candidate=candidate).select_related(
+    locations = scope_queryset(PollingLocation.objects.filter(candidate=candidate), request.user, candidate).select_related(
         "ward", "assigned_scrutineer", "backup_scrutineer"
     ).prefetch_related("status_updates").order_by("ward__name", "name")
 

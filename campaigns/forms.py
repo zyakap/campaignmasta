@@ -34,6 +34,8 @@ from .models import (
     UsageRateCard,
     UsageTopUp,
     UsageWallet,
+    Village,
+    Ward,
     WardProfile,
 )
 from .services import role_choices_for_candidate
@@ -83,7 +85,9 @@ class SupporterQuickForm(MobileFormMixin, forms.ModelForm):
             self.fields["district"].queryset = district_queryset
             self.fields["llg"].queryset = self.fields["llg"].queryset.filter(district__in=district_queryset)
             self.fields["ward"].queryset = self.fields["ward"].queryset.filter(llg__district__in=district_queryset)
-            self.fields["village"].queryset = self.fields["village"].queryset.filter(ward__llg__district__in=district_queryset)
+            self.fields["village"].queryset = self.fields["village"].queryset.filter(
+                ward__llg__district__in=district_queryset, approval_status="APPROVED"
+            )
 
 
 class TeamMemberQuickForm(MobileFormMixin, forms.ModelForm):
@@ -117,9 +121,10 @@ class TeamMemberQuickForm(MobileFormMixin, forms.ModelForm):
         ]
         widgets = {"notes": forms.Textarea(attrs={"rows": 3})}
 
-    def __init__(self, *args, candidate=None, **kwargs):
+    def __init__(self, *args, candidate=None, creator_member=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.candidate = candidate
+        self.creator_member = creator_member
         if candidate:
             self.fields["role"].choices = role_choices_for_candidate(candidate)
             self.fields["province"].queryset = self.fields["province"].queryset.filter(id=candidate.province_id)
@@ -127,9 +132,40 @@ class TeamMemberQuickForm(MobileFormMixin, forms.ModelForm):
             self.fields["district"].queryset = district_queryset
             self.fields["llg"].queryset = candidate.available_llgs()
             self.fields["ward"].queryset = candidate.available_wards()
-            self.fields["village"].queryset = self.fields["village"].queryset.filter(ward__in=candidate.available_wards())
+            self.fields["village"].queryset = self.fields["village"].queryset.filter(
+                ward__in=candidate.available_wards(), approval_status="APPROVED"
+            )
+            self._restrict_to_creator(creator_member)
         if self.instance and self.instance.pk and self.instance.user_id:
             self.fields["login_username"].initial = self.instance.user.username
+
+    def _restrict_to_creator(self, creator_member):
+        """Limit the role choices to subordinate roles, and the geography fields
+        to the creator's own branch, so coordinators only build their own team."""
+        from .permissions import VIEW_ALL_ROLES, creatable_roles
+
+        if creator_member is None or creator_member.role in VIEW_ALL_ROLES:
+            return  # candidate / manager / IT admin create campaign-wide
+        # Restrict creatable roles.
+        self.fields["role"].choices = creatable_roles(creator_member, self.candidate)
+        # Lock geography to the creator's assignment and narrow the level below.
+        if creator_member.district_id:
+            self.fields["district"].queryset = self.fields["district"].queryset.filter(id=creator_member.district_id)
+            self.fields["district"].initial = creator_member.district_id
+        if creator_member.llg_id:
+            self.fields["llg"].queryset = self.fields["llg"].queryset.filter(id=creator_member.llg_id)
+            self.fields["llg"].initial = creator_member.llg_id
+        elif creator_member.district_id:
+            self.fields["llg"].queryset = self.fields["llg"].queryset.filter(district_id=creator_member.district_id)
+        if creator_member.ward_id:
+            self.fields["ward"].queryset = self.fields["ward"].queryset.filter(id=creator_member.ward_id)
+            self.fields["ward"].initial = creator_member.ward_id
+        elif creator_member.llg_id:
+            self.fields["ward"].queryset = self.fields["ward"].queryset.filter(llg_id=creator_member.llg_id)
+        if creator_member.village_id:
+            self.fields["village"].queryset = self.fields["village"].queryset.filter(id=creator_member.village_id)
+        elif creator_member.ward_id:
+            self.fields["village"].queryset = self.fields["village"].queryset.filter(ward_id=creator_member.ward_id)
 
     def clean_login_username(self):
         from django.contrib.auth import get_user_model
@@ -155,6 +191,28 @@ class TeamMemberQuickForm(MobileFormMixin, forms.ModelForm):
         if password and not username and not (self.instance and self.instance.user_id):
             self.add_error("login_username", "Set a username to enable mobile login.")
         return cleaned
+
+
+class VillageQuickForm(MobileFormMixin, forms.ModelForm):
+    class Meta:
+        model = Village
+        fields = ["ward", "name"]
+
+    def __init__(self, *args, candidate=None, creator_member=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        qs = candidate.available_wards() if candidate else Ward.objects.all()
+        if creator_member is not None:
+            from .permissions import VIEW_ALL_ROLES
+
+            if creator_member.role not in VIEW_ALL_ROLES:
+                if creator_member.ward_id:
+                    qs = qs.filter(id=creator_member.ward_id)
+                elif creator_member.llg_id:
+                    qs = qs.filter(llg_id=creator_member.llg_id)
+                elif creator_member.district_id:
+                    qs = qs.filter(llg__district_id=creator_member.district_id)
+        self.fields["ward"].queryset = qs
+        self.fields["name"].widget.attrs["placeholder"] = "Village / area name"
 
 
 class CallLogQuickForm(MobileFormMixin, forms.ModelForm):

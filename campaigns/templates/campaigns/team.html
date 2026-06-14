@@ -1,9 +1,73 @@
 {% extends "campaigns/base.html" %}
 {% block content %}
   <section class="page-head">
-    <div><p class="eyebrow">Team Management</p><h1>Campaign Team</h1></div>
-    <a class="primary-btn" href="{% url 'team_member_create' %}">Add</a>
+    <div>
+      <p class="eyebrow">Team Management</p>
+      <h1>Campaign Team</h1>
+      {% if current_member %}<p class="muted" style="font-size:13px">You are {{ current_member.get_role_display }}{% if current_member.ward %} · {{ current_member.ward }}{% elif current_member.llg %} · {{ current_member.llg }}{% elif current_member.district %} · {{ current_member.district }}{% endif %}</p>{% endif %}
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      {% if can_add_village %}<a class="secondary-btn" href="{% url 'village_create' %}">Add Village</a>{% endif %}
+      {% if can_add %}<a class="primary-btn" href="{% url 'team_member_create' %}">Add Member</a>{% endif %}
+    </div>
   </section>
+
+  {% if pending_villages %}
+  <div class="panel urgent" style="margin-bottom:16px">
+    <div class="panel-title"><h2>Villages Awaiting Approval ({{ pending_villages|length }})</h2></div>
+    <div style="padding:6px 16px 14px">
+      {% for village in pending_villages %}
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);flex-wrap:wrap">
+          <div style="flex:1;min-width:0">
+            <strong>{{ village.name }}</strong>
+            <span class="tag tag-warn">Village</span>
+            <div class="muted" style="font-size:12px">
+              {{ village.ward }}{% if village.ward.llg %} · {{ village.ward.llg }}{% endif %}
+              {% if village.created_by_member %} · added by {{ village.created_by_member.full_name }}{% endif %}
+            </div>
+          </div>
+          <form method="post" action="{% url 'village_approve' village.id %}" style="margin:0">
+            {% csrf_token %}
+            <button type="submit" class="primary-btn" style="min-height:40px">Approve</button>
+          </form>
+          <form method="post" action="{% url 'village_reject' village.id %}" style="margin:0" onsubmit="return confirm('Reject {{ village.name|escapejs }}?');">
+            {% csrf_token %}
+            <button type="submit" class="secondary-btn" style="min-height:40px">Reject</button>
+          </form>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  {% if pending %}
+  <div class="panel urgent" style="margin-bottom:16px">
+    <div class="panel-title"><h2>Awaiting Your Approval ({{ pending|length }})</h2></div>
+    <div style="padding:6px 16px 14px">
+      {% for member in pending %}
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);flex-wrap:wrap">
+          <div style="flex:1;min-width:0">
+            <strong>{{ member.full_name }}</strong>
+            <span class="tag tag-warn">{{ member.get_role_display }}</span>
+            <div class="muted" style="font-size:12px">
+              {% if member.ward %}{{ member.ward }}{% elif member.llg %}{{ member.llg }}{% elif member.district %}{{ member.district }}{% endif %}
+              {% if member.created_by_member %} · added by {{ member.created_by_member.full_name }}{% endif %}
+            </div>
+          </div>
+          <form method="post" action="{% url 'team_member_approve' member.id %}" style="margin:0">
+            {% csrf_token %}
+            <button type="submit" class="primary-btn" style="min-height:40px">Approve</button>
+          </form>
+          <form method="post" action="{% url 'team_member_reject' member.id %}" style="margin:0" onsubmit="return confirm('Reject {{ member.full_name|escapejs }}?');">
+            {% csrf_token %}
+            <button type="submit" class="secondary-btn" style="min-height:40px">Reject</button>
+          </form>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
   <section class="record-list">
     {% for member in records %}
       <article class="record-card">
@@ -11,7 +75,7 @@
         <p>{{ member.phone|default:"No phone" }}{% if member.ward %} · {{ member.ward }}{% elif member.llg %} · {{ member.llg }}{% elif member.district %} · {{ member.district }}{% endif %}</p>
         <small>
           {% if member.is_active %}Active{% else %}Inactive{% endif %}
-          {% if member.user_id %} · <span class="tag tag-ok">📱 Mobile login: {{ member.user.username }}</span>{% else %} · <span class="tag tag-muted">No mobile login</span>{% endif %}
+          {% if member.user_id %} · <span class="tag tag-ok">📱 {{ member.user.username }}</span>{% else %} · <span class="tag tag-muted">No mobile login</span>{% endif %}
           {% if member.notes %} · {{ member.notes }}{% endif %}
         </small>
         <div class="card-actions">
@@ -19,7 +83,7 @@
         </div>
       </article>
     {% empty %}
-      <p class="muted">No team members yet.</p>
+      <p class="muted">No team members in your area yet.</p>
     {% endfor %}
   </section>
 {% endblock %}

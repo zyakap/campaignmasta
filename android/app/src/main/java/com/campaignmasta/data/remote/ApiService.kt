@@ -27,12 +27,49 @@ interface ApiService {
     @POST("api/supporters/")
     suspend fun createSupporter(@Body request: Map<String, Any?>): Response<SupporterDto>
 
-    // ── Team Members ──────────────────────────────────────────────────────────
+    // ── Team Members & hierarchy ──────────────────────────────────────────────
 
     @GET("api/team-members/")
     suspend fun getTeamMembers(
         @Query("updated_after") updatedAfter: String? = null
     ): Response<ListResponse<TeamMemberDto>>
+
+    @POST("api/team-members/")
+    suspend fun createTeamMember(@Body request: CreateTeamMemberRequest): Response<TeamMemberDto>
+
+    @GET("api/team-members/pending/")
+    suspend fun getPendingTeamMembers(): Response<ListResponse<TeamMemberDto>>
+
+    @GET("api/team-members/creatable-roles/")
+    suspend fun getCreatableRoles(): Response<CreatableRolesResponse>
+
+    @POST("api/team-members/{id}/approve/")
+    suspend fun approveTeamMember(
+        @Path("id") id: Int,
+        @Body request: ApprovalActionRequest
+    ): Response<TeamMemberDto>
+
+    // ── Geography (cascading pickers) ─────────────────────────────────────────
+
+    @GET("api/geography/")
+    suspend fun getGeography(
+        @Query("level") level: String,
+        @Query("parent") parent: Int? = null
+    ): Response<GeoResponse>
+
+    // ── Villages (create on request + approval) ───────────────────────────────
+
+    @GET("api/villages/")
+    suspend fun getPendingVillages(): Response<VillageListResponse>
+
+    @POST("api/villages/")
+    suspend fun createVillage(@Body request: CreateVillageRequest): Response<VillageDto>
+
+    @POST("api/villages/{id}/approve/")
+    suspend fun approveVillage(
+        @Path("id") id: Int,
+        @Body request: ApprovalActionRequest
+    ): Response<Map<String, Any?>>
 
     // ── Influencers ───────────────────────────────────────────────────────────
 

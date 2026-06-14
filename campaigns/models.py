@@ -34,6 +34,12 @@ class CandidateType(models.TextChoices):
     PROVINCIAL = "PROVINCIAL", "Provincial"
 
 
+class ApprovalStatus(models.TextChoices):
+    PENDING = "PENDING", "Pending Approval"
+    APPROVED = "APPROVED", "Approved"
+    REJECTED = "REJECTED", "Rejected"
+
+
 class Province(models.Model):
     name = models.CharField(max_length=120, unique=True)
 
@@ -84,10 +90,33 @@ class Ward(models.Model):
 class Village(models.Model):
     ward = models.ForeignKey(Ward, on_delete=models.CASCADE, related_name="villages")
     name = models.CharField(max_length=120)
+    # Villages vary on the ground, so coordinators may add new ones on request.
+    # Pre-populated/official villages default to APPROVED; coordinator-created
+    # ones are PENDING until the LLG coordinator for that ward approves them.
+    approval_status = models.CharField(
+        max_length=12, choices=ApprovalStatus.choices, default=ApprovalStatus.APPROVED,
+    )
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="villages_created",
+    )
+    created_by_member = models.ForeignKey(
+        "TeamMember", on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="villages_created",
+    )
+    approved_by = models.ForeignKey(
+        "TeamMember", on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="villages_approved",
+    )
+    approved_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         unique_together = ("ward", "name")
         ordering = ["ward__name", "name"]
+
+    @property
+    def is_pending(self):
+        return self.approval_status == ApprovalStatus.PENDING
 
     def __str__(self):
         return self.name
@@ -700,7 +729,9 @@ class Role(models.TextChoices):
     DISTRICT_COORDINATOR = "DISTRICT_COORDINATOR", "District Coordinator"
     LLG_COORDINATOR = "LLG_COORDINATOR", "LLG Coordinator"
     WARD_COORDINATOR = "WARD_COORDINATOR", "Ward Coordinator"
-    VILLAGE_COORDINATOR = "VILLAGE_COORDINATOR", "Village Coordinator"
+    # Stored value kept as VILLAGE_COORDINATOR for data compatibility; the
+    # operational label is "Area Coordinator" (an area = a village-level unit).
+    VILLAGE_COORDINATOR = "VILLAGE_COORDINATOR", "Area Coordinator"
     VOLUNTEER = "VOLUNTEER", "Volunteer"
     SCRUTINEER = "SCRUTINEER", "Polling-Day Scrutineer"
 
@@ -729,6 +760,21 @@ class TeamMember(TenantOwnedModel):
     notes = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)
 
+    # ── Hierarchy & approval workflow ──────────────────────────────────────────
+    # The TeamMember who created this record (distinct from created_by, a User).
+    created_by_member = models.ForeignKey(
+        "self", on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="created_members",
+    )
+    approval_status = models.CharField(
+        max_length=12, choices=ApprovalStatus.choices, default=ApprovalStatus.APPROVED,
+    )
+    approved_by = models.ForeignKey(
+        "self", on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="approved_members",
+    )
+    approved_at = models.DateTimeField(null=True, blank=True)
+
     class Meta:
         ordering = ["role", "full_name"]
 
@@ -738,6 +784,26 @@ class TeamMember(TenantOwnedModel):
                 raise ValidationError({"role": "District Coordinators are only enabled for Provincial campaigns."})
             if self.province_id != self.candidate.province_id:
                 raise ValidationError({"province": "Team member must be assigned inside the candidate province."})
+
+    @property
+    def is_pending(self):
+        return self.approval_status == ApprovalStatus.PENDING
+
+    @property
+    def is_approved(self):
+        return self.approval_status == ApprovalStatus.APPROVED
+
+    def approve(self, by_member=None):
+        self.approval_status = ApprovalStatus.APPROVED
+        self.approved_by = by_member
+        self.approved_at = timezone.now()
+        self.is_active = True
+
+    def reject(self, by_member=None):
+        self.approval_status = ApprovalStatus.REJECTED
+        self.approved_by = by_member
+        self.approved_at = timezone.now()
+        self.is_active = False
 
     def __str__(self):
         return f"{self.full_name} ({self.get_role_display()})"

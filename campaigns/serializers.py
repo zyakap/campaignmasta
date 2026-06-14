@@ -97,7 +97,12 @@ class SupporterSerializer(serializers.ModelSerializer):
 
 class TeamMemberSerializer(serializers.ModelSerializer):
     province_name = serializers.CharField(source="province.name", read_only=True)
+    district_name = serializers.CharField(source="district.name", read_only=True, default=None)
+    llg_name = serializers.CharField(source="llg.name", read_only=True, default=None)
     ward_name = serializers.CharField(source="ward.name", read_only=True, default=None)
+    village_name = serializers.CharField(source="village.name", read_only=True, default=None)
+    role_display = serializers.CharField(source="get_role_display", read_only=True)
+    created_by_member_name = serializers.CharField(source="created_by_member.full_name", read_only=True, default=None)
 
     class Meta:
         model = TeamMember
@@ -108,20 +113,26 @@ class TeamMemberSerializer(serializers.ModelSerializer):
             "phone",
             "email",
             "role",
+            "role_display",
             "province",
             "province_name",
             "district",
+            "district_name",
             "llg",
+            "llg_name",
             "ward",
             "ward_name",
             "village",
+            "village_name",
             "influence_level",
             "is_active",
+            "approval_status",
+            "created_by_member_name",
             "notes",
             "created_at",
             "updated_at",
         ]
-        read_only_fields = ["id", "created_at", "updated_at"]
+        read_only_fields = ["id", "role_display", "approval_status", "created_by_member_name", "created_at", "updated_at"]
 
 
 # ─── Influencer ───────────────────────────────────────────────────────────────

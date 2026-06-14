@@ -4,7 +4,9 @@ from campaigns.api_views import (
     CallLogCreateView,
     CommunityGroupListCreateView,
     CompetitorActivityCreateView,
+    CreatableRolesView,
     DashboardView,
+    GeographyView,
     InfluencerListView,
     LoginView,
     MessageAcknowledgeView,
@@ -16,7 +18,11 @@ from campaigns.api_views import (
     RegistrationDriveListView,
     SupporterListCreateView,
     SyncPushView,
+    TeamMemberApproveView,
     TeamMemberListView,
+    TeamMemberPendingView,
+    VillageApproveView,
+    VillageListCreateView,
     WardProfileListView,
 )
 
@@ -30,8 +36,16 @@ urlpatterns = [
     # Supporters
     path("supporters/", SupporterListCreateView.as_view(), name="api_supporters"),
 
-    # Team Members
+    # Team Members & hierarchy
     path("team-members/", TeamMemberListView.as_view(), name="api_team_members"),
+    path("team-members/pending/", TeamMemberPendingView.as_view(), name="api_team_members_pending"),
+    path("team-members/creatable-roles/", CreatableRolesView.as_view(), name="api_creatable_roles"),
+    path("team-members/<int:pk>/approve/", TeamMemberApproveView.as_view(), name="api_team_member_approve"),
+
+    # Geography (cascading pickers) & villages
+    path("geography/", GeographyView.as_view(), name="api_geography"),
+    path("villages/", VillageListCreateView.as_view(), name="api_villages"),
+    path("villages/<int:pk>/approve/", VillageApproveView.as_view(), name="api_village_approve"),
 
     # Influencers
     path("influencers/", InfluencerListView.as_view(), name="api_influencers"),
