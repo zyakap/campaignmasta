@@ -29,6 +29,7 @@ import com.campaignmasta.data.repository.AuthRepository;
 import com.campaignmasta.data.repository.MessageRepository;
 import com.campaignmasta.data.repository.SupporterRepository;
 import com.campaignmasta.data.repository.SyncRepository;
+import com.campaignmasta.data.repository.TeamRepository;
 import com.campaignmasta.di.AppModule_ProvideUserPreferencesFactory;
 import com.campaignmasta.di.DatabaseModule_CallLogDaoFactory;
 import com.campaignmasta.di.DatabaseModule_CommunityGroupDaoFactory;
@@ -58,6 +59,10 @@ import com.campaignmasta.ui.screens.polling.PollingViewModel;
 import com.campaignmasta.ui.screens.polling.PollingViewModel_HiltModules;
 import com.campaignmasta.ui.screens.supporters.SupporterViewModel;
 import com.campaignmasta.ui.screens.supporters.SupporterViewModel_HiltModules;
+import com.campaignmasta.ui.screens.team.AddMemberViewModel;
+import com.campaignmasta.ui.screens.team.AddMemberViewModel_HiltModules;
+import com.campaignmasta.ui.screens.team.TeamViewModel;
+import com.campaignmasta.ui.screens.team.TeamViewModel_HiltModules;
 import com.campaignmasta.ui.screens.wards.WardViewModel;
 import com.campaignmasta.ui.screens.wards.WardViewModel_HiltModules;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
@@ -425,7 +430,7 @@ public final class DaggerCampaignMastaApp_HiltComponents_SingletonC {
 
     @Override
     public Map<Class<?>, Boolean> getViewModelKeys() {
-      return LazyClassKeyMap.<Boolean>of(MapBuilder.<String, Boolean>newMapBuilder(7).put(LazyClassKeyProvider.com_campaignmasta_ui_screens_calls_CallViewModel, CallViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_campaignmasta_ui_screens_dashboard_DashboardViewModel, DashboardViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_campaignmasta_ui_screens_auth_LoginViewModel, LoginViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_campaignmasta_ui_screens_messages_MessageViewModel, MessageViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_campaignmasta_ui_screens_polling_PollingViewModel, PollingViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_campaignmasta_ui_screens_supporters_SupporterViewModel, SupporterViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_campaignmasta_ui_screens_wards_WardViewModel, WardViewModel_HiltModules.KeyModule.provide()).build());
+      return LazyClassKeyMap.<Boolean>of(MapBuilder.<String, Boolean>newMapBuilder(9).put(LazyClassKeyProvider.com_campaignmasta_ui_screens_team_AddMemberViewModel, AddMemberViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_campaignmasta_ui_screens_calls_CallViewModel, CallViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_campaignmasta_ui_screens_dashboard_DashboardViewModel, DashboardViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_campaignmasta_ui_screens_auth_LoginViewModel, LoginViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_campaignmasta_ui_screens_messages_MessageViewModel, MessageViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_campaignmasta_ui_screens_polling_PollingViewModel, PollingViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_campaignmasta_ui_screens_supporters_SupporterViewModel, SupporterViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_campaignmasta_ui_screens_team_TeamViewModel, TeamViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_campaignmasta_ui_screens_wards_WardViewModel, WardViewModel_HiltModules.KeyModule.provide()).build());
     }
 
     @Override
@@ -445,40 +450,50 @@ public final class DaggerCampaignMastaApp_HiltComponents_SingletonC {
 
     @IdentifierNameString
     private static final class LazyClassKeyProvider {
-      static String com_campaignmasta_ui_screens_dashboard_DashboardViewModel = "com.campaignmasta.ui.screens.dashboard.DashboardViewModel";
-
-      static String com_campaignmasta_ui_screens_supporters_SupporterViewModel = "com.campaignmasta.ui.screens.supporters.SupporterViewModel";
+      static String com_campaignmasta_ui_screens_team_AddMemberViewModel = "com.campaignmasta.ui.screens.team.AddMemberViewModel";
 
       static String com_campaignmasta_ui_screens_wards_WardViewModel = "com.campaignmasta.ui.screens.wards.WardViewModel";
 
-      static String com_campaignmasta_ui_screens_calls_CallViewModel = "com.campaignmasta.ui.screens.calls.CallViewModel";
-
       static String com_campaignmasta_ui_screens_messages_MessageViewModel = "com.campaignmasta.ui.screens.messages.MessageViewModel";
 
-      static String com_campaignmasta_ui_screens_polling_PollingViewModel = "com.campaignmasta.ui.screens.polling.PollingViewModel";
+      static String com_campaignmasta_ui_screens_calls_CallViewModel = "com.campaignmasta.ui.screens.calls.CallViewModel";
+
+      static String com_campaignmasta_ui_screens_supporters_SupporterViewModel = "com.campaignmasta.ui.screens.supporters.SupporterViewModel";
 
       static String com_campaignmasta_ui_screens_auth_LoginViewModel = "com.campaignmasta.ui.screens.auth.LoginViewModel";
 
-      @KeepFieldType
-      DashboardViewModel com_campaignmasta_ui_screens_dashboard_DashboardViewModel2;
+      static String com_campaignmasta_ui_screens_dashboard_DashboardViewModel = "com.campaignmasta.ui.screens.dashboard.DashboardViewModel";
+
+      static String com_campaignmasta_ui_screens_polling_PollingViewModel = "com.campaignmasta.ui.screens.polling.PollingViewModel";
+
+      static String com_campaignmasta_ui_screens_team_TeamViewModel = "com.campaignmasta.ui.screens.team.TeamViewModel";
 
       @KeepFieldType
-      SupporterViewModel com_campaignmasta_ui_screens_supporters_SupporterViewModel2;
+      AddMemberViewModel com_campaignmasta_ui_screens_team_AddMemberViewModel2;
 
       @KeepFieldType
       WardViewModel com_campaignmasta_ui_screens_wards_WardViewModel2;
 
       @KeepFieldType
+      MessageViewModel com_campaignmasta_ui_screens_messages_MessageViewModel2;
+
+      @KeepFieldType
       CallViewModel com_campaignmasta_ui_screens_calls_CallViewModel2;
 
       @KeepFieldType
-      MessageViewModel com_campaignmasta_ui_screens_messages_MessageViewModel2;
+      SupporterViewModel com_campaignmasta_ui_screens_supporters_SupporterViewModel2;
+
+      @KeepFieldType
+      LoginViewModel com_campaignmasta_ui_screens_auth_LoginViewModel2;
+
+      @KeepFieldType
+      DashboardViewModel com_campaignmasta_ui_screens_dashboard_DashboardViewModel2;
 
       @KeepFieldType
       PollingViewModel com_campaignmasta_ui_screens_polling_PollingViewModel2;
 
       @KeepFieldType
-      LoginViewModel com_campaignmasta_ui_screens_auth_LoginViewModel2;
+      TeamViewModel com_campaignmasta_ui_screens_team_TeamViewModel2;
     }
   }
 
@@ -488,6 +503,8 @@ public final class DaggerCampaignMastaApp_HiltComponents_SingletonC {
     private final ActivityRetainedCImpl activityRetainedCImpl;
 
     private final ViewModelCImpl viewModelCImpl = this;
+
+    private Provider<AddMemberViewModel> addMemberViewModelProvider;
 
     private Provider<CallViewModel> callViewModelProvider;
 
@@ -500,6 +517,8 @@ public final class DaggerCampaignMastaApp_HiltComponents_SingletonC {
     private Provider<PollingViewModel> pollingViewModelProvider;
 
     private Provider<SupporterViewModel> supporterViewModelProvider;
+
+    private Provider<TeamViewModel> teamViewModelProvider;
 
     private Provider<WardViewModel> wardViewModelProvider;
 
@@ -516,18 +535,20 @@ public final class DaggerCampaignMastaApp_HiltComponents_SingletonC {
     @SuppressWarnings("unchecked")
     private void initialize(final SavedStateHandle savedStateHandleParam,
         final ViewModelLifecycle viewModelLifecycleParam) {
-      this.callViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 0);
-      this.dashboardViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 1);
-      this.loginViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 2);
-      this.messageViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 3);
-      this.pollingViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 4);
-      this.supporterViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 5);
-      this.wardViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 6);
+      this.addMemberViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 0);
+      this.callViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 1);
+      this.dashboardViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 2);
+      this.loginViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 3);
+      this.messageViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 4);
+      this.pollingViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 5);
+      this.supporterViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 6);
+      this.teamViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 7);
+      this.wardViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 8);
     }
 
     @Override
     public Map<Class<?>, javax.inject.Provider<ViewModel>> getHiltViewModelMap() {
-      return LazyClassKeyMap.<javax.inject.Provider<ViewModel>>of(MapBuilder.<String, javax.inject.Provider<ViewModel>>newMapBuilder(7).put(LazyClassKeyProvider.com_campaignmasta_ui_screens_calls_CallViewModel, ((Provider) callViewModelProvider)).put(LazyClassKeyProvider.com_campaignmasta_ui_screens_dashboard_DashboardViewModel, ((Provider) dashboardViewModelProvider)).put(LazyClassKeyProvider.com_campaignmasta_ui_screens_auth_LoginViewModel, ((Provider) loginViewModelProvider)).put(LazyClassKeyProvider.com_campaignmasta_ui_screens_messages_MessageViewModel, ((Provider) messageViewModelProvider)).put(LazyClassKeyProvider.com_campaignmasta_ui_screens_polling_PollingViewModel, ((Provider) pollingViewModelProvider)).put(LazyClassKeyProvider.com_campaignmasta_ui_screens_supporters_SupporterViewModel, ((Provider) supporterViewModelProvider)).put(LazyClassKeyProvider.com_campaignmasta_ui_screens_wards_WardViewModel, ((Provider) wardViewModelProvider)).build());
+      return LazyClassKeyMap.<javax.inject.Provider<ViewModel>>of(MapBuilder.<String, javax.inject.Provider<ViewModel>>newMapBuilder(9).put(LazyClassKeyProvider.com_campaignmasta_ui_screens_team_AddMemberViewModel, ((Provider) addMemberViewModelProvider)).put(LazyClassKeyProvider.com_campaignmasta_ui_screens_calls_CallViewModel, ((Provider) callViewModelProvider)).put(LazyClassKeyProvider.com_campaignmasta_ui_screens_dashboard_DashboardViewModel, ((Provider) dashboardViewModelProvider)).put(LazyClassKeyProvider.com_campaignmasta_ui_screens_auth_LoginViewModel, ((Provider) loginViewModelProvider)).put(LazyClassKeyProvider.com_campaignmasta_ui_screens_messages_MessageViewModel, ((Provider) messageViewModelProvider)).put(LazyClassKeyProvider.com_campaignmasta_ui_screens_polling_PollingViewModel, ((Provider) pollingViewModelProvider)).put(LazyClassKeyProvider.com_campaignmasta_ui_screens_supporters_SupporterViewModel, ((Provider) supporterViewModelProvider)).put(LazyClassKeyProvider.com_campaignmasta_ui_screens_team_TeamViewModel, ((Provider) teamViewModelProvider)).put(LazyClassKeyProvider.com_campaignmasta_ui_screens_wards_WardViewModel, ((Provider) wardViewModelProvider)).build());
     }
 
     @Override
@@ -537,40 +558,50 @@ public final class DaggerCampaignMastaApp_HiltComponents_SingletonC {
 
     @IdentifierNameString
     private static final class LazyClassKeyProvider {
-      static String com_campaignmasta_ui_screens_dashboard_DashboardViewModel = "com.campaignmasta.ui.screens.dashboard.DashboardViewModel";
-
-      static String com_campaignmasta_ui_screens_calls_CallViewModel = "com.campaignmasta.ui.screens.calls.CallViewModel";
+      static String com_campaignmasta_ui_screens_polling_PollingViewModel = "com.campaignmasta.ui.screens.polling.PollingViewModel";
 
       static String com_campaignmasta_ui_screens_supporters_SupporterViewModel = "com.campaignmasta.ui.screens.supporters.SupporterViewModel";
 
-      static String com_campaignmasta_ui_screens_polling_PollingViewModel = "com.campaignmasta.ui.screens.polling.PollingViewModel";
-
-      static String com_campaignmasta_ui_screens_auth_LoginViewModel = "com.campaignmasta.ui.screens.auth.LoginViewModel";
+      static String com_campaignmasta_ui_screens_calls_CallViewModel = "com.campaignmasta.ui.screens.calls.CallViewModel";
 
       static String com_campaignmasta_ui_screens_wards_WardViewModel = "com.campaignmasta.ui.screens.wards.WardViewModel";
 
+      static String com_campaignmasta_ui_screens_auth_LoginViewModel = "com.campaignmasta.ui.screens.auth.LoginViewModel";
+
+      static String com_campaignmasta_ui_screens_team_AddMemberViewModel = "com.campaignmasta.ui.screens.team.AddMemberViewModel";
+
+      static String com_campaignmasta_ui_screens_dashboard_DashboardViewModel = "com.campaignmasta.ui.screens.dashboard.DashboardViewModel";
+
       static String com_campaignmasta_ui_screens_messages_MessageViewModel = "com.campaignmasta.ui.screens.messages.MessageViewModel";
 
-      @KeepFieldType
-      DashboardViewModel com_campaignmasta_ui_screens_dashboard_DashboardViewModel2;
-
-      @KeepFieldType
-      CallViewModel com_campaignmasta_ui_screens_calls_CallViewModel2;
-
-      @KeepFieldType
-      SupporterViewModel com_campaignmasta_ui_screens_supporters_SupporterViewModel2;
+      static String com_campaignmasta_ui_screens_team_TeamViewModel = "com.campaignmasta.ui.screens.team.TeamViewModel";
 
       @KeepFieldType
       PollingViewModel com_campaignmasta_ui_screens_polling_PollingViewModel2;
 
       @KeepFieldType
-      LoginViewModel com_campaignmasta_ui_screens_auth_LoginViewModel2;
+      SupporterViewModel com_campaignmasta_ui_screens_supporters_SupporterViewModel2;
+
+      @KeepFieldType
+      CallViewModel com_campaignmasta_ui_screens_calls_CallViewModel2;
 
       @KeepFieldType
       WardViewModel com_campaignmasta_ui_screens_wards_WardViewModel2;
 
       @KeepFieldType
+      LoginViewModel com_campaignmasta_ui_screens_auth_LoginViewModel2;
+
+      @KeepFieldType
+      AddMemberViewModel com_campaignmasta_ui_screens_team_AddMemberViewModel2;
+
+      @KeepFieldType
+      DashboardViewModel com_campaignmasta_ui_screens_dashboard_DashboardViewModel2;
+
+      @KeepFieldType
       MessageViewModel com_campaignmasta_ui_screens_messages_MessageViewModel2;
+
+      @KeepFieldType
+      TeamViewModel com_campaignmasta_ui_screens_team_TeamViewModel2;
     }
 
     private static final class SwitchingProvider<T> implements Provider<T> {
@@ -594,25 +625,31 @@ public final class DaggerCampaignMastaApp_HiltComponents_SingletonC {
       @Override
       public T get() {
         switch (id) {
-          case 0: // com.campaignmasta.ui.screens.calls.CallViewModel 
+          case 0: // com.campaignmasta.ui.screens.team.AddMemberViewModel 
+          return (T) new AddMemberViewModel(singletonCImpl.teamRepositoryProvider.get());
+
+          case 1: // com.campaignmasta.ui.screens.calls.CallViewModel 
           return (T) new CallViewModel(singletonCImpl.influencerDao(), singletonCImpl.callLogDao(), singletonCImpl.syncQueueDao(), singletonCImpl.provideGsonProvider.get());
 
-          case 1: // com.campaignmasta.ui.screens.dashboard.DashboardViewModel 
+          case 2: // com.campaignmasta.ui.screens.dashboard.DashboardViewModel 
           return (T) new DashboardViewModel(singletonCImpl.provideApiServiceProvider.get(), singletonCImpl.supporterRepositoryProvider.get(), singletonCImpl.syncRepositoryProvider.get(), singletonCImpl.provideUserPreferencesProvider.get(), singletonCImpl.authRepositoryProvider.get());
 
-          case 2: // com.campaignmasta.ui.screens.auth.LoginViewModel 
+          case 3: // com.campaignmasta.ui.screens.auth.LoginViewModel 
           return (T) new LoginViewModel(singletonCImpl.authRepositoryProvider.get());
 
-          case 3: // com.campaignmasta.ui.screens.messages.MessageViewModel 
+          case 4: // com.campaignmasta.ui.screens.messages.MessageViewModel 
           return (T) new MessageViewModel(singletonCImpl.messageRepositoryProvider.get());
 
-          case 4: // com.campaignmasta.ui.screens.polling.PollingViewModel 
+          case 5: // com.campaignmasta.ui.screens.polling.PollingViewModel 
           return (T) new PollingViewModel(singletonCImpl.pollingLocationDao(), singletonCImpl.syncQueueDao(), singletonCImpl.provideGsonProvider.get());
 
-          case 5: // com.campaignmasta.ui.screens.supporters.SupporterViewModel 
+          case 6: // com.campaignmasta.ui.screens.supporters.SupporterViewModel 
           return (T) new SupporterViewModel(singletonCImpl.supporterRepositoryProvider.get());
 
-          case 6: // com.campaignmasta.ui.screens.wards.WardViewModel 
+          case 7: // com.campaignmasta.ui.screens.team.TeamViewModel 
+          return (T) new TeamViewModel(singletonCImpl.teamRepositoryProvider.get());
+
+          case 8: // com.campaignmasta.ui.screens.wards.WardViewModel 
           return (T) new WardViewModel(singletonCImpl.wardProfileDao());
 
           default: throw new AssertionError(id);
@@ -715,6 +752,8 @@ public final class DaggerCampaignMastaApp_HiltComponents_SingletonC {
 
     private Provider<SyncWorker_AssistedFactory> syncWorker_AssistedFactoryProvider;
 
+    private Provider<TeamRepository> teamRepositoryProvider;
+
     private Provider<AuthRepository> authRepositoryProvider;
 
     private SingletonCImpl(ApplicationContextModule applicationContextModuleParam) {
@@ -784,7 +823,8 @@ public final class DaggerCampaignMastaApp_HiltComponents_SingletonC {
       this.supporterRepositoryProvider = DoubleCheck.provider(new SwitchingProvider<SupporterRepository>(singletonCImpl, 8));
       this.messageRepositoryProvider = DoubleCheck.provider(new SwitchingProvider<MessageRepository>(singletonCImpl, 9));
       this.syncWorker_AssistedFactoryProvider = SingleCheck.provider(new SwitchingProvider<SyncWorker_AssistedFactory>(singletonCImpl, 0));
-      this.authRepositoryProvider = DoubleCheck.provider(new SwitchingProvider<AuthRepository>(singletonCImpl, 10));
+      this.teamRepositoryProvider = DoubleCheck.provider(new SwitchingProvider<TeamRepository>(singletonCImpl, 10));
+      this.authRepositoryProvider = DoubleCheck.provider(new SwitchingProvider<AuthRepository>(singletonCImpl, 11));
     }
 
     @Override
@@ -867,7 +907,10 @@ public final class DaggerCampaignMastaApp_HiltComponents_SingletonC {
           case 9: // com.campaignmasta.data.repository.MessageRepository 
           return (T) new MessageRepository(singletonCImpl.messageDao(), singletonCImpl.provideApiServiceProvider.get(), singletonCImpl.provideUserPreferencesProvider.get());
 
-          case 10: // com.campaignmasta.data.repository.AuthRepository 
+          case 10: // com.campaignmasta.data.repository.TeamRepository 
+          return (T) new TeamRepository(singletonCImpl.provideApiServiceProvider.get());
+
+          case 11: // com.campaignmasta.data.repository.AuthRepository 
           return (T) new AuthRepository(singletonCImpl.provideApiServiceProvider.get(), singletonCImpl.provideUserPreferencesProvider.get());
 
           default: throw new AssertionError(id);

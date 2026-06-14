@@ -12,6 +12,8 @@ import com.campaignmasta.ui.screens.dashboard.DashboardViewModel_HiltModules;
 import com.campaignmasta.ui.screens.messages.MessageViewModel_HiltModules;
 import com.campaignmasta.ui.screens.polling.PollingViewModel_HiltModules;
 import com.campaignmasta.ui.screens.supporters.SupporterViewModel_HiltModules;
+import com.campaignmasta.ui.screens.team.AddMemberViewModel_HiltModules;
+import com.campaignmasta.ui.screens.team.TeamViewModel_HiltModules;
 import com.campaignmasta.ui.screens.wards.WardViewModel_HiltModules;
 import dagger.Binds;
 import dagger.Component;
@@ -169,6 +171,7 @@ public final class CampaignMastaApp_HiltComponents {
 
   @Subcomponent(
       modules = {
+          AddMemberViewModel_HiltModules.KeyModule.class,
           CallViewModel_HiltModules.KeyModule.class,
           ActivityCBuilderModule.class,
           ViewModelCBuilderModule.class,
@@ -179,6 +182,7 @@ public final class CampaignMastaApp_HiltComponents {
           MessageViewModel_HiltModules.KeyModule.class,
           PollingViewModel_HiltModules.KeyModule.class,
           SupporterViewModel_HiltModules.KeyModule.class,
+          TeamViewModel_HiltModules.KeyModule.class,
           WardViewModel_HiltModules.KeyModule.class
       }
   )
@@ -215,6 +219,7 @@ public final class CampaignMastaApp_HiltComponents {
 
   @Subcomponent(
       modules = {
+          AddMemberViewModel_HiltModules.BindsModule.class,
           CallViewModel_HiltModules.BindsModule.class,
           DashboardViewModel_HiltModules.BindsModule.class,
           HiltWrapper_HiltViewModelFactory_ViewModelModule.class,
@@ -222,6 +227,7 @@ public final class CampaignMastaApp_HiltComponents {
           MessageViewModel_HiltModules.BindsModule.class,
           PollingViewModel_HiltModules.BindsModule.class,
           SupporterViewModel_HiltModules.BindsModule.class,
+          TeamViewModel_HiltModules.BindsModule.class,
           WardViewModel_HiltModules.BindsModule.class
       }
   )

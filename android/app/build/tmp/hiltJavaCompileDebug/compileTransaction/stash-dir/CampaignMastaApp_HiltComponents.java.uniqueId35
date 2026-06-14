@@ -5,6 +5,7 @@ import com.campaignmasta.di.AppModule;
 import com.campaignmasta.di.DatabaseModule;
 import com.campaignmasta.di.NetworkModule;
 import com.campaignmasta.sync.SyncWorker_HiltModule;
+import com.campaignmasta.ui.navigation.NavGraphEntryPoint;
 import com.campaignmasta.ui.screens.auth.LoginViewModel_HiltModules;
 import com.campaignmasta.ui.screens.calls.CallViewModel_HiltModules;
 import com.campaignmasta.ui.screens.dashboard.DashboardViewModel_HiltModules;
@@ -149,6 +150,7 @@ public final class CampaignMastaApp_HiltComponents {
   )
   @Singleton
   public abstract static class SingletonC implements CampaignMastaApp_GeneratedInjector,
+      NavGraphEntryPoint,
       FragmentGetContextFix.FragmentGetContextFixEntryPoint,
       HiltWrapper_ActivityRetainedComponentManager_ActivityRetainedComponentBuilderEntryPoint,
       ServiceComponentManager.ServiceComponentBuilderEntryPoint,
