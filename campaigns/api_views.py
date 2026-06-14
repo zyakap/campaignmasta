@@ -131,11 +131,17 @@ class DashboardView(APIView):
             )
             .count()
         )
+        ward_briefs_count = WardProfile.objects.filter(candidate=candidate).count()
+        polling_locations_count = PollingLocation.objects.filter(candidate=candidate).count()
+        team_count = TeamMember.objects.filter(candidate=candidate, is_active=True).count()
         return Response(
             {
                 "supporter_count": supporter_count,
                 "calls_due_count": calls_due_count,
                 "messages_unread_count": messages_unread_count,
+                "ward_briefs_count": ward_briefs_count,
+                "polling_locations_count": polling_locations_count,
+                "team_count": team_count,
                 "sync_timestamp": timezone.now().isoformat(),
             }
         )

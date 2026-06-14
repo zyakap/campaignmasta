@@ -4,13 +4,15 @@
     <a href="javascript:history.back()">Back</a>
     <h1>{{ title }}</h1>
   </section>
-  <form method="post" class="mobile-form">
+  <form method="post" class="mobile-form" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.non_field_errors }}
-    {% for field in form %}
+    {% for field in form.hidden_fields %}{{ field }}{% endfor %}
+    {% for field in form.visible_fields %}
       <label>
-        <span>{{ field.label }}</span>
+        <span>{{ field.label }}{% if field.field.required %} <em class="req">*</em>{% endif %}</span>
         {{ field }}
+        {% if field.help_text %}<small class="field-help">{{ field.help_text|safe }}</small>{% endif %}
         {% if field.errors %}<small class="field-error">{{ field.errors|striptags }}</small>{% endif %}
       </label>
     {% endfor %}

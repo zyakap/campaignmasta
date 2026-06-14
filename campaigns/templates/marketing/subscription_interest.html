@@ -37,4 +37,38 @@
 .interest-form{background:#fff;border:1px solid var(--neutral-200);border-radius:24px;box-shadow:0 20px 60px rgba(26,12,12,.10);padding:26px;display:grid;gap:16px}.interest-form label{display:grid;gap:7px;font-weight:700;color:var(--neutral-700)}.interest-form label span strong{color:var(--red-soft)}.interest-form input,.interest-form select{width:100%;min-height:48px;border:1px solid var(--neutral-200);border-radius:12px;padding:10px 12px;font:inherit;background:#fff}.interest-form input:focus,.interest-form select:focus{outline:none;border-color:var(--green-mid);box-shadow:0 0 0 4px rgba(42,170,42,.12)}.interest-form em{font-style:normal;color:var(--red-soft);font-size:13px}.interest-note,.interest-form small{font-size:13px;color:var(--neutral-500)}.interest-alert{border-radius:12px;padding:12px 14px;background:var(--green-pale);color:var(--green-dark);font-weight:700}
 @media(max-width:860px){.interest-hero{grid-template-columns:1fr;padding:44px 5%}.interest-form{padding:20px;border-radius:20px}}
 </style>
+<script>
+// Cascade: show only the districts that belong to the selected province.
+(function () {
+  var prov = document.getElementById('id_province');
+  var dist = document.getElementById('id_district');
+  if (!prov || !dist) return;
+
+  // Snapshot the full district option list once (each option is tagged with
+  // data-province by ProvinceAwareDistrictSelect).
+  var all = Array.prototype.map.call(dist.options, function (o) {
+    return { value: o.value, text: o.text, province: o.getAttribute('data-province') };
+  });
+
+  function rebuild() {
+    var pid = prov.value;
+    var current = dist.value;
+    dist.innerHTML = '';
+    all.forEach(function (o) {
+      // Always keep the blank prompt; otherwise only matching-province districts.
+      if (o.value === '' || (pid && o.province === pid)) {
+        var opt = document.createElement('option');
+        opt.value = o.value;
+        opt.text = o.text;
+        if (o.province) opt.setAttribute('data-province', o.province);
+        if (o.value === current) opt.selected = true;
+        dist.appendChild(opt);
+      }
+    });
+  }
+
+  prov.addEventListener('change', rebuild);
+  rebuild(); // run once so a pre-selected province (e.g. after a validation error) filters immediately
+})();
+</script>
 {% endblock %}

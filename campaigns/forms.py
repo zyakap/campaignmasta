@@ -8,6 +8,7 @@ from .models import (
     CitizenRequest,
     CommunityIssue,
     ConnectorSetting,
+    District,
     ExportRequest,
     FreeAIModel,
     Influencer,
@@ -25,6 +26,7 @@ from .models import (
     PollingStatus,
     PreferenceDeal,
     PromiseTracker,
+    Province,
     RegistrationDrive,
     SoftwareModule,
     SubscriptionInterest,
@@ -40,6 +42,23 @@ from .models import (
     WardProfile,
 )
 from .services import role_choices_for_candidate
+
+
+class ProvinceAwareDistrictSelect(forms.Select):
+    """District <select> that tags each <option> with the owning province id.
+
+    The marketing appointment form uses this so client-side JS can show only the
+    districts that belong to the chosen province. Without JS every district is
+    still rendered, so the form degrades gracefully (server-side validation in
+    SubscriptionInterestForm.clean enforces the province/district match).
+    """
+
+    def create_option(self, name, value, label, selected, index, subindex=None, attrs=None):
+        option = super().create_option(name, value, label, selected, index, subindex, attrs)
+        province_id = getattr(getattr(value, "instance", None), "province_id", None)
+        if province_id is not None:
+            option["attrs"]["data-province"] = str(province_id)
+        return option
 
 
 class MobileFormMixin:
@@ -65,6 +84,7 @@ class SubscriptionInterestForm(MobileFormMixin, forms.ModelForm):
         ]
         widgets = {
             "meeting_appointment": forms.DateTimeInput(attrs={"type": "datetime-local"}),
+            "district": ProvinceAwareDistrictSelect,
         }
         labels = {
             "candidate_option": "Provincial or District Candidate Option",
@@ -76,6 +96,12 @@ class SubscriptionInterestForm(MobileFormMixin, forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["district"].required = False
+        # Preload every province, and every district grouped by province so the
+        # appointment form can cascade province -> district. select_related keeps
+        # the per-option province lookup from hitting the DB N times.
+        self.fields["province"].queryset = Province.objects.all()
+        self.fields["district"].queryset = District.objects.select_related("province").all()
+        self.fields["district"].empty_label = "Select province first"
         self.fields["whatsapp_number"].required = False
         self.fields["full_name"].widget.attrs["placeholder"] = "Candidate or campaign manager full name"
         self.fields["mobile_number"].widget.attrs["placeholder"] = "+675 ..."

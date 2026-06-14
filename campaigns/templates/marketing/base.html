@@ -3,6 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/png" href="{% static 'img/campaignmasta_logo.png' %}">
+  <link rel="apple-touch-icon" href="{% static 'img/campaignmasta_logo.png' %}">
   <title>{% block title %}CampaignMasta — PNG Political Campaign CRM{% endblock %}</title>
   <meta name="description" content="{% block meta_desc %}CampaignMasta is the complete digital command centre for PNG election candidates. Manage supporters, outreach, polling day and more.{% endblock %}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -157,7 +159,7 @@
 
 <nav class="site-nav">
   <a href="/" class="nav-brand">
-    <img class="nav-logo" src="{% static 'img/campaignmasta-logo.svg' %}" alt="CampaignMasta logo">
+    <img class="nav-logo" src="{% static 'img/campaignmasta_logo.png' %}" alt="CampaignMasta logo">
   </a>
   <ul class="nav-links">
     <li><a href="/" {% block nav_home %}{% endblock %}>Home</a></li>
@@ -191,7 +193,7 @@
   <div class="footer-grid">
     <div class="footer-brand">
       <div class="footer-logo">
-        <img class="footer-logo-mark" src="{% static 'img/campaignmasta-logo.svg' %}" alt="CampaignMasta logo">
+        <img class="footer-logo-mark" src="{% static 'img/campaignmasta_logo.png' %}" alt="CampaignMasta logo">
       </div>
       <p class="footer-tagline">The complete digital command centre for PNG election candidates. Built for Papua New Guinea's unique political landscape.</p>
     </div>

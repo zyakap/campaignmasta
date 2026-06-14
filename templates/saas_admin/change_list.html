@@ -33,7 +33,9 @@
   {% endblock %}
 </div>
 
-<div style="background:var(--white);border:1px solid var(--n200);border-radius:var(--r14);overflow:hidden;">
+<div class="sa-changelist-body">
+
+<div class="sa-results-card" style="background:var(--white);border:1px solid var(--n200);border-radius:var(--r14);overflow:hidden;">
 
   {% block search %}{% search_form cl %}{% endblock %}
 
@@ -90,10 +92,12 @@
 </div>
 
 {% if cl.has_filters %}
-<div id="changelist-filter" style="float:right;margin-top:-{% if cl.result_count %}0{% else %}0{% endif %}px">
+<div id="changelist-filter">
   <h2>{% trans "Filter" %}</h2>
   {% for spec in cl.filter_specs %}{% admin_list_filter cl spec %}{% endfor %}
 </div>
 {% endif %}
+
+</div>{# /.sa-changelist-body #}
 
 {% endblock %}

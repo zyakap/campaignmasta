@@ -51,9 +51,9 @@ fun DashboardScreen(
         DashboardCard("Supporters", uiState.supporterCount, Icons.Default.People, SupportStrong, Screen.Supporters.route),
         DashboardCard("Calls Due", uiState.callsDueCount, Icons.Default.Phone, SupportWeak, Screen.Calls.route),
         DashboardCard("Messages", uiState.messagesUnreadCount, Icons.Default.Mail, PNGRed, Screen.Messages.route),
-        DashboardCard("Ward Briefs", 0, Icons.Default.Map, PNGGold, Screen.WardBriefs.route),
-        DashboardCard("Polling Day", 0, Icons.Default.HowToVote, Color(0xFF6A1B9A), Screen.Polling.route),
-        DashboardCard("My Team", 0, Icons.Default.Groups, Color(0xFF1565C0), Screen.Team.route),
+        DashboardCard("Ward Briefs", uiState.wardBriefsCount, Icons.Default.Map, PNGGold, Screen.WardBriefs.route),
+        DashboardCard("Polling Day", uiState.pollingLocationsCount, Icons.Default.HowToVote, Color(0xFF6A1B9A), Screen.Polling.route),
+        DashboardCard("My Team", uiState.teamCount, Icons.Default.Groups, Color(0xFF1565C0), Screen.Team.route),
     )
 
     Scaffold(

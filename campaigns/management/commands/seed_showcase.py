@@ -47,7 +47,7 @@ SUR = ["Kila", "Wapi", "Tongia", "Mendi", "Yaki", "Pora", "Namaliu", "Agarobe",
        "Oala", "Wari", "Konga", "Sapu", "Mond", "Pundia", "Lakane"]
 
 GEO_PROV = {
-    "province": "Enga",
+    "province": "Enga Province",
     "districts": [
         {"name": "Wabag Open", "llgs": [
             {"name": "Wabag Urban LLG", "wards": [
@@ -69,7 +69,7 @@ GEO_PROV = {
 }
 
 GEO_DIST = {
-    "province": "Eastern Highlands",
+    "province": "Eastern Highlands Province",
     "districts": [
         {"name": "Kainantu Open", "llgs": [
             {"name": "Kainantu Urban LLG", "wards": [

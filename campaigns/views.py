@@ -42,6 +42,7 @@ from .forms import (
 from .models import (
     AIWorkItem,
     ApprovalStatus,
+    CallLog,
     CampaignEvent,
     CampaignTask,
     Candidate,

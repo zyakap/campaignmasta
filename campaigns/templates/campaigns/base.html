@@ -3,6 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/png" href="{% static 'img/campaignmasta_logo.png' %}">
+  <link rel="apple-touch-icon" href="{% static 'img/campaignmasta_logo.png' %}">
   <title>{% block title %}CampaignMasta{% endblock %}</title>
 
   <!-- Fonts -->
@@ -71,6 +73,15 @@
     /* ── Content area ── */
     .content-wrapper { background: #F5F2EC; }
     .content { padding-top: 0 !important; }
+
+    /* Freeze fix: AdminLTE only drops its dim off-canvas overlay (#sidebar-overlay)
+       below 992px. On laptops at >100% browser zoom / display scaling the viewport
+       falls into that band, so opening the menu covered the page with a click-
+       blocking layer. data-auto-collapse-size="768" keeps the sidebar a normal
+       desktop push-sidebar down to 768px; this guarantees the dim layer can never
+       sit over the content on tablet/desktop widths. Phones (<768px) keep the
+       normal off-canvas drawer. */
+    @media (min-width: 768px) { #sidebar-overlay { display: none !important; } }
     .content-header { display: none; }
 
     /* ── Flash messages ── */
@@ -191,14 +202,14 @@
   </style>
   {% block extra_head %}{% endblock %}
 </head>
-<body class="hold-transition sidebar-mini layout-fixed">
+<body class="hold-transition sidebar-mini sidebar-mini-md layout-fixed">
 <div class="wrapper">
 
   <!-- ── Top Navbar ──────────────────────────────────────── -->
   <nav class="main-header navbar navbar-expand">
     <ul class="navbar-nav">
       <li class="nav-item">
-        <a class="nav-link" data-widget="pushmenu" href="#" role="button">
+        <a class="nav-link" data-widget="pushmenu" href="#" role="button" data-auto-collapse-size="768">
           <i class="fas fa-bars" style="color:#1A0C0C;"></i>
         </a>
       </li>
@@ -260,7 +271,7 @@
   <!-- ── Sidebar ─────────────────────────────────────────── -->
   <aside class="main-sidebar elevation-4">
     <a href="{% url 'dashboard' %}" class="brand-link">
-      <img class="brand-image" src="{% static 'img/campaignmasta-logo.svg' %}" alt="CampaignMasta logo" style="width:44px;height:34px;object-fit:contain;background:#fff;border-radius:8px;padding:2px;margin-right:6px;">
+      <img class="brand-image" src="{% static 'img/campaignmasta_logo.png' %}" alt="CampaignMasta logo" style="width:44px;height:34px;object-fit:contain;background:#fff;border-radius:8px;padding:2px;margin-right:6px;">
       <span class="brand-text">
         CampaignMasta
         {% if candidate %}<small>{{ candidate.name }}</small>{% endif %}

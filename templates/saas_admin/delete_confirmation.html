@@ -11,7 +11,7 @@
   {% endif %}
   <a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
   <span class="sa-crumb-sep">›</span>
-  <a href="{% url opts|admin_urlname:'change' object_id %}">{{ object }}</a>
+  <a href="{% url opts|admin_urlname:'change' object.pk %}">{{ object }}</a>
   <span class="sa-crumb-sep">›</span>
   <span class="sa-crumb-cur">Delete</span>
 {% endblock %}
@@ -44,7 +44,7 @@
   <form method="post">
     {% csrf_token %}
     <div style="display:flex;gap:10px;flex-wrap:wrap;">
-      <a href="{% url opts|admin_urlname:'change' object_id %}" style="height:38px;padding:0 20px;background:var(--white);border:1px solid var(--n300);border-radius:var(--r6);display:inline-flex;align-items:center;font-size:13px;font-weight:600;color:var(--n700);text-decoration:none;">
+      <a href="{% url opts|admin_urlname:'change' object.pk %}" style="height:38px;padding:0 20px;background:var(--white);border:1px solid var(--n300);border-radius:var(--r6);display:inline-flex;align-items:center;font-size:13px;font-weight:600;color:var(--n700);text-decoration:none;">
         <i class="fas fa-arrow-left fa-sm" style="margin-right:7px;"></i> Cancel — Keep it
       </a>
       <button type="submit" style="height:38px;padding:0 20px;background:var(--r600);border:none;border-radius:var(--r6);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">

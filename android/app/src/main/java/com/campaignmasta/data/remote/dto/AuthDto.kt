@@ -20,5 +20,8 @@ data class DashboardResponse(
     @SerializedName("supporter_count") val supporterCount: Int,
     @SerializedName("calls_due_count") val callsDueCount: Int,
     @SerializedName("messages_unread_count") val messagesUnreadCount: Int,
+    @SerializedName("ward_briefs_count") val wardBriefsCount: Int = 0,
+    @SerializedName("polling_locations_count") val pollingLocationsCount: Int = 0,
+    @SerializedName("team_count") val teamCount: Int = 0,
     @SerializedName("sync_timestamp") val syncTimestamp: String
 )

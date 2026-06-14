@@ -186,6 +186,8 @@ h2 { margin: 0; font-size: 18px; }
 .mobile-form label span { font-size: 14px; }
 .mobile-form textarea { resize: vertical; }
 .field-error { color: var(--accent); }
+.mobile-form .field-help { color: var(--muted); font-size: 12px; font-weight: 500; }
+.mobile-form .req { color: var(--accent); font-weight: 800; }
 .sticky-submit { position: sticky; bottom: 84px; width: 100%; }
 
 .auth-panel, .hero-panel {
