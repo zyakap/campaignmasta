@@ -284,8 +284,8 @@ Copy `.env.example` to `.env` and set:
 ```bash
 DJANGO_DEBUG=false
 DJANGO_SECRET_KEY=your-production-secret-key          # required when DEBUG is off
-DJANGO_ALLOWED_HOSTS=campaign.webmasta.com.pg,www.campaign.webmasta.com.pg
-DJANGO_CSRF_TRUSTED_ORIGINS=https://campaign.webmasta.com.pg
+DJANGO_ALLOWED_HOSTS=campaignmasta.com,www.campaignmasta.com
+DJANGO_CSRF_TRUSTED_ORIGINS=https://campaignmasta.com
 
 # Postgres (omit all DB_* to fall back to the bundled SQLite database)
 DB_ENGINE=django.db.backends.postgresql
