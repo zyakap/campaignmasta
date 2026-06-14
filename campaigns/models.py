@@ -633,6 +633,9 @@ class FreeAIModel(TimeStampedModel):
     name = models.CharField(max_length=120)
     provider = models.CharField(max_length=80, blank=True)
     model_id = models.CharField(max_length=120, unique=True)
+    # OpenAI-compatible endpoint for this free model. Blank = use the platform
+    # default base URL (env CAMPAIGNMASTA_AI_BASE_URL) or the tenant's AI connector.
+    base_url = models.URLField(blank=True)
     context_window = models.PositiveIntegerField(null=True, blank=True)
     daily_free_requests = models.PositiveIntegerField(default=0)
     monthly_free_requests = models.PositiveIntegerField(default=0)
@@ -849,11 +852,38 @@ class Supporter(TenantOwnedModel):
     follow_up_date = models.DateField(null=True, blank=True)
     consent_to_messages = models.BooleanField(default=False)
     registered_by = models.ForeignKey(TeamMember, on_delete=models.SET_NULL, null=True, blank=True)
+    # ── Attribution chain for incentive tracking ───────────────────────────────
+    # Each supporter is attributed up the coordinator chain so registration
+    # counts aggregate upward (volunteer → area → ward → llg → district). The
+    # registrant gets credit at their own level; the chain above is resolved
+    # from the supporter's geography at registration time.
+    attributed_volunteer = models.ForeignKey(
+        TeamMember, on_delete=models.SET_NULL, null=True, blank=True, related_name="supporters_as_volunteer"
+    )
+    attributed_area_coordinator = models.ForeignKey(
+        TeamMember, on_delete=models.SET_NULL, null=True, blank=True, related_name="supporters_as_area"
+    )
+    attributed_ward_coordinator = models.ForeignKey(
+        TeamMember, on_delete=models.SET_NULL, null=True, blank=True, related_name="supporters_as_ward"
+    )
+    attributed_llg_coordinator = models.ForeignKey(
+        TeamMember, on_delete=models.SET_NULL, null=True, blank=True, related_name="supporters_as_llg"
+    )
+    attributed_district_coordinator = models.ForeignKey(
+        TeamMember, on_delete=models.SET_NULL, null=True, blank=True, related_name="supporters_as_district"
+    )
     notes = models.TextField(blank=True)
 
     class Meta:
         ordering = ["full_name"]
-        indexes = [models.Index(fields=["candidate", "phone", "ward", "village"])]
+        indexes = [
+            models.Index(fields=["candidate", "phone", "ward", "village"]),
+            models.Index(fields=["attributed_volunteer"]),
+            models.Index(fields=["attributed_area_coordinator"]),
+            models.Index(fields=["attributed_ward_coordinator"]),
+            models.Index(fields=["attributed_llg_coordinator"]),
+            models.Index(fields=["attributed_district_coordinator"]),
+        ]
 
     def possible_duplicates(self):
         return Supporter.objects.filter(

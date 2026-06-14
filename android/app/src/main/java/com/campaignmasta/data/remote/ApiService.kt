@@ -49,6 +49,11 @@ interface ApiService {
         @Body request: ApprovalActionRequest
     ): Response<TeamMemberDto>
 
+    // ── Performance / incentives ──────────────────────────────────────────────
+
+    @GET("api/performance/")
+    suspend fun getPerformance(): Response<PerformanceResponse>
+
     // ── Geography (cascading pickers) ─────────────────────────────────────────
 
     @GET("api/geography/")

@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -111,6 +112,22 @@ fun TeamScreen(
                 else -> LazyColumn(
                     contentPadding = PaddingValues(bottom = 96.dp, top = 8.dp)
                 ) {
+                    state.performance?.let { perf ->
+                        item {
+                            PerformanceCard(
+                                registered = perf.supportersRegistered,
+                                teamTotal = perf.teamTotal,
+                                volunteers = perf.volunteersCreated
+                            )
+                        }
+                    }
+                    if (state.leaderboard.isNotEmpty()) {
+                        item { SectionHeader("Registration Leaderboard") }
+                        itemsIndexed(state.leaderboard) { index, row ->
+                            LeaderboardRow(rank = index + 1, name = row.fullName, role = row.roleDisplay, count = row.count)
+                        }
+                    }
+
                     if (state.pendingMembers.isNotEmpty() || state.pendingVillages.isNotEmpty()) {
                         item { SectionHeader("Awaiting Your Approval") }
                         items(state.pendingMembers, key = { "m${it.id}" }) { m ->
@@ -150,6 +167,51 @@ fun TeamScreen(
             onSave = { wardId, name -> viewModel.createVillage(wardId, name) }
         )
     }
+}
+
+@Composable
+private fun PerformanceCard(registered: Int, teamTotal: Int, volunteers: Int) {
+    Surface(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
+        shape = RoundedCornerShape(16.dp),
+        color = SupportStrong
+    ) {
+        Column(Modifier.padding(16.dp)) {
+            Text("MY PERFORMANCE", style = MaterialTheme.typography.labelMedium, color = Color.White.copy(alpha = 0.8f), fontWeight = FontWeight.Bold)
+            Spacer(Modifier.height(12.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                StatCell("Registered", registered, Modifier.weight(1f))
+                StatCell("Team total", teamTotal, Modifier.weight(1f))
+                if (volunteers > 0) StatCell("Volunteers", volunteers, Modifier.weight(1f))
+            }
+        }
+    }
+}
+
+@Composable
+private fun StatCell(label: String, value: Int, modifier: Modifier = Modifier) {
+    Surface(modifier = modifier, color = Color.White.copy(alpha = 0.15f), shape = RoundedCornerShape(10.dp)) {
+        Column(Modifier.padding(vertical = 12.dp, horizontal = 8.dp)) {
+            Text("$value", style = MaterialTheme.typography.headlineSmall, color = Color.White, fontWeight = FontWeight.Bold)
+            Text(label, style = MaterialTheme.typography.bodySmall, color = Color.White.copy(alpha = 0.85f))
+        }
+    }
+}
+
+@Composable
+private fun LeaderboardRow(rank: Int, name: String, role: String, count: Int) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text("$rank", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Color.Gray, modifier = Modifier.width(28.dp))
+        Column(Modifier.weight(1f)) {
+            Text(name, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
+            if (role.isNotBlank()) Text(role, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+        }
+        Text("$count", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = SupportStrong)
+    }
+    HorizontalDivider(color = Color(0xFFEEEEEE))
 }
 
 @Composable

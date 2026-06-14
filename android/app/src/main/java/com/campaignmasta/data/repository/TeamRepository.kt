@@ -6,6 +6,7 @@ import com.campaignmasta.data.remote.dto.CreatableRoleDto
 import com.campaignmasta.data.remote.dto.CreateTeamMemberRequest
 import com.campaignmasta.data.remote.dto.CreateVillageRequest
 import com.campaignmasta.data.remote.dto.GeoItemDto
+import com.campaignmasta.data.remote.dto.PerformanceResponse
 import com.campaignmasta.data.remote.dto.TeamMemberDto
 import com.campaignmasta.data.remote.dto.VillageDto
 import retrofit2.Response
@@ -38,6 +39,9 @@ class TeamRepository @Inject constructor(
 
     suspend fun approveMember(id: Int, reject: Boolean = false): Result<TeamMemberDto> =
         safe { api.approveTeamMember(id, ApprovalActionRequest(reject)) }
+
+    suspend fun getPerformance(): Result<PerformanceResponse> =
+        safe { api.getPerformance() }
 
     suspend fun getPendingVillages(): Result<List<VillageDto>> =
         safe { api.getPendingVillages() }.map { it.results }

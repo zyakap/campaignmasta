@@ -105,6 +105,98 @@ def role_choices_for_candidate(candidate):
     return roles
 
 
+# ── Supporter attribution & incentive performance ──────────────────────────────
+def resolve_coordinator_chain(candidate, *, district=None, llg=None, ward=None, village=None):
+    """Find the approved coordinator sitting at each geographic level, so a
+    supporter registered anywhere is attributed up the whole chain."""
+    base = TeamMember.objects.filter(candidate=candidate, approval_status="APPROVED", is_active=True)
+
+    def pick(role, **geo):
+        return base.filter(role=role, **geo).order_by("id").first()
+
+    chain = {}
+    if district is not None:
+        chain["district_coordinator"] = pick(Role.DISTRICT_COORDINATOR, district=district)
+    if llg is not None:
+        chain["llg_coordinator"] = pick(Role.LLG_COORDINATOR, llg=llg)
+    if ward is not None:
+        chain["ward_coordinator"] = pick(Role.WARD_COORDINATOR, ward=ward)
+    if village is not None:
+        chain["area_coordinator"] = pick(Role.VILLAGE_COORDINATOR, village=village)
+    return chain
+
+
+def supporter_attribution_fields(candidate, member, *, district=None, llg=None, ward=None, village=None):
+    """Return the attribution field values for a supporter. The chain above the
+    registrant is resolved from geography; the registrant overrides their own
+    level so they always get personal credit."""
+    chain = resolve_coordinator_chain(candidate, district=district, llg=llg, ward=ward, village=village)
+    fields = {
+        "registered_by": member,
+        "attributed_volunteer": None,
+        "attributed_area_coordinator": chain.get("area_coordinator"),
+        "attributed_ward_coordinator": chain.get("ward_coordinator"),
+        "attributed_llg_coordinator": chain.get("llg_coordinator"),
+        "attributed_district_coordinator": chain.get("district_coordinator"),
+    }
+    if member is not None:
+        overrides = {
+            Role.VOLUNTEER: "attributed_volunteer",
+            Role.VILLAGE_COORDINATOR: "attributed_area_coordinator",
+            Role.WARD_COORDINATOR: "attributed_ward_coordinator",
+            Role.LLG_COORDINATOR: "attributed_llg_coordinator",
+            Role.DISTRICT_COORDINATOR: "attributed_district_coordinator",
+        }
+        field = overrides.get(member.role)
+        if field:
+            fields[field] = member
+    return fields
+
+
+# Which Supporter column credits each role for incentive aggregation.
+_PERFORMANCE_FIELD = {
+    Role.VOLUNTEER: "attributed_volunteer",
+    Role.VILLAGE_COORDINATOR: "attributed_area_coordinator",
+    Role.WARD_COORDINATOR: "attributed_ward_coordinator",
+    Role.LLG_COORDINATOR: "attributed_llg_coordinator",
+    Role.DISTRICT_COORDINATOR: "attributed_district_coordinator",
+}
+
+
+def member_performance(member):
+    """Incentive numbers for one member: supporters they personally registered,
+    the team total attributed to them (their own + everyone below), and — for
+    area coordinators — the count of volunteers under them."""
+    if member is None:
+        return {"supporters_registered": 0, "team_total": 0, "volunteers_created": 0}
+    candidate = member.candidate
+    sup = Supporter.objects.filter(candidate=candidate)
+    own = sup.filter(registered_by=member).count()
+    field = _PERFORMANCE_FIELD.get(member.role)
+    team_total = sup.filter(**{field: member}).count() if field else sup.count()
+    result = {"supporters_registered": own, "team_total": team_total, "volunteers_created": 0}
+    if member.role == Role.VILLAGE_COORDINATOR and member.village_id:
+        result["volunteers_created"] = TeamMember.objects.filter(
+            candidate=candidate, role=Role.VOLUNTEER, village=member.village,
+            approval_status="APPROVED", is_active=True,
+        ).count()
+    return result
+
+
+def performance_for_member_qs(member_qs):
+    """Attach team_total counts to a queryset of TeamMembers (for leaderboards).
+    Returns a list of (member, count) sorted high-to-low."""
+    rows = []
+    for m in member_qs:
+        field = _PERFORMANCE_FIELD.get(m.role)
+        if not field:
+            continue
+        count = Supporter.objects.filter(candidate=m.candidate, **{field: m}).count()
+        rows.append((m, count))
+    rows.sort(key=lambda r: r[1], reverse=True)
+    return rows
+
+
 def message_target_options(candidate):
     common = [
         "All Team",
@@ -698,6 +790,70 @@ def report_rollup(candidate):
     )
 
 
+def _ai_endpoint_for(candidate, free_model=None):
+    """Resolve (base_url, api_key, model_id, temperature) for an AI call.
+    Priority: the tenant's AI connector (if it has a key), otherwise the platform
+    default free-model gateway from environment + the free model's own endpoint."""
+    import os
+
+    connector = ai_connector_for_candidate(candidate) if candidate else None
+    if connector and connector.api_key:
+        base = connector.api_base_url or os.environ.get("CAMPAIGNMASTA_AI_BASE_URL", "")
+        model = connector.ai_model or (free_model.model_id if free_model else "")
+        temp = float(connector.ai_temperature or 0.3)
+        return base.rstrip("/"), connector.api_key, model, temp
+    base = (
+        free_model.base_url if free_model and free_model.base_url
+        else os.environ.get("CAMPAIGNMASTA_AI_BASE_URL", "https://openrouter.ai/api/v1")
+    )
+    key = os.environ.get("CAMPAIGNMASTA_AI_API_KEY", "")
+    model = free_model.model_id if free_model else os.environ.get("CAMPAIGNMASTA_AI_MODEL", "")
+    return base.rstrip("/"), key, model, 0.3
+
+
+def generate_ai_completion(system_prompt, user_prompt, *, candidate=None, free_model=None,
+                           max_tokens=900, timeout=30):
+    """Call an OpenAI-compatible chat endpoint — the free models DeepSeek and
+    Kimi, or a tenant-configured AI connector. Returns the generated text, or
+    None on any failure so callers fall back to the built-in deterministic
+    draft. Never raises."""
+    base_url, api_key, model, temperature = _ai_endpoint_for(candidate, free_model)
+    if not (base_url and api_key and model):
+        return None
+    try:
+        import requests
+
+        resp = requests.post(
+            f"{base_url}/chat/completions",
+            headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+            json={
+                "model": model,
+                "messages": [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt},
+                ],
+                "temperature": temperature,
+                "max_tokens": max_tokens,
+            },
+            timeout=timeout,
+        )
+        if resp.status_code != 200:
+            return None
+        data = resp.json()
+        text = (data.get("choices") or [{}])[0].get("message", {}).get("content", "") or ""
+        return text.strip() or None
+    except Exception:
+        return None
+
+
+# System prompt shared by all AI drafts — keeps generations within the safety rules.
+AI_SYSTEM_PROMPT = (
+    "You are a respectful campaign assistant for a Papua New Guinea election candidate. "
+    + " ".join(SENSITIVE_AI_RULES)
+    + " Write clear, practical, culturally-aware notes. Be concise."
+)
+
+
 def build_ward_brief_payload(candidate, ward_profile):
     ward = ward_profile.ward
     supporters = Supporter.objects.filter(candidate=candidate, ward=ward)
@@ -735,13 +891,20 @@ def create_ward_ai_work_item(candidate, ward_profile, user=None):
         user=user,
     )
     payload = build_ward_brief_payload(candidate, ward_profile)
-    output = [
+    template = "\n".join([
         f"Ward: {payload['ward']['ward']}",
         f"Support strength: {payload['ward']['support_strength']}",
         f"Supporters registered: {payload['supporter_count']} ({payload['undecided_count']} undecided)",
         f"Key issues: {payload['ward']['issues'] or 'No issues recorded'}",
         f"Talking points: {payload['ward']['talking_points'] or 'Listen first and confirm local priorities.'}",
-    ]
+    ])
+    # Try a free-model generation (DeepSeek / Kimi); fall back to the template draft.
+    generated = generate_ai_completion(
+        AI_SYSTEM_PROMPT,
+        "Rewrite and expand these ward visit notes into a clear, practical one-page brief for the "
+        "candidate. Do not invent facts beyond these notes.\n\n" + template,
+        candidate=candidate, free_model=plan_model,
+    )
     return AIWorkItem.objects.create(
         candidate=candidate,
         ward=ward_profile.ward,
@@ -749,7 +912,7 @@ def create_ward_ai_work_item(candidate, ward_profile, user=None):
         ai_model=model_name,
         used_free_model=usage_event.status == UsageEvent.Status.FREE,
         source_snapshot=payload,
-        output="\n".join(output),
+        output=generated or template,
         safety_notes="\n".join(SENSITIVE_AI_RULES),
         status=AIWorkItem.Status.READY_FOR_REVIEW,
         created_by=user,
@@ -797,6 +960,13 @@ def create_speech_ai_work_item(candidate, ward_profile, event=None, user=None):
         "",
         f"SUPPORTER SNAPSHOT: {payload['supporter_count']} registered · {payload['undecided_count']} undecided",
     ]
+    template = "\n".join(output_lines)
+    generated = generate_ai_completion(
+        AI_SYSTEM_PROMPT,
+        "Turn these notes into a clear speech outline the candidate can use for this ward visit. "
+        "Keep the section structure, stay respectful, and do not invent facts.\n\n" + template,
+        candidate=candidate, free_model=plan_model,
+    )
     return AIWorkItem.objects.create(
         candidate=candidate,
         ward=ward_profile.ward,
@@ -805,7 +975,7 @@ def create_speech_ai_work_item(candidate, ward_profile, event=None, user=None):
         ai_model=model_name,
         used_free_model=usage_event.status == UsageEvent.Status.FREE,
         source_snapshot=payload,
-        output="\n".join(output_lines),
+        output=generated or template,
         safety_notes="\n".join(SENSITIVE_AI_RULES),
         status=AIWorkItem.Status.READY_FOR_REVIEW,
         created_by=user,

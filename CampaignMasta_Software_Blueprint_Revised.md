@@ -222,6 +222,76 @@ When `candidate_type = PROVINCIAL`:
 
 ---
 
+### 4.3 Coordinator Hierarchy Levels (Implemented)
+
+The campaign team is a strict multi-level chain of command. The lowest field
+coordinator level is the **Area Coordinator** (a village-level role; stored
+internally as the village coordinator role but presented as "Area Coordinator").
+The **Supporter** is the final, lowest level of the chain — created by a
+volunteer, an area coordinator, or any higher coordinator.
+
+Provincial chain (top to bottom):
+
+```text
+Candidate
+  → Campaign Manager (Provincial Coordinator)
+    → District Coordinator
+      → LLG Coordinator
+        → Ward Coordinator
+          → Area Coordinator
+            → Volunteer
+              → Supporter (lowest level)
+```
+
+District Open chain: identical, but the Campaign Manager acts as the top field
+coordinator and the District Coordinator level is not used.
+
+### 4.4 Team Building and Approval Workflow (Implemented)
+
+Any coordinator can create the roles **below** their own level, but the new
+member must be **approved by the role one level above the creator** before they
+become active. This keeps the chain of command accountable.
+
+```text
+Creator              Can create                 Must be approved by
+-------              ----------                 -------------------
+Candidate            any role below             (auto-approved)
+Campaign Manager     district coord & below     (auto-approved, senior)
+District Coordinator LLG coord & below          Campaign Manager
+LLG Coordinator      ward coord & below         District Coordinator
+Ward Coordinator     area coord, volunteer      LLG Coordinator
+Area Coordinator     volunteer                  Ward Coordinator
+```
+
+Rules:
+
+- A new member is held as `PENDING` (inactive, cannot log in) until approved.
+- Senior/admin roles (Candidate, Campaign Manager, IT Administrator) and the
+  platform superadmin approve immediately.
+- The approver must be senior to the creator **and** geographically contain the
+  new member (e.g. an LLG coordinator only approves members inside their LLG).
+- Approve/reject actions are available on the web team page and the Android app,
+  and are recorded in the audit log.
+
+### 4.5 Geographic Data Visibility — Upward Aggregation (Implemented)
+
+Every list of campaign data is filtered to the signed-in member's geographic
+scope, and seniors are a superset of their subordinates so data rolls upward
+automatically:
+
+```text
+Volunteer / Area Coordinator → their village / area
+Ward Coordinator             → their ward (all areas in it)
+LLG Coordinator              → their LLG (all wards in it)
+District Coordinator         → their district (all LLGs in it)
+Campaign Manager / Candidate → the whole campaign
+```
+
+A coordinator can never see another district's, LLG's, or ward's data — only
+their own branch and everything beneath it.
+
+---
+
 ## 5. PNG Administrative Geography Module
 
 CampaignMasta should maintain a national administrative geography database.
@@ -267,6 +337,29 @@ Districts: Auto-loaded from province
 LLGs: Auto-loaded from districts
 Wards: Auto-loaded from LLGs
 ```
+
+### 5.3 Standard vs Variable Geography (Implemented)
+
+- **Provinces, Districts, LLGs, and Wards are standard** and pre-loaded from
+  publicly available administrative data. The platform superadmin maintains all
+  geography levels centrally.
+- **Villages vary on the ground.** Well-known villages are pre-populated; others
+  are created on request from the field.
+
+### 5.4 Village Creation on Request (Implemented)
+
+```text
+1. A Ward Coordinator adds a new village under one of their wards.
+2. The village is created as PENDING.
+3. The LLG Coordinator for that ward reviews and approves (or rejects) it.
+4. Only APPROVED villages appear in selection lists for team members and supporters.
+```
+
+- Ward coordinators and above may submit a village; LLG coordinators and above
+  approve within their branch.
+- Senior/admin roles and the superadmin add official villages immediately.
+- Cascading pickers in the web app and Android only offer geography that exists
+  in the system and is valid for the candidate (district → LLG → ward → village).
 
 ---
 
@@ -392,20 +485,26 @@ Can:
 - Receive messages
 - Track ward-level tasks
 
-#### Village Coordinator
+#### Area Coordinator (Village-Level)
+
+The lowest field coordinator level. Presented as "Area Coordinator"; assigned to
+a single village/area.
 
 Can:
 
-- Register village-level supporters
+- Create Volunteers under them (subject to Ward Coordinator approval)
+- Register area-level supporters (credited to them and the chain above)
 - Record village issues
 - Report local attendance
 - Record follow-up notes
 - Assist ward coordinator
+- View two performance numbers: volunteers created and supporters registered
 
 #### Volunteer
 
 Can:
 
+- Register supporters (each registration logged against the volunteer for incentives)
 - Assist with events
 - Receive task assignments
 - Submit basic activity reports
@@ -511,7 +610,7 @@ District Open Candidate:
 - IT Administrator has whole tenant access.
 - LLG Coordinators are assigned to LLGs.
 - Ward Coordinators are assigned to wards.
-- Village Coordinators are assigned to villages.
+- Area Coordinators are assigned to villages/areas.
 - District Coordinator role is not available.
 
 Provincial Candidate:
@@ -521,7 +620,36 @@ Provincial Candidate:
 - District Coordinators are assigned to districts.
 - LLG Coordinators are assigned under districts.
 - Ward Coordinators are assigned under LLGs.
-- Village Coordinators are assigned under wards.
+- Area Coordinators are assigned under wards.
+
+### 8.3 Hierarchical Team Building and Approval (Implemented)
+
+Team building is distributed: every coordinator grows their own sub-team rather
+than relying on the IT Administrator to add everyone.
+
+- The role-selection dropdown only offers roles **below** the creator's level.
+- Geography fields are locked to the creator's own branch (an LLG coordinator
+  creating a ward coordinator can only pick wards inside their LLG).
+- New members are `PENDING` until the creator's supervisor approves them — see
+  Section 4.4.
+- The web team page and the Android **Team** screen both show an "Awaiting Your
+  Approval" list with one-tap Approve / Reject.
+- Member creation, approval, and rejection are written to the audit log.
+
+### 8.4 Team Performance and Incentives (Implemented)
+
+Each coordinator's team page shows a **My Performance** panel and a **Registration
+Leaderboard**. The numbers tracked per role:
+
+```text
+Volunteer          → supporters they personally registered
+Area Coordinator   → volunteers created + total supporters (own + their volunteers')
+Ward Coordinator   → total supporters across all areas in their ward
+LLG Coordinator    → total supporters across all wards in their LLG
+District Coordinator → total supporters across all LLGs in their district
+```
+
+See Section 10.3 for how supporter attribution drives these numbers.
 
 ---
 
@@ -608,6 +736,13 @@ Follow-Up Required: Yes / No
 Follow-Up Date
 Consent to Receive Messages: Yes / No
 Notes
+
+# Attribution chain (set automatically at registration)
+Attributed Volunteer
+Attributed Area Coordinator
+Attributed Ward Coordinator
+Attributed LLG Coordinator
+Attributed District Coordinator
 ```
 
 ### 10.2 Supporter Rules
@@ -618,6 +753,40 @@ Notes
 - Allow duplicate detection by name, phone, ward, and village.
 - Limit access based on user role and geography assignment.
 - Allow import from CSV with validation.
+
+### 10.3 Supporter Attribution and Incentive Tracking (Implemented)
+
+The supporter is the lowest level of the chain. Every supporter is automatically
+attributed up the coordinator chain so registration counts roll upward for
+leadership incentives.
+
+How it works:
+
+- A supporter may be registered by a volunteer, an area coordinator, or any
+  higher coordinator (web, REST API, or the offline Android app).
+- At registration the system resolves the coordinator at each geographic level
+  from the supporter's village → ward → LLG → district, and credits all of them.
+- The registrant additionally gets credit at their **own** level, so a volunteer
+  always gets personal credit even though the area/ward/LLG/district above are
+  also credited.
+- When a higher coordinator registers a supporter, the supporter is still
+  assigned down the chain to the area level via geography, so every supporter has
+  a complete attribution chain.
+
+Resulting performance numbers (see Section 8.4):
+
+```text
+Volunteer registers a supporter
+  → +1 to that volunteer (personal incentive)
+  → +1 to their area coordinator's team total
+  → +1 to their ward coordinator's team total
+  → +1 to their LLG coordinator's team total
+  → +1 to their district coordinator's team total
+```
+
+Area coordinators also see the number of volunteers they have created. All
+numbers are visible on the web team page and the Android app, and a Registration
+Leaderboard ranks the team by supporters registered.
 
 ---
 
@@ -1096,6 +1265,7 @@ Notes
 - Influencer list by ward
 - Overdue call report
 - Coordinator performance report
+- Supporter registration leaderboard (incentive tracking, see Section 10.3)
 - Ward activity report
 - Event attendance report
 - Issue trend report
@@ -1600,6 +1770,12 @@ ward
 village
 is_active
 last_login
+
+# Hierarchy & approval workflow
+created_by_member        # which member created this record
+approval_status          # PENDING / APPROVED / REJECTED
+approved_by              # member who approved
+approved_at
 ```
 
 ### 28.4 Supporter
@@ -1626,6 +1802,13 @@ registered_by
 follow_up_required
 follow_up_date
 notes
+
+# Attribution chain for incentive tracking
+attributed_volunteer
+attributed_area_coordinator
+attributed_ward_coordinator
+attributed_llg_coordinator
+attributed_district_coordinator
 ```
 
 ### 28.5 Influencer
@@ -1932,8 +2115,8 @@ The MVP should include:
 
 ## 32. Future Enhancements
 
-- Mobile app for coordinators
-- Offline data capture
+- Mobile app for coordinators — **delivered** (native Android app: dashboard, supporters, calls, messages, ward briefs, polling, and full team hierarchy / approvals / incentives)
+- Offline data capture — **delivered** (offline-first Android app with background sync)
 - SMS gateway integration
 - WhatsApp Business API integration
 - GIS campaign map
@@ -1960,6 +2143,10 @@ The MVP should include:
 8. The system must protect sensitive personal and political data.
 9. The app must work well on mobile because coordinators will use phones.
 10. The platform must continue to provide value after elections.
+11. Coordinators build their own sub-teams; new members are approved by the level above the creator.
+12. Each level sees only its own geographic branch, and data aggregates upward.
+13. Every supporter is attributed up the coordinator chain so registration counts roll up for incentives.
+14. Villages can be created from the field on request and approved by the LLG coordinator.
 
 ---
 

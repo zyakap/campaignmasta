@@ -12,6 +12,46 @@
     </div>
   </section>
 
+  {% if my_performance %}
+  <div class="dark-panel" style="margin-bottom:16px">
+    <p class="dark-panel-eyebrow">My Performance</p>
+    <div class="metric-grid" style="padding:0">
+      <article style="background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.14)">
+        <span style="color:#fff">{{ my_performance.supporters_registered }}</span>
+        <small style="color:rgba(255,255,255,.65)">Supporters I registered</small>
+      </article>
+      <article style="background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.14)">
+        <span style="color:#fff">{{ my_performance.team_total }}</span>
+        <small style="color:rgba(255,255,255,.65)">Team total (incl. below me)</small>
+      </article>
+      {% if current_member.role == 'VILLAGE_COORDINATOR' %}
+      <article style="background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.14)">
+        <span style="color:#fff">{{ my_performance.volunteers_created }}</span>
+        <small style="color:rgba(255,255,255,.65)">Volunteers under me</small>
+      </article>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+  {% if leaderboard %}
+  <div class="panel" style="margin-bottom:16px">
+    <div class="panel-title"><h2>Registration Leaderboard</h2></div>
+    <div style="padding:4px 16px 12px">
+      {% for member, count in leaderboard %}
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)">
+          <span class="muted" style="width:22px;text-align:right;font-weight:800">{{ forloop.counter }}</span>
+          <div style="flex:1;min-width:0">
+            <strong>{{ member.full_name }}</strong>
+            <span class="tag tag-muted">{{ member.get_role_display }}</span>
+          </div>
+          <strong style="color:var(--primary)">{{ count }}</strong>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
   {% if pending_villages %}
   <div class="panel urgent" style="margin-bottom:16px">
     <div class="panel-title"><h2>Villages Awaiting Approval ({{ pending_villages|length }})</h2></div>

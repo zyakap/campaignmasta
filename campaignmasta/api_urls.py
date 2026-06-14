@@ -9,6 +9,7 @@ from campaigns.api_views import (
     GeographyView,
     InfluencerListView,
     LoginView,
+    PerformanceView,
     MessageAcknowledgeView,
     MessageListView,
     MessageReadView,
@@ -41,6 +42,9 @@ urlpatterns = [
     path("team-members/pending/", TeamMemberPendingView.as_view(), name="api_team_members_pending"),
     path("team-members/creatable-roles/", CreatableRolesView.as_view(), name="api_creatable_roles"),
     path("team-members/<int:pk>/approve/", TeamMemberApproveView.as_view(), name="api_team_member_approve"),
+
+    # Performance / incentives
+    path("performance/", PerformanceView.as_view(), name="api_performance"),
 
     # Geography (cascading pickers) & villages
     path("geography/", GeographyView.as_view(), name="api_geography"),

@@ -64,3 +64,23 @@ data class CreateVillageRequest(
 data class ApprovalActionRequest(
     val reject: Boolean = false
 )
+
+/** Incentive numbers for the signed-in member. */
+data class MePerformanceDto(
+    @SerializedName("supporters_registered") val supportersRegistered: Int = 0,
+    @SerializedName("team_total") val teamTotal: Int = 0,
+    @SerializedName("volunteers_created") val volunteersCreated: Int = 0
+)
+
+data class LeaderboardEntryDto(
+    val id: Int,
+    @SerializedName("full_name") val fullName: String,
+    val role: String = "",
+    @SerializedName("role_display") val roleDisplay: String = "",
+    val count: Int = 0
+)
+
+data class PerformanceResponse(
+    val me: MePerformanceDto = MePerformanceDto(),
+    val leaderboard: List<LeaderboardEntryDto> = emptyList()
+)

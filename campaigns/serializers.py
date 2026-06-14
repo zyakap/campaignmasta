@@ -88,8 +88,21 @@ class SupporterSerializer(serializers.ModelSerializer):
         team_member = TeamMember.objects.filter(user=request.user).first()
         if not team_member:
             raise serializers.ValidationError("No TeamMember found for this user.")
-        validated_data["candidate"] = team_member.candidate
+        candidate = team_member.candidate
+        validated_data["candidate"] = candidate
         validated_data["created_by"] = request.user
+        # Attribute up the coordinator chain for incentive tracking.
+        from .services import supporter_attribution_fields
+
+        validated_data.update(
+            supporter_attribution_fields(
+                candidate, team_member,
+                district=validated_data.get("district"),
+                llg=validated_data.get("llg"),
+                ward=validated_data.get("ward"),
+                village=validated_data.get("village"),
+            )
+        )
         return super().create(validated_data)
 
 

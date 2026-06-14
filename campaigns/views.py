@@ -105,9 +105,12 @@ from .services import (
     create_ward_ai_work_item,
     dashboard_metrics,
     dispatch_message,
+    member_performance,
+    performance_for_member_qs,
     provision_team_member_login,
     recipients_for_message,
     resolve_active_candidate,
+    supporter_attribution_fields,
     bundle_catalog,
     report_rollup,
     module_catalog_for_candidate,
@@ -473,6 +476,9 @@ def team(request):
     pending_villages = pending_villages_for(request.user, candidate).order_by("ward__name", "name")
     can_add = request.user.is_superuser or bool(creatable_roles(member, candidate))
     can_add_village = request.user.is_superuser or can_create_village(member)
+    # Incentive performance: the viewer's own numbers + a leaderboard of their team.
+    my_performance = member_performance(member) if member else None
+    leaderboard = performance_for_member_qs(records)[:20]
     return render(
         request,
         "campaigns/team.html",
@@ -484,6 +490,8 @@ def team(request):
             "current_member": member,
             "can_add": can_add,
             "can_add_village": can_add_village,
+            "my_performance": my_performance,
+            "leaderboard": leaderboard,
         },
     )
 
@@ -672,6 +680,14 @@ def supporter_create(request):
         supporter.candidate = candidate
         supporter.created_by = request.user
         supporter.updated_by = request.user
+        # Attribute up the coordinator chain for incentive tracking.
+        registrant = team_member_for_user(request.user, candidate)
+        for field, value in supporter_attribution_fields(
+            candidate, registrant,
+            district=supporter.district, llg=supporter.llg,
+            ward=supporter.ward, village=supporter.village,
+        ).items():
+            setattr(supporter, field, value)
         supporter.save()
         duplicate_count = supporter.possible_duplicates().count()
         if duplicate_count:

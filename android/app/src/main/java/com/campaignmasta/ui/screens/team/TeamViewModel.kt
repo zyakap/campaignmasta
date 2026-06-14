@@ -3,6 +3,8 @@ package com.campaignmasta.ui.screens.team
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.campaignmasta.data.remote.dto.GeoItemDto
+import com.campaignmasta.data.remote.dto.LeaderboardEntryDto
+import com.campaignmasta.data.remote.dto.MePerformanceDto
 import com.campaignmasta.data.remote.dto.TeamMemberDto
 import com.campaignmasta.data.remote.dto.VillageDto
 import com.campaignmasta.data.repository.TeamRepository
@@ -20,6 +22,8 @@ data class TeamUiState(
     val pendingVillages: List<VillageDto> = emptyList(),
     val canAddMembers: Boolean = false,
     val canAddVillage: Boolean = false,
+    val performance: MePerformanceDto? = null,
+    val leaderboard: List<LeaderboardEntryDto> = emptyList(),
     val isLoading: Boolean = true,
     val isRefreshing: Boolean = false,
     val errorMessage: String? = null,
@@ -54,6 +58,7 @@ class TeamViewModel @Inject constructor(
             val pendingResult = teamRepository.getPendingMembers()
             val villageResult = teamRepository.getPendingVillages()
             val rolesResult = teamRepository.getCreatableRoles()
+            val performanceResult = teamRepository.getPerformance()
 
             val error = teamResult.exceptionOrNull()?.message
             _uiState.update {
@@ -63,6 +68,8 @@ class TeamViewModel @Inject constructor(
                     pendingVillages = villageResult.getOrDefault(emptyList()),
                     canAddMembers = rolesResult.getOrNull()?.isNotEmpty() ?: it.canAddMembers,
                     canAddVillage = rolesResult.getOrNull()?.isNotEmpty() ?: it.canAddVillage,
+                    performance = performanceResult.getOrNull()?.me ?: it.performance,
+                    leaderboard = performanceResult.getOrNull()?.leaderboard ?: it.leaderboard,
                     isLoading = false,
                     isRefreshing = false,
                     errorMessage = if (it.team.isEmpty()) error else null

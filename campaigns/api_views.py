@@ -649,3 +649,39 @@ class VillageApproveView(APIView):
             village.approved_at = timezone.now()
             village.save(update_fields=["approval_status", "approved_by", "approved_at"])
         return Response({"id": village.id, "approval_status": village.approval_status})
+
+
+# ─── Performance / incentives ─────────────────────────────────────────────────
+
+class PerformanceView(APIView):
+    """The current member's incentive numbers plus a scoped team leaderboard."""
+
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        from .models import ApprovalStatus
+        from .services import member_performance, performance_for_member_qs
+
+        candidate = _get_candidate(request)
+        if not candidate:
+            return Response({"detail": "No candidate found."}, status=status.HTTP_403_FORBIDDEN)
+        member = team_member_for_user(request.user, candidate)
+        scoped = scope_queryset(
+            TeamMember.objects.filter(candidate=candidate, approval_status=ApprovalStatus.APPROVED),
+            request.user, candidate,
+        )
+        leaderboard = [
+            {
+                "id": m.id,
+                "full_name": m.full_name,
+                "role": m.role,
+                "role_display": m.get_role_display(),
+                "count": count,
+            }
+            for m, count in performance_for_member_qs(scoped)[:20]
+        ]
+        return Response({
+            "me": member_performance(member),
+            "leaderboard": leaderboard,
+        })

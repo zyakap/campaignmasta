@@ -316,10 +316,10 @@ def build():
 
     # Stats row on cover
     stats = [
-        ["16+", "Feature Modules"],
+        ["7-Level", "Coordinator Hierarchy"],
         ["100%", "PNG-Focused"],
         ["Real-Time", "Polling War Room"],
-        ["AI-Powered", "Ward Briefs & Speeches"],
+        ["Incentive", "Performance Tracking"],
     ]
     stat_tbl = Table(
         [[Paragraph(f"<b><font size='22' color='#2AAA2A'>{v}</font></b><br/>"
@@ -372,13 +372,13 @@ def build():
         ("11", "Reports & Analytics"),
         ("12", "Data Operations — Import & Export"),
         ("13", "AI Assistant Tools"),
-        ("14", "Team Management"),
+        ("14", "Team, Hierarchy & Incentives"),
         ("15", "PNG-Specific Features"),
-        ("16", "Subscription, Billing & Modules"),
+        ("16", "Pricing — Everything Included"),
         ("17", "Settings, Connectors & Integrations"),
         ("18", "Usage, Credits & Billing"),
         ("19", "Security, Audit & Compliance"),
-        ("20", "Technology & Deployment"),
+        ("20", "The CampaignMasta Android App"),
     ]
 
     toc_rows = []
@@ -436,6 +436,8 @@ def build():
     principles = [
         ("Mobile-First", "Works on any Android or iOS phone, no laptop required"),
         ("PNG Geography Built-In", "Province → District → LLG → Ward → Village hierarchy pre-loaded"),
+        ("Coordinator Hierarchy", "7-level chain of command, each level sees only their own area"),
+        ("Incentive Tracking", "Every supporter registration counted and rolled up the chain"),
         ("Role-Based Access", "Each team member sees only what their role allows"),
         ("Audit Trail", "Every action is logged — who did what, and when"),
         ("Offline-Ready Android App", "Native mobile app for field use with or without internet"),
@@ -525,16 +527,22 @@ def build():
         ["Main Issue", "What issue matters most to this person"],
         ["Follow-Up Required", "Flag + scheduled follow-up date"],
         ["SMS Consent", "Has this person agreed to receive messages"],
-        ["Registered By", "Which team member recorded this entry"],
+        ["Registered By", "Which team member recorded this entry (drives incentive credit)"],
         ["Notes", "Free-text additional notes"],
     ]
     story.append(green_table(st, fields[0], fields[1:], [55*mm, 115*mm]))
     story.append(sp(3))
 
+    story.append(highlight_box(st,
+        "Every supporter is automatically credited to the volunteer who registered them and to "
+        "each coordinator above — feeding the performance and incentive tracking covered in "
+        "Section 14, Team, Hierarchy & Incentives."))
+
     story.append(Paragraph("Key Capabilities", st["h3"]))
     for line in [
         "Search by name, phone number, or village — results appear instantly",
         "Automatic duplicate detection: system warns if a record with the same name, phone, ward, and village already exists",
+        "Every registration is attributed up the coordinator chain for incentives and accountability",
         "Filter supporters by ward, status, influence level, or follow-up flag",
         "Bulk import via CSV (see Data Operations section)",
         "Export supporter lists for offline use or external reporting",
@@ -984,40 +992,116 @@ def build():
     story.append(PageBreak())
 
     # ══════════════════════════════════════════════════════════════════════════
-    # SECTION 14 — TEAM MANAGEMENT
+    # SECTION 14 — TEAM, HIERARCHY & INCENTIVES
     # ══════════════════════════════════════════════════════════════════════════
-    story.append(section_header(st, 14, "Team Management",
-        "Build your hierarchy from candidate to village coordinator"))
+    story.append(section_header(st, 14, "Team, Hierarchy & Incentives",
+        "A complete chain of command from candidate to volunteer — with built-in accountability"))
 
     story.append(Paragraph(
-        "CampaignMasta mirrors the structure of a PNG campaign operation — from the candidate "
-        "at the top down to ward coordinators and scrutineers on the ground. Each role has "
-        "defined access to the data in their geographic area.",
+        "CampaignMasta mirrors the real structure of a PNG campaign as a multi-level chain of "
+        "command. Each coordinator builds and manages their own sub-team, sees only the data in "
+        "their own area, and every supporter they and their team register is counted and rolled "
+        "up the chain for performance and incentives.",
         st["body"]))
     story.append(sp(2))
 
+    story.append(Paragraph("The Coordinator Hierarchy", st["h3"]))
+    story.append(Paragraph(
+        "For a Provincial campaign the chain runs top to bottom as below. For a District (Open) "
+        "campaign the Campaign Manager is the top field coordinator and the District Coordinator "
+        "layer is simply not used.",
+        st["body"]))
+    story.append(sp(1))
     roles = [
-        ["Role", "Geographic Scope", "Typical Responsibilities"],
-        ["Candidate", "Full electorate", "Platform owner, all access"],
-        ["Campaign Manager", "Full electorate", "Oversee all operations, approve exports"],
-        ["IT Admin", "Full electorate", "Manage connectors, settings, data ops"],
-        ["District Coordinator", "District (Provincial only)", "Manage LLG coordinators, district reporting"],
-        ["LLG Coordinator", "LLG area", "Coordinate ward teams, track ward activities"],
-        ["Ward Coordinator", "Single ward", "Register supporters, record calls, report events"],
-        ["Village Coordinator", "Single village", "Ground-level data collection"],
-        ["Volunteer", "Assigned area", "Data entry and field registration"],
-        ["Scrutineer", "Single polling location", "Submit polling day status reports"],
+        ["Level / Role", "Sees Data For", "Can Create"],
+        ["1. Candidate", "Whole campaign", "Any role below"],
+        ["2. Campaign Manager (Provincial Coordinator)", "Whole campaign", "District coord & below"],
+        ["3. District Coordinator", "Their district only", "LLG coord & below"],
+        ["4. LLG Coordinator", "Their LLG (all its wards)", "Ward coord & below"],
+        ["5. Ward Coordinator", "Their ward (all its areas)", "Area coord, volunteer"],
+        ["6. Area Coordinator", "Their area / village", "Volunteers"],
+        ["7. Volunteer", "Their own registrations", "(field registration only)"],
     ]
-    story.append(green_table(st, roles[0], roles[1:], [45*mm, 45*mm, 85*mm]))
+    story.append(green_table(st, roles[0], roles[1:], [62*mm, 55*mm, 53*mm]))
+    story.append(sp(3))
+
+    story.append(Paragraph("Build Your Own Team — With Approval", st["h3"]))
+    story.append(Paragraph(
+        "Any coordinator can add the roles beneath them, but a new member must be approved by the "
+        "level directly above the person who added them — so the chain of command stays accountable "
+        "and no one is added without a supervisor's sign-off.",
+        st["body"]))
+    for line in [
+        "A <b>Ward Coordinator</b> can add an Area Coordinator or Volunteer — the <b>LLG Coordinator</b> approves",
+        "An <b>Area Coordinator</b> can add a Volunteer — the <b>Ward Coordinator</b> approves",
+        "Senior roles (Candidate, Campaign Manager) add members that are active immediately",
+        "Until approved, a new member is held as <b>Pending</b> and cannot yet log in or act",
+        "Mobile logins (username + password) can be issued to any member for the Android app",
+    ]:
+        story.append(Paragraph(f"&#x2022;  {line}", st["bullet"]))
+    story.append(sp(3))
+
+    story.append(dark_banner(st, "Each Level Sees Only Their Own Area",
+        "A ward coordinator sees their ward; an LLG coordinator sees every ward in their LLG; a "
+        "district coordinator sees their whole district — but never another district. Data rolls "
+        "upward automatically, so seniors get the complete picture while the field stays focused."))
+
+    story.append(Paragraph("Villages Created On Request", st["h3"]))
+    story.append(Paragraph(
+        "Provinces, districts, LLGs and wards are standard and pre-loaded. Villages vary on the "
+        "ground, so a Ward Coordinator can add a new village when needed — it is then approved by "
+        "the LLG Coordinator before it becomes available for assigning team and supporters. The "
+        "platform superadmin can manage all geography levels centrally.",
+        st["body"]))
+    story.append(PageBreak())
+
+    # ── Incentive tracking (page 2 of the section) ──
+    story.append(section_header(st, 14, "Team, Hierarchy & Incentives  (continued)",
+        "Every registration counted, every coordinator credited"))
+
+    story.append(highlight_box(st,
+        "Supporters are the foundation of the campaign — and CampaignMasta counts every single one "
+        "against the volunteer who registered them and every coordinator above them. This turns "
+        "your field operation into a measurable, incentivised performance engine."))
+
+    story.append(Paragraph("How Supporter Attribution Works", st["h3"]))
+    story.append(Paragraph(
+        "When anyone registers a supporter, the platform automatically attributes that supporter "
+        "all the way down the chain to the lowest responsible coordinator — and credits every "
+        "level above. A supporter registered by a volunteer counts for that volunteer, their area "
+        "coordinator, their ward coordinator, their LLG coordinator and their district coordinator "
+        "at the same time.",
+        st["body"]))
+    story.append(sp(2))
+
+    perf = [
+        ["Role", "Numbers Tracked"],
+        ["Volunteer", "Supporters they personally registered (their incentive count)"],
+        ["Area Coordinator", "Volunteers under them + total supporters (own + all their volunteers')"],
+        ["Ward Coordinator", "Total supporters across all areas in their ward"],
+        ["LLG Coordinator", "Total supporters across all wards in their LLG"],
+        ["District Coordinator", "Total supporters across all LLGs in their district"],
+    ]
+    story.append(green_table(st, perf[0], perf[1:], [50*mm, 120*mm]))
+    story.append(sp(3))
+
+    story.append(Paragraph("Built for Leadership Incentives", st["h3"]))
+    for line in [
+        "Each coordinator sees their own <b>My Performance</b> figures: supporters registered, team total, and (for area coordinators) volunteers recruited",
+        "A live <b>Registration Leaderboard</b> ranks the team by supporters registered — visible on both web and the Android app",
+        "Higher-level coordinators are credited for everything their sub-teams achieve, so rewards can flow down the chain fairly",
+        "Numbers update the moment a supporter is saved — even from a volunteer's phone in the field",
+        "Because every supporter carries its attribution chain, you always know exactly who brought in which voters",
+    ]:
+        story.append(Paragraph(f"&#x2022;  {line}", st["bullet"]))
     story.append(sp(3))
 
     story.append(Paragraph("Team Member Provisioning", st["h3"]))
     for line in [
-        "Each team member can optionally be given a login account (username + password) to access the platform",
-        "Team members without logins can still be referenced in call logs, tasks, messages, and events",
-        "Password reset is available from the team member edit screen",
-        "Active/Inactive flag — deactivate team members who leave without deleting their history",
-        "Profile photo support for easy identification",
+        "Each team member can optionally be given a login account for the web platform and Android app",
+        "Members without logins can still be referenced in call logs, tasks, messages, and events",
+        "Active/Inactive flag — deactivate members who leave without deleting their history or their registrations",
+        "Full audit trail — every member added, approved, or rejected is logged with who and when",
     ]:
         story.append(Paragraph(f"&#x2022;  {line}", st["bullet"]))
     story.append(PageBreak())
@@ -1071,52 +1155,90 @@ def build():
     # ══════════════════════════════════════════════════════════════════════════
     # SECTION 16 — SUBSCRIPTION
     # ══════════════════════════════════════════════════════════════════════════
-    story.append(section_header(st, 16, "Subscription, Billing & Modules",
-        "Flexible plans built around what each campaign actually needs"))
+    story.append(section_header(st, 16, "Simple Pricing — Everything Included",
+        "One setup fee, one fortnightly plan, and the whole platform is yours"))
 
     story.append(Paragraph(
-        "CampaignMasta is sold as a modular platform. You can subscribe to individual modules, "
-        "purchase bundled packages at a discount, or take the Full Package for complete access. "
-        "All pricing is in Papua New Guinea Kina (PGK).",
+        "CampaignMasta keeps pricing simple. You pay a one-time setup fee to create and configure "
+        "your candidate profile, then a single fortnightly subscription. Every plan unlocks every "
+        "module and every feature — there are no paid add-ons to chase.",
         st["body"]))
     story.append(sp(2))
 
-    story.append(Paragraph("Subscription Plans", st["h3"]))
-    plans = [
-        ["Plan", "Suitable For", "Billing Options"],
-        ["Starter", "Small district campaign, limited budget, core functions only",
-         "Monthly / Quarterly / Annual / Campaign Period"],
-        ["Professional", "Active district or provincial campaign with full team",
-         "Monthly / Quarterly / Annual / Campaign Period"],
-        ["Full Package", "Maximum capacity campaign — every module unlocked",
-         "Campaign Period (flat rate)"],
-    ]
-    story.append(green_table(st, plans[0], plans[1:], [35*mm, 85*mm, 55*mm]))
-    story.append(sp(3))
+    # One-time setup fee callout
+    story.append(dark_banner(st, "One-Time Setup Fee — K3,000",
+        "A single K3,000 payment to set up your candidate profile, load your geography, and get "
+        "your campaign live. Pair it with any plan below and the platform is fully usable from day one."))
 
-    story.append(Paragraph("Module Categories", st["h3"]))
-    mod_cats = [
-        ("Foundation", "Core platform — team, geography, settings, dashboard"),
-        ("Field", "Supporter registration, events, ward visits"),
-        ("CRM", "Influencer management, calls, relationship tracking"),
-        ("Messaging", "In-app, SMS, WhatsApp, email messaging"),
-        ("Intelligence", "Ward briefs, issues, competitor tracking, reports"),
-        ("Polling", "Polling day war room, scrutineer management, live tallies"),
-        ("AI", "AI ward briefs, speech notes, automated summaries"),
-        ("Constituency", "Post-election mode — community assistance, development funds, promises"),
-        ("Platform", "Data operations, advanced reporting, API access"),
-    ]
-    for name, desc in mod_cats:
-        story.append(Paragraph(f"<b>{name}:</b>  {desc}", st["bullet"]))
+    story.append(highlight_box(st,
+        "Every feature is FREE on every plan — including the AI tools and the Android app. You only "
+        "ever pay extra if you choose to send more SMS, WhatsApp, or premium-AI volume than your "
+        "plan already includes."))
 
-    story.append(sp(3))
-    story.append(Paragraph("Quoting & Acceptance", st["h3"]))
+    story.append(Paragraph("The Three Plans (Fortnightly)", st["h3"]))
     story.append(Paragraph(
-        "Generate a formal quote by selecting modules and/or bundles, choosing a billing cycle, "
-        "and reviewing the total with any applicable bundle discounts. Quotes show standalone "
-        "cost vs bundle price so you can see exactly what you save. Accept the quote to activate "
-        "the modules immediately.",
+        "All plans include all modules, the AI assistant, and the Android app. Choose a plan by the "
+        "size of your campaign and the volume of messaging you expect.",
         st["body"]))
+    story.append(sp(1))
+    plans = [
+        ["Plan", "Price", "Best For"],
+        ["Starter", "K75 / fortnight", "Getting started — build your base and run outreach"],
+        ["Professional", "K100 / fortnight", "Active district or provincial field campaign (most popular)"],
+        ["Full Package", "K150 / fortnight", "Maximum-capacity campaign with the highest messaging volume"],
+    ]
+    story.append(green_table(st, plans[0], plans[1:], [34*mm, 40*mm, 96*mm]))
+    story.append(sp(2))
+
+    story.append(Paragraph("Everything In Every Plan", st["h3"]))
+    for line in [
+        "All modules: Supporters, Ward Intelligence, Calls/CRM, Messaging, Events &amp; Tasks, Polling War Room, Constituency",
+        "<b>AI tools are free</b> — ward briefs and speech notes run on free models already connected (DeepSeek and Kimi)",
+        "<b>The Android app is free</b> — offline-first, full coordinator hierarchy, approvals, and incentive tracking",
+        "Full coordinator hierarchy, approvals, geographic scoping, and the registration leaderboard",
+        "Audit logs, data import/export, and reports &amp; analytics",
+    ]:
+        story.append(Paragraph(f"&#x2022;  {line}", st["bullet"]))
+    story.append(PageBreak())
+
+    # ── Section 16 continued — included credits ──
+    story.append(section_header(st, 16, "Simple Pricing  (continued)",
+        "What's included, and the only things that are ever optional"))
+
+    story.append(Paragraph("Included Credits Per Plan", st["h3"]))
+    story.append(Paragraph(
+        "Each plan comes with a pool of third-party service credits per fortnight. These cover the "
+        "real costs charged by SMS, WhatsApp, and premium-AI providers. Most campaigns never need "
+        "more than what is included.",
+        st["body"]))
+    story.append(sp(1))
+    included = [
+        ["Plan", "SMS", "WhatsApp", "Premium-AI Requests"],
+        ["Starter", "100", "50", "—  (free models only)"],
+        ["Professional", "300", "150", "50"],
+        ["Full Package", "600", "300", "150"],
+    ]
+    story.append(green_table(st, included[0], included[1:], [36*mm, 34*mm, 38*mm, 62*mm]))
+    story.append(sp(2))
+
+    story.append(highlight_box(st,
+        "AI is FREE. The 'Premium-AI Requests' above apply only if you opt to use premium AI models. "
+        "Out of the box, the AI assistant runs on free models (DeepSeek and Kimi) that are already "
+        "connected — so ward briefs and speech notes cost you nothing.",
+        bg=colors.HexColor("#FDF8EC"), border=GOLD))
+
+    story.append(Paragraph("The Only Optional Extras", st["h3"]))
+    story.append(Paragraph(
+        "Third-party services have real per-message and per-request costs charged by the providers "
+        "(SMS gateways, WhatsApp Business, premium-AI). If you exceed your plan's included pool, you "
+        "can top up a prepaid wallet and pay only for what you use — see Section 18 for the simple "
+        "per-unit rates. Nothing else is ever charged.",
+        st["body"]))
+    story.append(sp(2))
+    story.append(Paragraph(
+        "<i>All prices in Papua New Guinea Kina (PGK). Setup fee is one-time; subscriptions are "
+        "billed per fortnight with no lock-in. Contact WebMasta to get set up before the election.</i>",
+        st["body_small"]))
     story.append(PageBreak())
 
     # ══════════════════════════════════════════════════════════════════════════
@@ -1192,6 +1314,23 @@ def build():
         story.append(Paragraph(f"<b>{name}:</b>  {desc}", st["bullet"]))
 
     story.append(sp(3))
+    story.append(Paragraph("Pay-As-You-Go Rates", st["h3"]))
+    story.append(Paragraph(
+        "Once a plan's included credits are used up, extra usage is charged at simple per-unit "
+        "rates from your prepaid wallet. AI on free models is always K0.00 — rates only apply if "
+        "you opt into premium AI models or extra messaging:",
+        st["body"]))
+    story.append(sp(1))
+    rates = [
+        ["Service", "Unit", "Indicative Rate (PGK)"],
+        ["AI — free models (DeepSeek, Kimi)", "per request", "K0.00  (free)"],
+        ["AI — premium model (optional)", "per request", "≈ K0.20"],
+        ["SMS", "per message", "≈ K0.11"],
+        ["WhatsApp", "per message", "≈ K0.08"],
+        ["Email", "per email", "≈ K0.02"],
+    ]
+    story.append(green_table(st, rates[0], rates[1:], [78*mm, 42*mm, 50*mm]))
+    story.append(sp(3))
     story.append(Paragraph("How It Works", st["h3"]))
     for line in [
         "Each subscription plan includes a free quota for certain services (e.g. 100 AI requests/month)",
@@ -1260,33 +1399,66 @@ def build():
     story.append(PageBreak())
 
     # ══════════════════════════════════════════════════════════════════════════
-    # SECTION 20 — TECHNOLOGY
+    # SECTION 20 — THE ANDROID FIELD APP
     # ══════════════════════════════════════════════════════════════════════════
-    story.append(section_header(st, 20, "Technology & Deployment",
-        "Modern, reliable, and built for PNG's network conditions"))
+    story.append(section_header(st, 20, "The CampaignMasta Android App",
+        "Your whole campaign in the pocket of every coordinator and volunteer"))
 
     story.append(Paragraph(
-        "CampaignMasta is built on proven, enterprise-grade open source technology, deployed "
-        "on dedicated servers, and accessed through any modern web browser or the Android native app.",
+        "CampaignMasta ships with a native Android app built specifically for field teams in Papua "
+        "New Guinea — coordinators and volunteers who work on the ground, often on basic phones and "
+        "patchy mobile networks. It is designed to be simple enough for first-time smartphone users "
+        "and tough enough to keep working where the signal does not.",
         st["body"]))
     story.append(sp(2))
 
-    tech_items = [
-        ("Web Platform", "Django (Python) backend — robust, battle-tested, used by major global platforms"),
-        ("Mobile App", "Native Android application with offline capability for field data collection"),
-        ("Database", "MySQL — reliable relational database for structured campaign data"),
-        ("File Server", "Nginx — high-performance reverse proxy and static file serving"),
-        ("Application Server", "Gunicorn — production-grade Python WSGI server"),
-        ("Deployment", "Linux VPS — dedicated server with full control"),
-        ("Connectivity", "Works on 3G, 4G, and slow connections — optimised for PNG network conditions"),
-        ("Browser Support", "Chrome, Firefox, Safari, Edge — any modern browser on any device"),
-        ("Security", "HTTPS encryption, CSRF protection, SQL injection prevention, XSS defence"),
-        ("Timezone", "Pacific/Port_Moresby (PGK +10) — all timestamps in PNG time"),
-    ]
-    for name, desc in tech_items:
-        story.append(Paragraph(f"<b>{name}:</b>  {desc}", st["bullet"]))
+    story.append(dark_banner(st, "Works Offline — Syncs When You're Back Online",
+        "Register supporters, log calls, and record polling reports with no signal at all. The app "
+        "stores everything safely on the phone and automatically uploads it the moment a connection "
+        "returns — so no fieldwork is ever lost."))
 
-    story.append(sp(4))
+    story.append(Paragraph("What the App Does", st["h3"]))
+    app_features = [
+        ("Dashboard", "Live campaign numbers the moment you open the app"),
+        ("Supporter Registry", "Register and search supporters in the field, even offline"),
+        ("Relationship Calls", "See who is due for a call and log the outcome on the spot"),
+        ("Messages", "Receive team broadcasts; read and acknowledge instructions"),
+        ("Ward Briefs", "Pull up the local brief before walking into a ward"),
+        ("Polling Day", "Scrutineers submit booth status and incidents in real time"),
+        ("My Team", "Build your sub-team, approve members, manage your area"),
+        ("Performance", "Your registration count, team total, and the live leaderboard"),
+    ]
+    story.append(two_col_features(st, [(a, a, b) for a, b in app_features]))
+    story.append(sp(2))
+
+    story.append(Paragraph("The Full Coordinator Hierarchy — On the Phone", st["h3"]))
+    for line in [
+        "Add team members with <b>cascading pickers</b> — choose district, then LLG, then ward, then area; only valid options appear",
+        "Roles are limited to those below you, so a coordinator can only build their own sub-team",
+        "<b>Approve or reject</b> new members and new villages with one tap from the Team screen",
+        "Every supporter a volunteer registers is counted for them and rolled up to every coordinator above",
+        "A green <b>My Performance</b> card and a <b>Registration Leaderboard</b> turn the field into a friendly contest",
+    ]:
+        story.append(Paragraph(f"&#x2022;  {line}", st["bullet"]))
+
+    story.append(sp(3))
+    story.append(Paragraph("Designed for Non-Technical Field Users", st["h3"]))
+    ux_items = [
+        ("Big, clear buttons", "Large tap targets and simple screens — easy on any phone"),
+        ("Plain language", "Straightforward wording, not technical jargon"),
+        ("Low-end friendly", "Runs on affordable Android phones common across PNG"),
+        ("Survives bad signal", "Offline-first design with automatic background sync"),
+        ("Secure login", "Each member gets their own username and password"),
+        ("Always current", "Pulls the latest team, geography, and tasks when online"),
+    ]
+    story.append(two_col_features(st, [(a, a, b) for a, b in ux_items]))
+
+    story.append(sp(3))
+    story.append(highlight_box(st,
+        "Give every ward and area coordinator the app and your campaign gains a real-time, "
+        "ground-level nervous system — registrations, calls, and reports flowing upward from the "
+        "village all the way to the candidate's dashboard."))
+
     story.append(rule(GOLD, 1.5, 4, 6))
 
     story.append(highlight_box(st,
