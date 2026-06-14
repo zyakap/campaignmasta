@@ -52,14 +52,14 @@ button, input, select, textarea { font: inherit; }
 }
 .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
 .brand-mark {
-  display: grid;
-  place-items: center;
-  width: 40px;
+  display: block;
+  width: 52px;
   height: 40px;
+  object-fit: contain;
   border-radius: 8px;
-  background: var(--primary);
-  color: #fff;
-  font-weight: 800;
+  background: #fff;
+  padding: 2px;
+  box-shadow: 0 8px 18px rgba(42,170,42,.18);
 }
 .brand strong, .brand small { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 48vw; }
 .brand small { color: var(--muted); font-size: 12px; }

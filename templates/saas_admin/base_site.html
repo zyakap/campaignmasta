@@ -48,9 +48,7 @@ a:hover{color:var(--g700)}
   border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0;text-decoration:none;
 }
 .sa-brand-mark{
-  width:30px;height:30px;background:var(--g600);border-radius:7px;flex-shrink:0;
-  display:flex;align-items:center;justify-content:center;
-  font-weight:900;font-size:12px;color:#fff;letter-spacing:-.5px;
+  width:52px;height:38px;object-fit:contain;background:#fff;border-radius:8px;flex-shrink:0;padding:2px;
 }
 .sa-brand-name{font-size:13px;font-weight:700;color:#fff;line-height:1.2}
 .sa-brand-sub{font-size:10px;color:rgba(255,255,255,.35);font-weight:400}
@@ -492,7 +490,7 @@ input[type=text]:focus,input[type=email]:focus,input[type=password]:focus,input[
 <!-- ═══ SIDEBAR ═══ -->
 <aside class="sa-sidebar">
   <a href="{% url 'saas_admin:index' %}" class="sa-brand">
-    <div class="sa-brand-mark">CM</div>
+    <img class="sa-brand-mark" src="{% static 'img/campaignmasta-logo.svg' %}" alt="CampaignMasta logo">
     <div>
       <div class="sa-brand-name">CampaignMasta</div>
       <div class="sa-brand-sub">Platform Admin</div>

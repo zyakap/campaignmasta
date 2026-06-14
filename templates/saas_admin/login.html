@@ -30,11 +30,7 @@
     .brand-mark{
       display:inline-flex;align-items:center;gap:10px;text-decoration:none;
     }
-    .brand-icon{
-      width:42px;height:42px;background:var(--g600);border-radius:11px;
-      display:flex;align-items:center;justify-content:center;
-      font-weight:900;font-size:15px;color:#fff;letter-spacing:-.5px;
-    }
+    .brand-icon{width:160px;height:auto;object-fit:contain;filter:drop-shadow(0 10px 18px rgba(0,0,0,.28));}
     .brand-text-main{font-size:16px;font-weight:800;color:#fff;line-height:1.2;display:block;}
     .brand-text-sub{font-size:11px;color:rgba(255,255,255,.4);font-weight:400;display:block;}
     .card{
@@ -77,7 +73,7 @@
   <div class="login-shell">
     <div class="brand-row">
       <a href="/" class="brand-mark">
-        <div class="brand-icon">CM</div>
+        <img class="brand-icon" src="{% static 'img/campaignmasta-logo.svg' %}" alt="CampaignMasta logo">
         <div>
           <span class="brand-text-main">CampaignMasta</span>
           <span class="brand-text-sub">Platform Administration</span>

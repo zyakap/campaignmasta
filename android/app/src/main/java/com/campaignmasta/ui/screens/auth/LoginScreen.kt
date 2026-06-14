@@ -18,6 +18,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -31,6 +33,7 @@ import com.campaignmasta.ui.theme.CampaignCream
 import com.campaignmasta.ui.theme.CampaignGreen
 import com.campaignmasta.ui.theme.PNGBlack
 import com.campaignmasta.ui.theme.PNGRed
+import com.campaignmasta.R
 
 @Composable
 fun LoginScreen(
@@ -72,20 +75,17 @@ fun LoginScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 // Header
-                Box(
-                    modifier = Modifier
-                        .size(76.dp)
-                        .background(
-                            Brush.linearGradient(listOf(PNGRed, CampaignGreen)),
-                            shape = RoundedCornerShape(22.dp)
-                        ),
-                    contentAlignment = Alignment.Center
+                Surface(
+                    modifier = Modifier.width(190.dp).height(120.dp),
+                    shape = RoundedCornerShape(24.dp),
+                    color = Color.White,
+                    tonalElevation = 4.dp,
+                    shadowElevation = 8.dp
                 ) {
-                    Text(
-                        text = "CM",
-                        style = MaterialTheme.typography.headlineMedium,
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold
+                    Image(
+                        painter = painterResource(id = R.drawable.campaignmasta_logo),
+                        contentDescription = "CampaignMasta logo",
+                        modifier = Modifier.padding(12.dp).fillMaxSize()
                     )
                 }
 

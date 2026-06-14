@@ -260,7 +260,7 @@
   <!-- ── Sidebar ─────────────────────────────────────────── -->
   <aside class="main-sidebar elevation-4">
     <a href="{% url 'dashboard' %}" class="brand-link">
-      <span class="brand-image" style="display:flex;align-items:center;justify-content:center;width:33px;height:33px;background:#2AAA2A;border-radius:7px;font-weight:900;color:#fff;font-size:13px;margin-right:4px;">CM</span>
+      <img class="brand-image" src="{% static 'img/campaignmasta-logo.svg' %}" alt="CampaignMasta logo" style="width:44px;height:34px;object-fit:contain;background:#fff;border-radius:8px;padding:2px;margin-right:6px;">
       <span class="brand-text">
         CampaignMasta
         {% if candidate %}<small>{{ candidate.name }}</small>{% endif %}
