@@ -134,6 +134,60 @@
       .content-grid { grid-template-columns: 1fr !important; }
       .metric-grid { grid-template-columns: repeat(2, 1fr) !important; }
     }
+
+    /* ── Professional UI polish and responsive density ── */
+    body{background:#F5F2EC;}
+    .content-wrapper{background:linear-gradient(180deg,#fbf8ef 0%,#F5F2EC 340px)}
+    .main-header.navbar{box-shadow:0 8px 24px rgba(26,12,12,.06)}
+    .brand-link .brand-image{box-shadow:0 8px 20px rgba(42,170,42,.28)}
+    .nav-sidebar .nav-link{border-radius:10px;margin:2px 10px;transition:background .15s ease,transform .15s ease}
+    .nav-sidebar .nav-link:hover{transform:translateX(2px)}
+    .app-shell{max-width:1320px;margin:0 auto;padding-bottom:28px}
+    .dashboard-head,.page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;background:linear-gradient(135deg,#fff 0%,#fffaf0 55%,#ecfaec 100%);border:1px solid rgba(221,208,184,.9);border-radius:24px;margin:18px 20px 8px;padding:26px;box-shadow:0 10px 30px rgba(26,12,12,.07);position:relative;overflow:hidden}
+    .dashboard-head:after,.page-head:after{content:"";position:absolute;right:-80px;top:-100px;width:260px;height:260px;border-radius:999px;background:rgba(42,170,42,.10)}
+    .dashboard-head>*,.page-head>*{position:relative;z-index:1}
+    .dashboard-head h1,.page-head h1{font-size:clamp(1.75rem,4vw,3rem);letter-spacing:-.045em;line-height:1.02}
+    .dashboard-head p:not(.eyebrow),.page-head p:not(.eyebrow){color:#7A6858;margin:0;font-size:14px}
+    .candidate-switch{position:relative;min-width:180px}
+    .candidate-switch summary{list-style:none;cursor:pointer;background:#fff;border:1px solid #DDD0B8;border-radius:12px;min-height:44px;padding:10px 14px;font-weight:800;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+    .candidate-switch summary::-webkit-details-marker{display:none}
+    .candidate-switch a{display:block;background:#fff;border:1px solid #DDD0B8;border-top:0;padding:10px 12px;color:#1A0C0C;font-size:13px}
+    .metric-grid{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;padding:16px 20px}
+    .metric-grid article{border:1px solid rgba(221,208,184,.75);border-radius:18px;text-align:left;padding:18px;background:linear-gradient(180deg,#fff,#fffdf8);box-shadow:0 8px 24px rgba(26,12,12,.06);transition:transform .15s ease,box-shadow .15s ease}
+    .metric-grid article:hover{transform:translateY(-2px);box-shadow:0 14px 34px rgba(26,12,12,.10)}
+    .metric-grid article span{font-size:clamp(1.75rem,4vw,2.4rem);line-height:1;color:#1A0C0C;font-weight:900;letter-spacing:-.04em}
+    .metric-grid article small{display:block;margin-top:8px;text-transform:uppercase;letter-spacing:.06em;font-weight:800;color:#7A6858}
+    .quick-actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(138px,1fr));gap:10px;padding:14px 20px}
+    .primary-btn,.secondary-btn{justify-content:center;border-radius:12px;font-weight:800;box-shadow:0 1px 3px rgba(0,0,0,.04);transition:transform .15s ease,box-shadow .15s ease,background .15s ease}
+    .primary-btn:hover,.secondary-btn:hover{transform:translateY(-1px);box-shadow:0 10px 22px rgba(26,12,12,.08)}
+    .content-grid{grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:16px;padding:16px 20px}
+    .panel{border:1px solid rgba(221,208,184,.8);border-radius:18px;box-shadow:0 10px 28px rgba(26,12,12,.06)}
+    .panel-title{padding:16px 18px 12px;background:linear-gradient(180deg,#fff,#fffaf0)}
+    .panel-title h2{font-size:15px;font-weight:900;letter-spacing:-.015em}
+    .list-card{padding:13px 18px;transition:background .15s ease}
+    .list-card:hover{background:#fbf8ef}
+    .mini-stat{padding:12px 18px;color:#7A6858;font-size:13px;font-weight:700}
+    .record-list{display:grid;gap:12px;padding:0 20px 20px}
+    .record-card{border-radius:18px;box-shadow:0 8px 22px rgba(26,12,12,.05)}
+    @media(max-width:767px){
+      .content-wrapper{padding-bottom:70px}
+      .main-header.navbar{min-height:58px}
+      .navbar-brand{display:block!important;max-width:58vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+      .dashboard-head,.page-head{margin:12px 12px 6px;padding:20px;border-radius:20px;align-items:flex-start;flex-direction:column}
+      .candidate-switch{width:100%}.candidate-switch summary{width:100%}
+      .metric-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;padding:12px;gap:10px}
+      .metric-grid article{padding:14px;border-radius:16px}
+      .quick-actions{grid-template-columns:repeat(2,minmax(0,1fr));padding:12px;gap:10px}
+      .content-grid{grid-template-columns:1fr!important;padding:12px;gap:12px}
+      .panel{border-radius:16px}.panel-title{padding:14px 16px 10px}
+      .form-card{margin:0 12px 16px;border-radius:18px}
+      .auth-panel{margin:18px auto;padding:0 12px}
+    }
+    @media(max-width:380px){.metric-grid,.quick-actions{grid-template-columns:1fr!important}.dashboard-head h1,.page-head h1{font-size:1.65rem}}
+
+    .metric-grid article i{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:12px;background:#E8F8E8;color:#1A721A;margin-bottom:12px}
+    .metric-grid article:nth-child(3n) i{background:#fff6db;color:#8a6f10}.metric-grid article:nth-child(4n) i{background:#f8e8e8;color:#7C1C1C}
+
   </style>
   {% block extra_head %}{% endblock %}
 </head>
@@ -206,7 +260,7 @@
   <!-- ── Sidebar ─────────────────────────────────────────── -->
   <aside class="main-sidebar elevation-4">
     <a href="{% url 'dashboard' %}" class="brand-link">
-      <span class="brand-image" style="display:flex;align-items:center;justify-content:center;width:33px;height:33px;background:#2AAA2A;border-radius:7px;font-weight:900;color:#fff;font-size:13px;margin-right:4px;">CM</span>
+      <img class="brand-image" src="{% static 'img/campaignmasta-logo.svg' %}" alt="CampaignMasta logo" style="width:44px;height:34px;object-fit:contain;background:#fff;border-radius:8px;padding:2px;margin-right:6px;">
       <span class="brand-text">
         CampaignMasta
         {% if candidate %}<small>{{ candidate.name }}</small>{% endif %}

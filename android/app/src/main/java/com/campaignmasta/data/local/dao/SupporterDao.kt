@@ -16,6 +16,9 @@ interface SupporterDao {
     @Query("SELECT * FROM supporters WHERE localId = :localId")
     suspend fun getByLocalId(localId: String): SupporterEntity?
 
+    @Query("SELECT * FROM supporters WHERE localId = :localId")
+    fun observeByLocalId(localId: String): Flow<SupporterEntity?>
+
     @Query("SELECT * FROM supporters WHERE serverId = :serverId")
     suspend fun getByServerId(serverId: Int): SupporterEntity?
 

@@ -1,6 +1,9 @@
 package com.campaignmasta.ui.screens.auth
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -13,7 +16,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -23,9 +29,11 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.campaignmasta.ui.theme.CampaignCream
+import com.campaignmasta.ui.theme.CampaignGreen
 import com.campaignmasta.ui.theme.PNGBlack
-import com.campaignmasta.ui.theme.PNGGold
 import com.campaignmasta.ui.theme.PNGRed
+import com.campaignmasta.R
 
 @Composable
 fun LoginScreen(
@@ -43,33 +51,41 @@ fun LoginScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(PNGBlack),
+            .background(
+                Brush.verticalGradient(
+                    listOf(PNGBlack, PNGRed, CampaignGreen)
+                )
+            )
+            .padding(horizontal = 20.dp),
         contentAlignment = Alignment.Center
     ) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(24.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
-            elevation = CardDefaults.cardElevation(8.dp)
+                .widthIn(max = 480.dp),
+            shape = RoundedCornerShape(28.dp),
+            colors = CardDefaults.cardColors(containerColor = CampaignCream),
+            elevation = CardDefaults.cardElevation(defaultElevation = 16.dp)
         ) {
             Column(
-                modifier = Modifier.padding(32.dp),
+                modifier = Modifier
+                    .verticalScroll(rememberScrollState())
+                    .padding(28.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 // Header
-                Box(
-                    modifier = Modifier
-                        .size(72.dp)
-                        .background(PNGRed, shape = MaterialTheme.shapes.medium),
-                    contentAlignment = Alignment.Center
+                Surface(
+                    modifier = Modifier.width(190.dp).height(120.dp),
+                    shape = RoundedCornerShape(24.dp),
+                    color = Color.White,
+                    tonalElevation = 4.dp,
+                    shadowElevation = 8.dp
                 ) {
-                    Text(
-                        text = "CM",
-                        style = MaterialTheme.typography.headlineMedium,
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold
+                    Image(
+                        painter = painterResource(id = R.drawable.campaignmasta_logo),
+                        contentDescription = "CampaignMasta logo",
+                        modifier = Modifier.padding(12.dp).fillMaxSize()
                     )
                 }
 
@@ -81,12 +97,22 @@ fun LoginScreen(
                 )
 
                 Text(
-                    text = "PNG Campaign Management",
+                    text = "Secure field operations for modern campaigns",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color.Gray
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Surface(
+                    color = Color.White.copy(alpha = 0.72f),
+                    shape = RoundedCornerShape(999.dp)
+                ) {
+                    Text(
+                        text = "Offline-ready • Team managed • Real-time sync",
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
 
                 // Username field
                 OutlinedTextField(
@@ -155,6 +181,7 @@ fun LoginScreen(
                         .fillMaxWidth()
                         .height(52.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = PNGRed),
+                    shape = RoundedCornerShape(16.dp),
                     enabled = !uiState.isLoading
                 ) {
                     if (uiState.isLoading) {
@@ -175,7 +202,7 @@ fun LoginScreen(
                 Text(
                     text = "Contact your campaign manager for access",
                     style = MaterialTheme.typography.labelSmall,
-                    color = Color.Gray
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }

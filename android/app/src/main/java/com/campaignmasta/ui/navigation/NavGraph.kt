@@ -15,6 +15,7 @@ import com.campaignmasta.ui.screens.dashboard.DashboardScreen
 import com.campaignmasta.ui.screens.messages.MessagesScreen
 import com.campaignmasta.ui.screens.polling.PollingScreen
 import com.campaignmasta.ui.screens.supporters.AddSupporterScreen
+import com.campaignmasta.ui.screens.supporters.SupporterDetailScreen
 import com.campaignmasta.ui.screens.supporters.SupportersScreen
 import com.campaignmasta.ui.screens.team.AddMemberScreen
 import com.campaignmasta.ui.screens.team.TeamScreen
@@ -83,7 +84,8 @@ fun CampaignMastaNavGraph() {
         composable(Screen.Supporters.route) {
             SupportersScreen(
                 onBack = { navController.popBackStack() },
-                onAddSupporter = { navController.navigate(Screen.AddSupporter.route) }
+                onAddSupporter = { navController.navigate(Screen.AddSupporter.route) },
+                onSupporterClick = { localId -> navController.navigate(Screen.SupporterDetail.createRoute(localId)) }
             )
         }
 
@@ -91,6 +93,14 @@ fun CampaignMastaNavGraph() {
             AddSupporterScreen(
                 onBack = { navController.popBackStack() },
                 onSaved = { navController.popBackStack() }
+            )
+        }
+
+        composable(Screen.SupporterDetail.route) { backStackEntry ->
+            val localId = backStackEntry.arguments?.getString("localId").orEmpty()
+            SupporterDetailScreen(
+                localId = localId,
+                onBack = { navController.popBackStack() }
             )
         }
 

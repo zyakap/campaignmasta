@@ -24,6 +24,9 @@ interface ApiService {
         @Query("page") page: Int = 1
     ): Response<PaginatedResponse<SupporterDto>>
 
+    @GET("api/supporters/{id}/")
+    suspend fun getSupporter(@Path("id") id: Int): Response<SupporterDto>
+
     @POST("api/supporters/")
     suspend fun createSupporter(@Body request: Map<String, Any?>): Response<SupporterDto>
 

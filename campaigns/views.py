@@ -459,6 +459,26 @@ def supporters(request):
 
 
 @login_required
+@module_required("supporter-registry")
+def supporter_detail(request, supporter_id):
+    candidate = _active_candidate(request)
+    scoped = scope_queryset(
+        Supporter.objects.filter(candidate=candidate), request.user, candidate
+    ).select_related("province", "district", "llg", "ward", "village", "registered_by")
+    supporter = get_object_or_404(scoped, id=supporter_id)
+    call_history = (
+        CallLog.objects.filter(candidate=candidate, supporter=supporter)
+        .select_related("caller")
+        .order_by("-call_datetime", "-created_at")[:12]
+    )
+    return render(
+        request,
+        "campaigns/supporter_detail.html",
+        {"candidate": candidate, "supporter": supporter, "call_history": call_history},
+    )
+
+
+@login_required
 @module_required("core-crm")
 def team(request):
     candidate = _active_candidate(request)
@@ -566,6 +586,26 @@ def team_member_edit(request, member_id):
 
 
 @login_required
+@module_required("supporter-registry")
+def supporter_detail(request, supporter_id):
+    candidate = _active_candidate(request)
+    scoped = scope_queryset(
+        Supporter.objects.filter(candidate=candidate), request.user, candidate
+    ).select_related("province", "district", "llg", "ward", "village", "registered_by")
+    supporter = get_object_or_404(scoped, id=supporter_id)
+    call_history = (
+        CallLog.objects.filter(candidate=candidate, supporter=supporter)
+        .select_related("caller")
+        .order_by("-call_datetime", "-created_at")[:12]
+    )
+    return render(
+        request,
+        "campaigns/supporter_detail.html",
+        {"candidate": candidate, "supporter": supporter, "call_history": call_history},
+    )
+
+
+@login_required
 @module_required("core-crm")
 def team_member_approve(request, member_id):
     candidate = _active_candidate(request)
@@ -581,6 +621,26 @@ def team_member_approve(request, member_id):
         log_audit(request, "TEAM_MEMBER_APPROVED", member, new_value={"role": member.role})
         messages.success(request, f"{member.full_name} approved and activated.")
     return redirect("team")
+
+
+@login_required
+@module_required("supporter-registry")
+def supporter_detail(request, supporter_id):
+    candidate = _active_candidate(request)
+    scoped = scope_queryset(
+        Supporter.objects.filter(candidate=candidate), request.user, candidate
+    ).select_related("province", "district", "llg", "ward", "village", "registered_by")
+    supporter = get_object_or_404(scoped, id=supporter_id)
+    call_history = (
+        CallLog.objects.filter(candidate=candidate, supporter=supporter)
+        .select_related("caller")
+        .order_by("-call_datetime", "-created_at")[:12]
+    )
+    return render(
+        request,
+        "campaigns/supporter_detail.html",
+        {"candidate": candidate, "supporter": supporter, "call_history": call_history},
+    )
 
 
 @login_required

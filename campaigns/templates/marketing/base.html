@@ -47,11 +47,7 @@
       height: 64px;
     }
     .nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
-    .nav-logo {
-      width: 36px; height: 36px; background: var(--green-mid); border-radius: 9px;
-      display: flex; align-items: center; justify-content: center;
-      color: #fff; font-weight: 900; font-size: 14px; letter-spacing: -.5px;
-    }
+    .nav-logo { width: 150px; height: 46px; object-fit: contain; display: block; }
     .nav-brand-name { font-weight: 800; font-size: 17px; color: var(--neutral-900); }
     .nav-brand-name span { color: var(--green-mid); }
     .nav-links { display: flex; align-items: center; gap: 28px; list-style: none; }
@@ -87,7 +83,7 @@
     .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 48px; }
     .footer-brand { }
     .footer-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
-    .footer-logo-mark { width: 36px; height: 36px; background: var(--green-mid); border-radius: 9px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 900; font-size: 14px; }
+    .footer-logo-mark { width: 150px; height: 56px; object-fit: contain; display: block; filter: drop-shadow(0 6px 14px rgba(0,0,0,.35)); }
     .footer-logo-text { color: #fff; font-weight: 800; font-size: 16px; }
     .footer-tagline { font-size: 13px; line-height: 1.6; max-width: 260px; }
     .footer-col h4 { color: #fff; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 14px; }
@@ -161,8 +157,7 @@
 
 <nav class="site-nav">
   <a href="/" class="nav-brand">
-    <div class="nav-logo">CM</div>
-    <span class="nav-brand-name">Campaign<span>Masta</span></span>
+    <img class="nav-logo" src="{% static 'img/campaignmasta-logo.svg' %}" alt="CampaignMasta logo">
   </a>
   <ul class="nav-links">
     <li><a href="/" {% block nav_home %}{% endblock %}>Home</a></li>
@@ -172,7 +167,7 @@
   </ul>
   <div class="nav-cta">
     <a href="/accounts/login/" class="btn btn-outline">Sign In</a>
-    <a href="/pricing/" class="btn btn-primary">Get Started</a>
+    <a href="/subscription-interest/" class="btn btn-primary">Book Consultation</a>
   </div>
   <button class="nav-mobile-toggle" id="nav-toggle" aria-label="Open menu" aria-expanded="false">
     <i class="fas fa-bars" id="nav-toggle-icon"></i>
@@ -186,7 +181,7 @@
   <a href="/download/" class="mobile-menu-link {% block mob_nav_download %}{% endblock %}">Download</a>
   <div class="mobile-menu-cta">
     <a href="/accounts/login/" class="btn btn-outline">Sign In</a>
-    <a href="/pricing/" class="btn btn-primary">Get Started</a>
+    <a href="/subscription-interest/" class="btn btn-primary">Book Consultation</a>
   </div>
 </div>
 
@@ -196,8 +191,7 @@
   <div class="footer-grid">
     <div class="footer-brand">
       <div class="footer-logo">
-        <div class="footer-logo-mark">CM</div>
-        <span class="footer-logo-text">CampaignMasta</span>
+        <img class="footer-logo-mark" src="{% static 'img/campaignmasta-logo.svg' %}" alt="CampaignMasta logo">
       </div>
       <p class="footer-tagline">The complete digital command centre for PNG election candidates. Built for Papua New Guinea's unique political landscape.</p>
     </div>
@@ -224,7 +218,7 @@
       <ul>
         <li><a href="mailto:admin@campaignmasta.com">admin@campaignmasta.com</a></li>
         <li><a href="https://webmasta.com.pg">webmasta.com.pg</a></li>
-        <li><a href="/pricing/">Get a Quote</a></li>
+        <li><a href="/subscription-interest/">Subscription Interest</a></li>
       </ul>
     </div>
   </div>

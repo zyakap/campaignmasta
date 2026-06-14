@@ -119,20 +119,26 @@ TEMPLATES = [
 WSGI_APPLICATION = "campaignmasta.wsgi.application"
 
 # ── Database ──────────────────────────────────────────────────────────────────
+DB_ENGINE = os.environ.get("DB_ENGINE", "django.db.backends.mysql")
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.mysql",
-        "NAME": "cmastadb",
-        "USER": "root",
-        "PASSWORD": "cmWrft5&Wfefs24@",
-        "HOST": "localhost",
-        "PORT": "3306",
-        "OPTIONS": {
-            "charset": "utf8mb4",
-            "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
-        },
+        "ENGINE": DB_ENGINE,
+        "NAME": os.environ.get("DB_NAME", "cmastadb"),
+        "USER": os.environ.get("DB_USER", "root"),
+        "PASSWORD": os.environ.get("DB_PASSWORD", ""),
+        "HOST": os.environ.get("DB_HOST", "localhost"),
+        "PORT": os.environ.get("DB_PORT", "3306"),
     }
 }
+
+if DB_ENGINE == "django.db.backends.mysql":
+    DATABASES["default"]["OPTIONS"] = {
+        "charset": "utf8mb4",
+        "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
+    }
+
+if not DEBUG and not DATABASES["default"].get("PASSWORD"):
+    raise RuntimeError("DB_PASSWORD environment variable must be set when DJANGO_DEBUG is off.")
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
@@ -164,6 +170,11 @@ LOGIN_REDIRECT_URL = "dashboard"
 LOGOUT_REDIRECT_URL = "login"
 
 SESSION_COOKIE_AGE = 28800
+SESSION_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_REFERRER_POLICY = "same-origin"
+X_FRAME_OPTIONS = "DENY"
 
 # ── Security hardening (active when DEBUG is off) ─────────────────────────────
 if not DEBUG:
@@ -173,10 +184,7 @@ if not DEBUG:
     SECURE_HSTS_SECONDS = int(os.environ.get("DJANGO_HSTS_SECONDS", "31536000"))
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
-    SECURE_CONTENT_TYPE_NOSNIFF = True
-    SECURE_REFERRER_POLICY = "same-origin"
     SESSION_COOKIE_HTTPONLY = True
-    X_FRAME_OPTIONS = "DENY"
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 # ── Logging ───────────────────────────────────────────────────────────────────

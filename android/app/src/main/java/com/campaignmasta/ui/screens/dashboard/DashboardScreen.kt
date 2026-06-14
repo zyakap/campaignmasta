@@ -1,9 +1,11 @@
 package com.campaignmasta.ui.screens.dashboard
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -11,14 +13,18 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.campaignmasta.ui.components.SyncStatusBar
 import com.campaignmasta.ui.navigation.Screen
+import com.campaignmasta.ui.theme.CampaignGreen
 import com.campaignmasta.ui.theme.PNGGold
 import com.campaignmasta.ui.theme.PNGRed
 import com.campaignmasta.ui.theme.SupportStrong
@@ -51,41 +57,43 @@ fun DashboardScreen(
     )
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            TopAppBar(
+            CenterAlignedTopAppBar(
                 title = {
-                    Column {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
                             text = uiState.candidateName.ifBlank { "CampaignMasta" },
-                            style = MaterialTheme.typography.titleLarge,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold
                         )
                         Text(
                             text = uiState.userRole.replace("_", " ").lowercase()
                                 .replaceFirstChar { it.uppercase() },
+                            maxLines = 1,
                             style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = PNGRed,
-                    titleContentColor = Color.White
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.96f),
+                    titleContentColor = MaterialTheme.colorScheme.onSurface
                 ),
                 actions = {
-                    if (uiState.isOnline) {
-                        Icon(
-                            Icons.Default.Cloud,
-                            contentDescription = "Online",
-                            tint = Color.White,
-                            modifier = Modifier.padding(end = 8.dp)
-                        )
-                    }
+                    Icon(
+                        imageVector = if (uiState.isOnline) Icons.Default.CloudDone else Icons.Default.CloudOff,
+                        contentDescription = if (uiState.isOnline) "Online" else "Offline",
+                        tint = if (uiState.isOnline) CampaignGreen else MaterialTheme.colorScheme.error,
+                        modifier = Modifier.padding(end = 4.dp)
+                    )
                     IconButton(onClick = {
                         viewModel.logout()
                         onLogout()
                     }) {
-                        Icon(Icons.Default.Logout, contentDescription = "Logout", tint = Color.White)
+                        Icon(Icons.Default.Logout, contentDescription = "Logout")
                     }
                 }
             )
@@ -103,34 +111,22 @@ fun DashboardScreen(
                 onRefresh = viewModel::refreshFromServer,
                 modifier = Modifier.fillMaxSize()
             ) {
-                Column(modifier = Modifier.fillMaxSize()) {
-                    // Banner
-                    Surface(
-                        modifier = Modifier.fillMaxWidth(),
-                        color = MaterialTheme.colorScheme.surfaceVariant
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(16.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(
-                                text = "Campaign Overview",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                        }
+                LazyVerticalGrid(
+                    columns = GridCells.Adaptive(minSize = 158.dp),
+                    contentPadding = PaddingValues(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(14.dp),
+                    verticalArrangement = Arrangement.spacedBy(14.dp),
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(maxLineSpan) }) {
+                        DashboardHero(
+                            supporterCount = uiState.supporterCount,
+                            callsDueCount = uiState.callsDueCount,
+                            unreadMessages = uiState.messagesUnreadCount
+                        )
                     }
-
-                    LazyVerticalGrid(
-                        columns = GridCells.Fixed(2),
-                        contentPadding = PaddingValues(16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        items(cards) { card ->
-                            DashboardCardItem(card = card, onClick = { onNavigate(card.route) })
-                        }
+                    items(cards) { card ->
+                        DashboardCardItem(card = card, onClick = { onNavigate(card.route) })
                     }
                 }
             }
@@ -139,42 +135,96 @@ fun DashboardScreen(
 }
 
 @Composable
-fun DashboardCardItem(card: DashboardCard, onClick: () -> Unit) {
+private fun DashboardHero(supporterCount: Int, callsDueCount: Int, unreadMessages: Int) {
     Card(
-        onClick = onClick,
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(4.dp)
+        shape = RoundedCornerShape(28.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
+                .clip(RoundedCornerShape(28.dp))
+                .background(Brush.linearGradient(listOf(PNGRed, CampaignGreen)))
+                .padding(22.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Text(
+                text = "Campaign command centre",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.ExtraBold,
+                color = Color.White
+            )
+            Text(
+                text = "Track your field team, supporter movement, calls, messages and polling readiness from one mobile workspace.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.White.copy(alpha = 0.82f)
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                HeroChip("$supporterCount contacts")
+                HeroChip("$callsDueCount calls")
+                HeroChip("$unreadMessages unread")
+            }
+        }
+    }
+}
+
+@Composable
+private fun HeroChip(label: String) {
+    Surface(
+        color = Color.White.copy(alpha = 0.16f),
+        shape = RoundedCornerShape(999.dp)
+    ) {
+        Text(
+            text = label,
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
+            color = Color.White,
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.Bold
+        )
+    }
+}
+
+@Composable
+fun DashboardCardItem(card: DashboardCard, onClick: () -> Unit) {
+    ElevatedCard(
+        onClick = onClick,
+        shape = RoundedCornerShape(22.dp),
+        colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 3.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(18.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Box(
                 modifier = Modifier
-                    .size(52.dp)
-                    .padding(4.dp),
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(card.color.copy(alpha = 0.12f)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = card.icon,
                     contentDescription = card.title,
                     tint = card.color,
-                    modifier = Modifier.size(36.dp)
+                    modifier = Modifier.size(27.dp)
                 )
             }
             Text(
                 text = if (card.count > 0) card.count.toString() else "—",
                 style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                color = card.color
+                fontWeight = FontWeight.ExtraBold,
+                color = MaterialTheme.colorScheme.onSurface
             )
             Text(
                 text = card.title,
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }
