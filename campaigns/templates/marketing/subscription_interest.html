@@ -1,0 +1,40 @@
+{% extends "marketing/base.html" %}
+{% block title %}Request a CampaignMasta Subscription Consultation{% endblock %}
+{% block meta_desc %}Send your CampaignMasta subscription interest and preferred meeting time. Choose provincial or district candidate option and the relevant geography.{% endblock %}
+{% block content %}
+<section class="interest-hero">
+  <div class="interest-copy">
+    <p class="section-label">Subscription Interest</p>
+    <h1>Book a CampaignMasta consultation</h1>
+    <p>Tell us the seat you plan to contest and when you would like to meet. The SaaS operations team will review your request and confirm availability.</p>
+    <div class="interest-benefits">
+      <span><i class="fas fa-check-circle"></i> Provincial or district setup</span>
+      <span><i class="fas fa-check-circle"></i> Android + web campaign tools</span>
+      <span><i class="fas fa-check-circle"></i> Team onboarding support</span>
+    </div>
+  </div>
+  <form method="post" class="interest-form">
+    {% csrf_token %}
+    {% if messages %}
+      {% for message in messages %}<div class="interest-alert {{ message.tags }}">{{ message }}</div>{% endfor %}
+    {% endif %}
+    {{ form.non_field_errors }}
+    {% for field in form %}
+      <label>
+        <span>{{ field.label }}{% if field.field.required %} <strong>*</strong>{% endif %}</span>
+        {{ field }}
+        {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+        {% for error in field.errors %}<em>{{ error }}</em>{% endfor %}
+      </label>
+    {% endfor %}
+    <button class="btn btn-primary btn-lg" type="submit"><i class="fas fa-calendar-check"></i> Send request</button>
+    <p class="interest-note">Your details are used only to respond to your CampaignMasta subscription enquiry.</p>
+  </form>
+</section>
+<style>
+.interest-hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,520px);gap:36px;align-items:start;background:linear-gradient(135deg,#fff 0%,var(--neutral-100) 100%)}
+.interest-copy h1{font-size:clamp(2.2rem,5vw,4rem);line-height:1.02;letter-spacing:-.05em;margin-bottom:18px}.interest-copy p{color:var(--neutral-500);max-width:620px;font-size:18px}.interest-benefits{display:grid;gap:10px;margin-top:26px}.interest-benefits span{display:flex;align-items:center;gap:10px;font-weight:700;color:var(--neutral-700)}.interest-benefits i{color:var(--green-mid)}
+.interest-form{background:#fff;border:1px solid var(--neutral-200);border-radius:24px;box-shadow:0 20px 60px rgba(26,12,12,.10);padding:26px;display:grid;gap:16px}.interest-form label{display:grid;gap:7px;font-weight:700;color:var(--neutral-700)}.interest-form label span strong{color:var(--red-soft)}.interest-form input,.interest-form select{width:100%;min-height:48px;border:1px solid var(--neutral-200);border-radius:12px;padding:10px 12px;font:inherit;background:#fff}.interest-form input:focus,.interest-form select:focus{outline:none;border-color:var(--green-mid);box-shadow:0 0 0 4px rgba(42,170,42,.12)}.interest-form em{font-style:normal;color:var(--red-soft);font-size:13px}.interest-note,.interest-form small{font-size:13px;color:var(--neutral-500)}.interest-alert{border-radius:12px;padding:12px 14px;background:var(--green-pale);color:var(--green-dark);font-weight:700}
+@media(max-width:860px){.interest-hero{grid-template-columns:1fr;padding:44px 5%}.interest-form{padding:20px;border-radius:20px}}
+</style>
+{% endblock %}

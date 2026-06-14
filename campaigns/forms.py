@@ -27,6 +27,7 @@ from .models import (
     PromiseTracker,
     RegistrationDrive,
     SoftwareModule,
+    SubscriptionInterest,
     SubscriptionQuote,
     Supporter,
     TeamMember,
@@ -47,6 +48,51 @@ class MobileFormMixin:
         for field in self.fields.values():
             css = field.widget.attrs.get("class", "")
             field.widget.attrs["class"] = f"{css} mobile-input".strip()
+
+
+class SubscriptionInterestForm(MobileFormMixin, forms.ModelForm):
+    class Meta:
+        model = SubscriptionInterest
+        fields = [
+            "full_name",
+            "candidate_option",
+            "province",
+            "district",
+            "mobile_number",
+            "whatsapp_number",
+            "email",
+            "meeting_appointment",
+        ]
+        widgets = {
+            "meeting_appointment": forms.DateTimeInput(attrs={"type": "datetime-local"}),
+        }
+        labels = {
+            "candidate_option": "Provincial or District Candidate Option",
+            "mobile_number": "Mobile number",
+            "whatsapp_number": "WhatsApp Number (if different from Mobile)",
+            "meeting_appointment": "Meeting Appointment Date/Time",
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["district"].required = False
+        self.fields["whatsapp_number"].required = False
+        self.fields["full_name"].widget.attrs["placeholder"] = "Candidate or campaign manager full name"
+        self.fields["mobile_number"].widget.attrs["placeholder"] = "+675 ..."
+        self.fields["whatsapp_number"].widget.attrs["placeholder"] = "Leave blank if same as mobile"
+
+    def clean(self):
+        cleaned = super().clean()
+        option = cleaned.get("candidate_option")
+        province = cleaned.get("province")
+        district = cleaned.get("district")
+        if option == SubscriptionInterest.CandidateOption.DISTRICT and not district:
+            self.add_error("district", "Please select the district you plan to contest.")
+        if option == SubscriptionInterest.CandidateOption.PROVINCIAL and district:
+            self.add_error("district", "Leave district blank for a provincial candidate interest.")
+        if province and district and district.province_id != province.id:
+            self.add_error("district", "Selected district must belong to the selected province.")
+        return cleaned
 
 
 class SupporterQuickForm(MobileFormMixin, forms.ModelForm):

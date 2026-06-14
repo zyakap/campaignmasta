@@ -24,6 +24,8 @@ class SupporterRepository @Inject constructor(
 ) {
     val supporters: Flow<List<SupporterEntity>> = supporterDao.getAllFlow()
 
+    fun observeSupporter(localId: String): Flow<SupporterEntity?> = supporterDao.observeByLocalId(localId)
+
     /** Create a supporter offline — queues for sync. */
     suspend fun createOffline(
         fullName: String,

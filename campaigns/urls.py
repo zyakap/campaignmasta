@@ -32,6 +32,7 @@ urlpatterns = [
     path("villages/<int:village_id>/reject/", views.village_reject, name="village_reject"),
     path("supporters/", views.supporters, name="supporters"),
     path("supporters/new/", views.supporter_create, name="supporter_create"),
+    path("supporters/<int:supporter_id>/", views.supporter_detail, name="supporter_detail"),
     path("influencers/", views.influencers, name="influencers"),
     path("influencers/new/", views.influencer_create, name="influencer_create"),
     path("calls/", views.calls, name="calls"),

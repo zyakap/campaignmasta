@@ -423,6 +423,67 @@ a.related-widget-wrapper-link{display:none!important;}
   #searchbar{min-width:0;width:100%;flex:1}
   .actions{padding:8px 12px}
 }
+
+/* ── Professional responsive polish pass ───────────────────────────────── */
+body{background:linear-gradient(180deg,#faf7f0 0%,var(--n50) 360px);}
+.sa-sidebar{box-shadow:18px 0 40px rgba(24,8,8,.18)}
+.sa-brand-mark{box-shadow:0 8px 18px rgba(42,170,42,.28)}
+.sa-nlink{border-radius:10px;margin:2px 10px;padding:9px 12px;min-height:40px}
+.sa-nlink.active{background:linear-gradient(135deg,var(--g600),var(--g700));box-shadow:0 10px 22px rgba(42,170,42,.20)}
+.sa-nlabel{padding:16px 18px 6px}
+.sa-content{max-width:1440px;width:100%;margin:0 auto}
+#content-start{min-width:0}
+.module,fieldset,#changelist-filter{box-shadow:var(--sh);}
+#changelist{display:grid;grid-template-columns:minmax(0,1fr) 230px;gap:18px;align-items:start}
+#changelist-form{min-width:0;background:var(--white);border:1px solid var(--n200);border-radius:var(--r14);overflow:hidden;box-shadow:var(--sh)}
+#changelist-filter{float:none;width:auto;margin:0;grid-column:2;grid-row:1 / span 2;position:sticky;top:calc(var(--th) + 16px)}
+#toolbar{border-radius:var(--r14) var(--r14) 0 0}
+#result_list{min-width:760px}
+#result_list tbody tr:nth-child(even){background:rgba(245,242,236,.42)}
+#result_list tbody tr:hover{background:#eef9ee}
+.submit-row{position:sticky;bottom:0;z-index:20;box-shadow:0 -10px 24px rgba(24,8,8,.06)}
+input[type=text],input[type=email],input[type=password],input[type=number],input[type=url],input[type=date],input[type=datetime-local],input[type=time],input[type=search],select,textarea{min-height:40px}
+input[type=text]:focus,input[type=email]:focus,input[type=password]:focus,input[type=number]:focus,input[type=url]:focus,input[type=date]:focus,input[type=datetime-local]:focus,select:focus,textarea:focus{box-shadow:0 0 0 4px rgba(42,170,42,.12)}
+.sa-user-pill,.sa-icon-btn,.object-tools li a,.submit-row input[type=submit],.submit-row button[type=submit]{transition:transform .15s ease,box-shadow .15s ease,background .15s ease,border-color .15s ease}
+.sa-icon-btn:hover,.sa-user-pill:hover,.object-tools li a:hover,.submit-row input[type=submit]:hover,.submit-row button[type=submit]:hover{transform:translateY(-1px)}
+@media(max-width:1024px){
+  .sa-content{padding:18px 16px}
+  #changelist{display:block}
+  #changelist-filter{position:static;margin-bottom:14px}
+}
+@media(max-width:767px){
+  .sa-content{padding:14px 10px 90px}
+  .sa-topbar{height:64px;box-shadow:0 8px 24px rgba(24,8,8,.08)}
+  .sa-crumb a:first-child{display:none}
+  .sa-user-pill{padding:4px;border-radius:999px}
+  .module,fieldset,#changelist-form,#changelist-filter{border-radius:14px}
+  #result_list,.module table{min-width:680px}
+  .paginator{position:sticky;left:0}
+  .submit-row{margin:0 -10px;border-radius:18px 18px 0 0;padding:12px;justify-content:stretch}
+  .submit-row input[type=submit],.submit-row button[type=submit],.submit-row input[name="_addanother"],.submit-row input[name="_continue"],.submit-row a.deletelink{flex:1 1 100%;justify-content:center;text-align:center}
+}
+@media(max-width:420px){
+  .sa-topbar-right .sa-icon-btn{display:none}
+  .sa-crumb-cur{max-width:52vw}
+  #result_list,.module table{min-width:620px}
+}
+
+.sa-page-hero{background:linear-gradient(135deg,#fff 0%,#f6f0df 100%);border:1px solid var(--n200);border-radius:22px;padding:24px;margin-bottom:20px;box-shadow:var(--sh);overflow:hidden;position:relative}
+.sa-page-hero:after{content:"";position:absolute;right:-70px;top:-80px;width:220px;height:220px;border-radius:999px;background:rgba(42,170,42,.10)}
+.sa-page-kicker{font-size:11px;text-transform:uppercase;letter-spacing:.12em;font-weight:800;color:var(--g700);margin-bottom:6px}
+.sa-page-hero h1{font-size:clamp(1.5rem,3vw,2.25rem);line-height:1.05;color:var(--n950);margin:0 0 8px;font-weight:900;letter-spacing:-.04em}
+.sa-page-hero p:last-child{color:var(--n600);max-width:62ch}
+.sa-model-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.sa-model-card{background:var(--white);border:1px solid var(--n200);border-radius:18px;box-shadow:var(--sh);overflow:hidden;transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease}
+.sa-model-card:hover{transform:translateY(-2px);box-shadow:var(--shm);border-color:rgba(42,170,42,.45)}
+.sa-model-main{display:grid;grid-template-columns:46px minmax(0,1fr) 18px;gap:12px;align-items:center;padding:18px;color:inherit;text-decoration:none}
+.sa-model-main strong{display:block;color:var(--n900);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sa-model-main small{display:block;color:var(--n500);font-size:12px;margin-top:2px}
+.sa-model-icon{width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,var(--g50),#fff7df);display:grid;place-items:center;color:var(--g700);font-size:17px}
+.sa-model-add{display:flex;align-items:center;gap:8px;padding:12px 18px;border-top:1px solid var(--n100);background:var(--n50);font-size:12px;font-weight:800;color:var(--g700);text-decoration:none}
+.sa-model-add:hover{background:var(--g50);color:var(--g800)}
+@media(max-width:767px){.sa-page-hero{padding:18px;border-radius:18px}.sa-model-grid{grid-template-columns:1fr}.sa-model-main{padding:16px}}
+
 </style>
 </head>
 <body>
@@ -460,6 +521,7 @@ a.related-widget-wrapper-link{display:none!important;}
       <div class="sa-nsub">
         <a href="{% url 'saas_admin:campaigns_subscription_changelist' %}" class="sa-nsublink">Subscriptions</a>
         <a href="{% url 'saas_admin:campaigns_subscriptionquote_changelist' %}" class="sa-nsublink">Quotes</a>
+        <a href="{% url 'saas_admin:campaigns_subscriptioninterest_changelist' %}" class="sa-nsublink">Subscription Interests</a>
         <a href="{% url 'saas_admin:campaigns_tenantmodulesubscription_changelist' %}" class="sa-nsublink">Module Subscriptions</a>
       </div>
     </div>

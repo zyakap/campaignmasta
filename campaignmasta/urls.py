@@ -16,6 +16,7 @@ urlpatterns = [
     path("", marketing_views.home, name="marketing_home"),
     path("features/", marketing_views.features, name="marketing_features"),
     path("pricing/", marketing_views.pricing, name="marketing_pricing"),
+    path("subscription-interest/", marketing_views.subscription_interest, name="marketing_subscription_interest"),
     path("download/", marketing_views.download, name="marketing_download"),
     path("", include("campaigns.urls")),
 ]

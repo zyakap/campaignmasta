@@ -19,6 +19,50 @@ from .models import (
 )
 
 
+def _request_team_member(context):
+    request = context.get("request")
+    if not request or not request.user.is_authenticated:
+        raise serializers.ValidationError("Authenticated request context is required.")
+    team_member = TeamMember.objects.select_related("candidate").filter(user=request.user).first()
+    if not team_member:
+        raise serializers.ValidationError("No TeamMember found for this user.")
+    return request, team_member, team_member.candidate
+
+
+def _ensure_candidate_geography(candidate, attrs, field_names=("province", "district", "llg", "ward", "village")):
+    province = attrs.get("province")
+    district = attrs.get("district")
+    llg = attrs.get("llg")
+    ward = attrs.get("ward")
+    village = attrs.get("village")
+
+    if province and province.id != candidate.province_id:
+        raise serializers.ValidationError({"province": "Province is outside this campaign."})
+    if district and district not in candidate.available_districts():
+        raise serializers.ValidationError({"district": "District is outside this campaign."})
+    if llg and llg not in candidate.available_llgs():
+        raise serializers.ValidationError({"llg": "LLG is outside this campaign."})
+    if ward and ward not in candidate.available_wards():
+        raise serializers.ValidationError({"ward": "Ward is outside this campaign."})
+    if village and (not ward or village.ward_id != ward.id or village.ward not in candidate.available_wards()):
+        raise serializers.ValidationError({"village": "Village is outside this campaign or ward."})
+
+
+def _ensure_candidate_owned(candidate, attrs, field_name):
+    obj = attrs.get(field_name)
+    if obj is not None and getattr(obj, "candidate_id", None) != candidate.id:
+        raise serializers.ValidationError({field_name: "Selected record is outside this campaign."})
+
+
+def _merged_instance_attrs(serializer, attrs, field_names):
+    merged = dict(attrs)
+    instance = getattr(serializer, "instance", None)
+    if instance is not None:
+        for field_name in field_names:
+            merged.setdefault(field_name, getattr(instance, field_name, None))
+    return merged
+
+
 # ─── Auth ─────────────────────────────────────────────────────────────────────
 
 class LoginSerializer(serializers.Serializer):
@@ -83,12 +127,14 @@ class SupporterSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ["id", "created_at", "updated_at"]
 
+    def validate(self, attrs):
+        _, _, candidate = _request_team_member(self.context)
+        _ensure_candidate_geography(candidate, _merged_instance_attrs(self, attrs, ("province", "district", "llg", "ward", "village")))
+        return attrs
+
     def create(self, validated_data):
-        request = self.context["request"]
-        team_member = TeamMember.objects.filter(user=request.user).first()
-        if not team_member:
-            raise serializers.ValidationError("No TeamMember found for this user.")
-        candidate = team_member.candidate
+        request, team_member, candidate = _request_team_member(self.context)
+        _ensure_candidate_geography(candidate, validated_data)
         validated_data["candidate"] = candidate
         validated_data["created_by"] = request.user
         # Attribute up the coordinator chain for incentive tracking.
@@ -147,6 +193,11 @@ class TeamMemberSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ["id", "role_display", "approval_status", "created_by_member_name", "created_at", "updated_at"]
 
+    def validate(self, attrs):
+        _, _, candidate = _request_team_member(self.context)
+        _ensure_candidate_geography(candidate, _merged_instance_attrs(self, attrs, ("province", "district", "llg", "ward", "village")))
+        return attrs
+
 
 # ─── Influencer ───────────────────────────────────────────────────────────────
 
@@ -174,6 +225,11 @@ class InfluencerSerializer(serializers.ModelSerializer):
             "updated_at",
         ]
         read_only_fields = ["id", "created_at", "updated_at"]
+
+    def validate(self, attrs):
+        _, _, candidate = _request_team_member(self.context)
+        _ensure_candidate_geography(candidate, _merged_instance_attrs(self, attrs, ("province", "district", "llg", "ward", "village")))
+        return attrs
 
 
 # ─── Message ──────────────────────────────────────────────────────────────────
@@ -282,12 +338,18 @@ class CallLogSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ["id", "created_at", "updated_at"]
 
+    def validate(self, attrs):
+        _, _, candidate = _request_team_member(self.context)
+        merged = _merged_instance_attrs(self, attrs, ("influencer", "supporter"))
+        _ensure_candidate_owned(candidate, merged, "influencer")
+        _ensure_candidate_owned(candidate, merged, "supporter")
+        return attrs
+
     def create(self, validated_data):
-        request = self.context["request"]
-        team_member = TeamMember.objects.filter(user=request.user).first()
-        if not team_member:
-            raise serializers.ValidationError("No TeamMember found for this user.")
-        validated_data["candidate"] = team_member.candidate
+        request, team_member, candidate = _request_team_member(self.context)
+        _ensure_candidate_owned(candidate, validated_data, "influencer")
+        _ensure_candidate_owned(candidate, validated_data, "supporter")
+        validated_data["candidate"] = candidate
         validated_data["created_by"] = request.user
         return super().create(validated_data)
 
@@ -314,12 +376,15 @@ class CommunityGroupSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ["id", "created_at", "updated_at"]
 
+    def validate(self, attrs):
+        _, _, candidate = _request_team_member(self.context)
+        _ensure_candidate_geography(candidate, _merged_instance_attrs(self, attrs, ("province", "district", "llg", "ward", "village")))
+        return attrs
+
     def create(self, validated_data):
-        request = self.context["request"]
-        team_member = TeamMember.objects.filter(user=request.user).first()
-        if not team_member:
-            raise serializers.ValidationError("No TeamMember found for this user.")
-        validated_data["candidate"] = team_member.candidate
+        request, team_member, candidate = _request_team_member(self.context)
+        _ensure_candidate_geography(candidate, validated_data)
+        validated_data["candidate"] = candidate
         validated_data["created_by"] = request.user
         return super().create(validated_data)
 
@@ -378,12 +443,20 @@ class PollingStatusSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ["id", "created_at", "updated_at"]
 
+    def validate(self, attrs):
+        _, _, candidate = _request_team_member(self.context)
+        location = _merged_instance_attrs(self, attrs, ("polling_location",)).get("polling_location")
+        if location and location.candidate_id != candidate.id:
+            raise serializers.ValidationError({"polling_location": "Polling location is outside this campaign."})
+        return attrs
+
     def create(self, validated_data):
-        request = self.context["request"]
-        team_member = TeamMember.objects.filter(user=request.user).first()
-        if not team_member:
-            raise serializers.ValidationError("No TeamMember found for this user.")
-        validated_data["candidate"] = team_member.candidate
+        request, team_member, candidate = _request_team_member(self.context)
+        location = validated_data.get("polling_location")
+        if location and location.candidate_id != candidate.id:
+            raise serializers.ValidationError({"polling_location": "Polling location is outside this campaign."})
+        validated_data["reported_by"] = team_member
+        validated_data["candidate"] = candidate
         validated_data["created_by"] = request.user
         return super().create(validated_data)
 
@@ -409,11 +482,9 @@ class CompetitorActivitySerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "created_at", "updated_at"]
 
     def create(self, validated_data):
-        request = self.context["request"]
-        team_member = TeamMember.objects.filter(user=request.user).first()
-        if not team_member:
-            raise serializers.ValidationError("No TeamMember found for this user.")
-        validated_data["candidate"] = team_member.candidate
+        request, team_member, candidate = _request_team_member(self.context)
+        _ensure_candidate_geography(candidate, validated_data)
+        validated_data["candidate"] = candidate
         validated_data["created_by"] = request.user
         return super().create(validated_data)
 

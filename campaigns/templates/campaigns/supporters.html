@@ -12,7 +12,7 @@
     <p class="dark-panel-eyebrow">Supporter Overview</p>
     <div class="dark-record-list">
       {% for person in records %}
-        <div class="dark-card">
+        <a class="dark-card" href="{% url 'supporter_detail' person.id %}">
           <div class="dark-card-icon"><i class="fas fa-user"></i></div>
           <div class="dark-card-body">
             <p class="dark-card-title">
@@ -29,7 +29,7 @@
           {% else %}
             <span class="dark-badge dark-badge-undecided">{{ person.get_support_status_display }}</span>
           {% endif %}
-        </div>
+        </a>
       {% empty %}
         <p style="color:rgba(255,255,255,.5);padding:24px 4px;text-align:center;">No supporter records yet.</p>
       {% endfor %}

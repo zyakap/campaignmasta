@@ -168,6 +168,24 @@ class SupporterListCreateView(APIView):
         return Response(SupporterSerializer(supporter, context={"request": request}).data, status=status.HTTP_201_CREATED)
 
 
+class SupporterDetailView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        candidate = _get_candidate(request)
+        if not candidate:
+            return Response({"detail": "No candidate found."}, status=status.HTTP_403_FORBIDDEN)
+        qs = scope_queryset(
+            Supporter.objects.filter(candidate=candidate), request.user, candidate
+        ).select_related("province", "district", "llg", "ward", "village")
+        supporter = qs.filter(pk=pk).first()
+        if not supporter:
+            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+        serializer = SupporterSerializer(supporter, context={"request": request})
+        return Response(serializer.data)
+
+
 # ─── TeamMembers ──────────────────────────────────────────────────────────────
 
 class TeamMemberListView(APIView):

@@ -373,6 +373,52 @@ class SubscriptionQuote(TimeStampedModel):
         return f"Quote for {self.candidate} ({self.total} {self.currency})"
 
 
+class SubscriptionInterest(TimeStampedModel):
+    class CandidateOption(models.TextChoices):
+        PROVINCIAL = "PROVINCIAL", "Provincial Candidate"
+        DISTRICT = "DISTRICT", "District Candidate"
+
+    class Status(models.TextChoices):
+        NEW = "NEW", "New"
+        CONTACTED = "CONTACTED", "Contacted"
+        MEETING_BOOKED = "MEETING_BOOKED", "Meeting Booked"
+        CONVERTED = "CONVERTED", "Converted"
+        CLOSED = "CLOSED", "Closed"
+
+    full_name = models.CharField(max_length=160)
+    candidate_option = models.CharField(max_length=20, choices=CandidateOption.choices)
+    province = models.ForeignKey(Province, on_delete=models.PROTECT)
+    district = models.ForeignKey(District, on_delete=models.PROTECT, null=True, blank=True)
+    mobile_number = models.CharField(max_length=40)
+    whatsapp_number = models.CharField(max_length=40, blank=True)
+    email = models.EmailField()
+    meeting_appointment = models.DateTimeField()
+    status = models.CharField(max_length=24, choices=Status.choices, default=Status.NEW)
+    internal_notes = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["status", "created_at"]),
+            models.Index(fields=["candidate_option", "province", "district"]),
+        ]
+
+    def clean(self):
+        if self.candidate_option == self.CandidateOption.DISTRICT and not self.district_id:
+            raise ValidationError({"district": "District candidate interests must select a district."})
+        if self.candidate_option == self.CandidateOption.PROVINCIAL and self.district_id:
+            raise ValidationError({"district": "Provincial candidate interests should not select a district."})
+        if self.district_id and self.district.province_id != self.province_id:
+            raise ValidationError({"district": "District must belong to the selected province."})
+
+    @property
+    def whatsapp_contact(self):
+        return self.whatsapp_number or self.mobile_number
+
+    def __str__(self):
+        return f"{self.full_name} — {self.get_candidate_option_display()}"
+
+
 class TenantSettings(TenantOwnedModel):
     sms_sender_name = models.CharField(max_length=40, blank=True)
     default_call_frequency_high = models.PositiveIntegerField(default=7)

@@ -32,7 +32,11 @@ android {
         val baseUrl: String = localProperties.getProperty("BASE_URL")
             ?: project.findProperty("BASE_URL") as String?
             ?: "http://10.0.2.2:8000/"
-        buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
+        val normalizedBaseUrl = if (baseUrl.endsWith("/")) baseUrl else "$baseUrl/"
+        if (normalizedBaseUrl.startsWith("http://") && !normalizedBaseUrl.contains("10.0.2.2") && !normalizedBaseUrl.contains("localhost") && !normalizedBaseUrl.contains("127.0.0.1")) {
+            throw GradleException("BASE_URL must use HTTPS except for local development hosts.")
+        }
+        buildConfigField("String", "BASE_URL", "\"$normalizedBaseUrl\"")
     }
 
     buildTypes {

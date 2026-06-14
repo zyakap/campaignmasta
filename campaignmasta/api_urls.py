@@ -17,6 +17,7 @@ from campaigns.api_views import (
     PollingStatusCreateView,
     PreferenceDealListView,
     RegistrationDriveListView,
+    SupporterDetailView,
     SupporterListCreateView,
     SyncPushView,
     TeamMemberApproveView,
@@ -36,6 +37,7 @@ urlpatterns = [
 
     # Supporters
     path("supporters/", SupporterListCreateView.as_view(), name="api_supporters"),
+    path("supporters/<int:pk>/", SupporterDetailView.as_view(), name="api_supporter_detail"),
 
     # Team Members & hierarchy
     path("team-members/", TeamMemberListView.as_view(), name="api_team_members"),

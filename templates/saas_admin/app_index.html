@@ -9,20 +9,29 @@
 {% endblock %}
 
 {% block content %}
-<div style="margin-bottom:22px;">
-  <h1 style="font-size:1.45rem;font-weight:800;color:var(--n900);">{{ app_config.verbose_name }}</h1>
-</div>
-<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;">
+<section class="sa-page-hero">
+  <div>
+    <p class="sa-page-kicker">Application</p>
+    <h1>{{ app_config.verbose_name }}</h1>
+    <p>Manage records, review activity, and keep campaign operations organized.</p>
+  </div>
+</section>
+
+<div class="sa-model-grid">
   {% for model in models %}
-  <a href="{{ model.admin_url }}" style="background:var(--white);border:1px solid var(--n200);border-radius:var(--r14);padding:20px;text-decoration:none;display:flex;flex-direction:column;gap:10px;transition:border-color .15s;" onmouseover="this.style.borderColor='var(--g500)'" onmouseout="this.style.borderColor='var(--n200)'">
-    <div style="width:38px;height:38px;border-radius:9px;background:var(--g50);display:flex;align-items:center;justify-content:center;color:var(--g600);font-size:16px;">
-      <i class="fas fa-table-list"></i>
-    </div>
-    <div style="font-size:13.5px;font-weight:700;color:var(--n900);">{{ model.name }}</div>
+  <article class="sa-model-card">
+    <a href="{{ model.admin_url }}" class="sa-model-main">
+      <span class="sa-model-icon"><i class="fas fa-table-list"></i></span>
+      <span>
+        <strong>{{ model.name }}</strong>
+        <small>Open records</small>
+      </span>
+      <i class="fas fa-arrow-right"></i>
+    </a>
     {% if model.add_url %}
-    <a href="{{ model.add_url }}" style="font-size:12px;color:var(--n400);text-decoration:none;" onclick="event.stopPropagation()">+ Add new</a>
+    <a href="{{ model.add_url }}" class="sa-model-add"><i class="fas fa-plus"></i> Add new</a>
     {% endif %}
-  </a>
+  </article>
   {% endfor %}
 </div>
 {% endblock %}
