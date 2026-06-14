@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 760" role="img" aria-labelledby="title desc">
+  <title id="title">CampaignMasta logo</title>
+  <desc id="desc">Green CM campaign mark with candidate podium, supporter silhouettes, gold accent and maroon wedge.</desc>
+  <defs>
+    <linearGradient id="green" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#083d21"/><stop offset=".55" stop-color="#0d6f35"/><stop offset="1" stop-color="#0a4e2a"/></linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f6c24b"/><stop offset="1" stop-color="#b77a14"/></linearGradient>
+    <linearGradient id="lime" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#67e929"/><stop offset="1" stop-color="#1ba51e"/></linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%"><feDropShadow dx="0" dy="7" stdDeviation="5" flood-color="#000" flood-opacity=".28"/></filter>
+  </defs>
+  <g filter="url(#shadow)">
+    <path fill="url(#green)" d="M478 74v145c-38-37-88-57-148-57-99 0-168 70-168 172 0 90 55 158 135 172l-45 99C137 571 54 465 54 334 54 166 174 38 338 38c55 0 101 10 140 36z"/>
+    <path fill="url(#green)" d="M493 62h41l151 188L827 62h102v90L798 415 681 545 493 300z"/>
+    <path fill="url(#gold)" d="M830 613h-68l145-460h28z"/>
+    <path fill="#a40f27" d="M797 613h134V220z"/>
+    <g fill="url(#green)">
+      <circle cx="419" cy="219" r="22"/><path d="M388 250h63l18 96h-99z"/><path d="M340 362h160v35H340zM360 397h120v118H360z"/><path d="M392 248c-15 6-28 18-33 36l-12 50h36l11-42z"/><path d="M390 242l-9-78 10-1 18 76z"/>
+    </g>
+    <g fill="url(#lime)">
+      <circle cx="295" cy="514" r="31"/><path d="M236 604c4-42 27-68 59-68 33 0 56 26 60 68z"/>
+      <circle cx="356" cy="540" r="26"/><path d="M309 610c3-35 22-57 47-57 27 0 46 22 49 57z"/>
+      <circle cx="425" cy="519" r="34"/><path d="M359 613c4-45 31-73 66-73 37 0 63 28 67 73z"/>
+      <circle cx="492" cy="540" r="26"/><path d="M445 610c3-35 22-57 47-57 27 0 46 22 49 57z"/>
+      <circle cx="553" cy="514" r="31"/><path d="M494 604c4-42 27-68 59-68 33 0 56 26 60 68z"/>
+    </g>
+    <text x="52" y="722" font-family="Inter, Arial, sans-serif" font-size="105" font-weight="900" letter-spacing="-5"><tspan fill="url(#green)">Campaign</tspan><tspan fill="url(#gold)">Masta</tspan></text>
+  </g>
+</svg>
