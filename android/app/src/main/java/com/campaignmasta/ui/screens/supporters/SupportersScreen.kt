@@ -1,5 +1,6 @@
 package com.campaignmasta.ui.screens.supporters
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -27,6 +28,7 @@ import com.campaignmasta.ui.theme.SupportUnknown
 fun SupportersScreen(
     onBack: () -> Unit,
     onAddSupporter: () -> Unit,
+    onSupporterClick: (String) -> Unit,
     viewModel: SupporterViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -99,7 +101,7 @@ fun SupportersScreen(
             } else {
                 LazyColumn(contentPadding = PaddingValues(bottom = 80.dp)) {
                     items(uiState.supporters, key = { it.localId }) { supporter ->
-                        SupporterListItem(supporter = supporter)
+                        SupporterListItem(supporter = supporter, onClick = { onSupporterClick(supporter.localId) })
                         HorizontalDivider()
                     }
                 }
@@ -109,7 +111,7 @@ fun SupportersScreen(
 }
 
 @Composable
-fun SupporterListItem(supporter: SupporterEntity) {
+fun SupporterListItem(supporter: SupporterEntity, onClick: () -> Unit) {
     val statusColor = when (supporter.supportStatus) {
         "STRONG" -> SupportStrong
         "LEANING" -> SupportMedium
@@ -120,6 +122,7 @@ fun SupporterListItem(supporter: SupporterEntity) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .clickable(onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -131,7 +134,7 @@ fun SupporterListItem(supporter: SupporterEntity) {
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Text(
-                    text = supporter.fullName.first().uppercase(),
+                    text = supporter.fullName.firstOrNull()?.uppercase() ?: "?",
                     style = MaterialTheme.typography.titleMedium,
                     color = statusColor,
                     fontWeight = FontWeight.Bold

@@ -38,6 +38,7 @@ from .models import (
     ReminderEscalation,
     Subscription,
     SubscriptionQuote,
+    SubscriptionInterest,
     Supporter,
     SupportTicket,
     SoftwareModule,
@@ -219,6 +220,14 @@ class UsageEventAdmin(TenantAdminMixin, admin.ModelAdmin):
     list_display = ("candidate", "service", "action", "quantity", "included_quantity_applied", "billable_quantity", "unit", "customer_charge", "balance_before", "balance_after", "status", "created_at")
     list_filter = ("candidate", "service", "unit", "status")
     search_fields = ("candidate__name", "action", "reference")
+    readonly_fields = ("created_at", "updated_at")
+
+
+@admin.register(SubscriptionInterest)
+class SubscriptionInterestAdmin(admin.ModelAdmin):
+    list_display = ("full_name", "candidate_option", "province", "district", "mobile_number", "email", "meeting_appointment", "status", "created_at")
+    list_filter = ("status", "candidate_option", "province", "district")
+    search_fields = ("full_name", "mobile_number", "whatsapp_number", "email")
     readonly_fields = ("created_at", "updated_at")
 
 

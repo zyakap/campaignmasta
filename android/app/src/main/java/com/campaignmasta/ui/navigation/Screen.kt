@@ -5,6 +5,9 @@ sealed class Screen(val route: String) {
     object Dashboard : Screen("dashboard")
     object Supporters : Screen("supporters")
     object AddSupporter : Screen("add_supporter")
+    object SupporterDetail : Screen("supporters/{localId}") {
+        fun createRoute(localId: String) = "supporters/$localId"
+    }
     object Calls : Screen("calls")
     object Messages : Screen("messages")
     object WardBriefs : Screen("ward_briefs")

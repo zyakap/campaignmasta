@@ -1,0 +1,68 @@
+{% extends "campaigns/base.html" %}
+{% block nav_supporters %}active{% endblock %}
+{% block content %}
+<section class="page-head supporter-profile-head">
+  <div>
+    <p class="eyebrow">Supporter Profile</p>
+    <h1>{{ supporter.full_name }}</h1>
+    <p>{% if supporter.ward %}{{ supporter.ward }}{% if supporter.village %} · {{ supporter.village }}{% endif %}{% else %}No ward recorded{% endif %}</p>
+  </div>
+  <div class="supporter-actions">
+    {% if supporter.phone %}<a class="primary-btn" href="tel:{{ supporter.phone }}"><i class="fas fa-phone mr-2"></i>Call</a>{% endif %}
+    {% if supporter.phone %}<a class="secondary-btn" href="https://wa.me/{{ supporter.phone|cut:'+'|cut:' ' }}" target="_blank"><i class="fab fa-whatsapp mr-2"></i>WhatsApp</a>{% endif %}
+    <a class="secondary-btn" href="{% url 'supporters' %}"><i class="fas fa-arrow-left mr-2"></i>Back</a>
+  </div>
+</section>
+
+<section class="supporter-detail-grid">
+  <article class="profile-card status-card">
+    <span class="profile-label">Support Status</span>
+    <strong>{{ supporter.get_support_status_display }}</strong>
+    <small>{{ supporter.get_influence_level_display }} influence</small>
+  </article>
+  <article class="profile-card">
+    <span class="profile-label">Mobile</span>
+    <strong>{{ supporter.phone|default:"Not recorded" }}</strong>
+    <small>{% if supporter.consent_to_messages %}Consented to messages{% else %}No SMS consent recorded{% endif %}</small>
+  </article>
+  <article class="profile-card">
+    <span class="profile-label">Demographics</span>
+    <strong>{{ supporter.get_gender_display|default:"Unknown" }}</strong>
+    <small>{{ supporter.age_range|default:"Age not recorded" }}</small>
+  </article>
+  <article class="profile-card">
+    <span class="profile-label">Community</span>
+    <strong>{{ supporter.clan|default:"No clan recorded" }}</strong>
+    <small>{{ supporter.church_group|default:supporter.occupation|default:"No group details" }}</small>
+  </article>
+</section>
+
+<section class="content-grid">
+  <div class="panel">
+    <div class="panel-title"><h2>Location & campaign notes</h2></div>
+    <div class="detail-list">
+      <p><span>Province</span><strong>{{ supporter.province }}</strong></p>
+      <p><span>District</span><strong>{{ supporter.district|default:"—" }}</strong></p>
+      <p><span>LLG</span><strong>{{ supporter.llg|default:"—" }}</strong></p>
+      <p><span>Ward</span><strong>{{ supporter.ward|default:"—" }}</strong></p>
+      <p><span>Village</span><strong>{{ supporter.village|default:"—" }}</strong></p>
+      <p><span>Main issue</span><strong>{{ supporter.main_issue|default:"—" }}</strong></p>
+      <p><span>Notes</span><strong>{{ supporter.notes|default:"—" }}</strong></p>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-title"><h2>Recent call history</h2><a href="{% url 'call_create' %}">Record call</a></div>
+    {% for call in call_history %}
+      <article class="list-card">
+        <strong>{{ call.person_called|default:supporter.full_name }}</strong>
+        <span>{{ call.call_datetime|date:"M j, g:i a" }} · {{ call.get_call_outcome_display }}</span>
+      </article>
+    {% empty %}
+      <p class="muted">No calls recorded for this supporter yet.</p>
+    {% endfor %}
+  </div>
+</section>
+<style>
+.supporter-actions{display:flex;flex-wrap:wrap;gap:10px}.supporter-detail-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;padding:16px 20px}.profile-card{background:#fff;border:1px solid rgba(221,208,184,.8);border-radius:18px;padding:18px;box-shadow:0 8px 24px rgba(26,12,12,.06)}.profile-label{display:block;text-transform:uppercase;letter-spacing:.08em;font-size:11px;font-weight:900;color:#7A6858;margin-bottom:8px}.profile-card strong{display:block;font-size:1.15rem;color:#1A0C0C}.profile-card small{display:block;color:#7A6858;margin-top:5px}.status-card{background:linear-gradient(135deg,#fff,#ecfaec)}.detail-list{padding:4px 18px 18px}.detail-list p{display:flex;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid #EDE5D2;margin:0}.detail-list span{color:#7A6858}.detail-list strong{text-align:right;color:#1A0C0C}@media(max-width:767px){.supporter-detail-grid{grid-template-columns:1fr;padding:12px}.supporter-actions{width:100%}.supporter-actions a{flex:1 1 100%;justify-content:center}.detail-list p{display:block}.detail-list strong{text-align:left;display:block;margin-top:4px}}
+</style>
+{% endblock %}

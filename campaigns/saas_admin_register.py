@@ -59,6 +59,7 @@ from .models import (
     SoftwareModule,
     Subscription,
     SubscriptionQuote,
+    SubscriptionInterest,
     Supporter,
     SupportTicket,
     TeamMember,
@@ -210,6 +211,19 @@ class CandidateSaaSAdmin(SaaSTemplateMixin, admin.ModelAdmin):
         super().save_model(request, obj, form, change)
 
 
+class SubscriptionInterestSaaSAdmin(SaaSTemplateMixin, admin.ModelAdmin):
+    list_display = ("full_name", "candidate_option", "province", "district", "mobile_number", "email", "meeting_appointment", "status", "created_at")
+    list_filter = ("status", "candidate_option", "province", "district")
+    search_fields = ("full_name", "mobile_number", "whatsapp_number", "email")
+    readonly_fields = ("created_at", "updated_at", "whatsapp_contact")
+    fieldsets = (
+        ("Request", {"fields": ("status", "full_name", "candidate_option", "province", "district")}),
+        ("Contact", {"fields": ("mobile_number", "whatsapp_number", "whatsapp_contact", "email", "meeting_appointment")}),
+        ("Internal follow-up", {"fields": ("internal_notes",)}),
+        ("Audit", {"fields": ("created_at", "updated_at"), "classes": ("collapse",)}),
+    )
+
+
 class SubscriptionSaaSAdmin(SaaSTemplateMixin, admin.ModelAdmin):
     list_display = ("candidate", "plan", "billing_cycle", "status", "amount", "start_date", "end_date")
     list_filter = ("plan", "billing_cycle", "status")
@@ -232,6 +246,7 @@ class TenantModuleSubscriptionSaaSAdmin(SaaSTemplateMixin, admin.ModelAdmin):
 
 
 saas_admin_site.register(Candidate, CandidateSaaSAdmin)
+saas_admin_site.register(SubscriptionInterest, SubscriptionInterestSaaSAdmin)
 saas_admin_site.register(Subscription, SubscriptionSaaSAdmin)
 saas_admin_site.register(SubscriptionQuote, SubscriptionQuoteSaaSAdmin)
 saas_admin_site.register(TenantModuleSubscription, TenantModuleSubscriptionSaaSAdmin)
